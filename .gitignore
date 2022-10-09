@@ -14,3 +14,4 @@
 **/.env.development
 
 **/uploads/**
+!**/uploads/index.html
