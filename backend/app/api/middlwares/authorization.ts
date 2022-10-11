@@ -30,7 +30,7 @@ export const authorization = (req: Request, res: Response, next: NextFunction) =
 
 // decode token
 function verifyToken(token: string) {
-  const secret: string = process.env.SECRET;
+  const secret: string = process.env.JWT_SECRET;
 
   return verify(token, secret);
 }

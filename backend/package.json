@@ -9,6 +9,7 @@
     "dev": "ts-node-dev ./app/app.ts --project tsconfig.json --respawn"
   },
   "devDependencies": {
+    "@types/body-parser": "^1.19.2",
     "@types/cors": "^2.8.12",
     "@types/express": "^4.17.14",
     "@types/jsonwebtoken": "^8.5.9",
@@ -22,6 +23,7 @@
   "dependencies": {
     "@ricdotnet/upfile": "^0.0.10",
     "argon2": "^0.29.1",
+    "body-parser": "^1.20.1",
     "cors": "^2.8.5",
     "dotenv": "^16.0.3",
     "express": "^4.18.2",

@@ -11,7 +11,8 @@ declare global {
     interface ProcessEnv {
       PORT: string;
       NODE_ENV: 'development' | 'production';
-      SECRET: string;
+      ARGON_SECRET: string;
+      JWT_SECRET: string;
       DB_STRING: string;
       DIGEST: string;
     }

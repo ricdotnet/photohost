@@ -1,5 +1,6 @@
 import express, { Express, Request, Response } from 'express';
 import cors from 'cors';
+import bodyParser from 'body-parser';
 
 import { api } from './api';
 import { config } from './config';
@@ -7,6 +8,7 @@ import { config } from './config';
 const app: Express = express();
 
 app.use(cors());
+app.use(bodyParser.json());
 
 // app.use('/photo', express.static('uploads'));
 
