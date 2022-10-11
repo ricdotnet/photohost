@@ -9,4 +9,5 @@ export interface IPhoto {
   path: string;
   filename: string;
   fullPath: string;
+  private: boolean;
 }

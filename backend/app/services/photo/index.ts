@@ -57,7 +57,12 @@ export async function doGetOne(req: Request): Promise<undefined | { file: Buffer
   }
 
   // Now we want to check if the user is allowed to see this photo
-  const canSee = verifyDigest(photo.username, req.query['digest'] as string);
+  let canSee;
+  if ( req.path.includes('/p/') ) {
+    canSee = !photo.private;
+  } else {
+    canSee = verifyDigest(photo.username, req.query['digest'] as string);
+  }
 
   if ( !canSee ) {
     return;
@@ -82,9 +87,7 @@ export async function doGetAll(req: Request) {
   const photosResult =
     await client.query<IPhoto>('SELECT * FROM photos WHERE username = $1 LIMIT 10', [req.userContext?.username]);
 
-  const photos = clone(photosResult.rows);
-
-  return photos;
+  return clone(photosResult.rows);
 }
 
 /**

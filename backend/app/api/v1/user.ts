@@ -3,6 +3,9 @@ import { doLogin, doRegister } from '../../services/user';
 
 export const user: Router = Router();
 
+/**
+ * @Post the login details
+ */
 user.post('/login', async (req, res) => {
   if ( !req.body.hasOwnProperty('username') || !req.body.hasOwnProperty('password') ) {
     return res.status(401).send({ code: 401, message: 'data is missing' });
@@ -21,6 +24,9 @@ user.post('/login', async (req, res) => {
   res.status(200).send({ code: 200, message: 'login success', user });
 });
 
+/**
+ * @Post the new user data to be registered
+ */
 user.post('/register', async (req, res) => {
   if ( !req.body.hasOwnProperty('email')
     || !req.body.hasOwnProperty('username')
