@@ -1,20 +1,30 @@
-import { Request } from 'express';
-import { client } from '../../config/database';
-import { IPhoto, IUserContext } from '../../interfaces';
 import fs from 'fs';
 import path from 'path';
 import fsp from 'fs/promises';
+import { Request } from 'express';
+import { client } from '../../config/database';
+import { IPhoto, IUserContext } from '../../interfaces';
 import { clone } from 'lodash';
+import { IFile } from '@ricdotnet/upfile/src/types';
+import { getUserData } from '../user';
 
 export function doInsert(req: Request): Promise<void> {
   return new Promise(async (resolve) => {
-    for ( let file in req.files! ) {
-      await moveTmpFile(req.userContext!, req.files![file]);
+    for ( let fileEl in req.files! ) {
+      const file: IFile = req.files![fileEl];
+      await moveTmpFile(req.userContext!, file);
 
-      await client.query<IPhoto>('INSERT INTO photos (username, path, filename) VALUES ($1, $2, $3)',
-        [req.userContext?.username, '', req.files![file].originalName]);
+      let sanitizedName;
+      if (!req.body['fileName']) {
+        sanitizedName = sanitizeFilename(file.originalName);
+      } else {
+        sanitizedName = req.body['fileName'];
+      }
 
-      if ( parseInt(file) === req.files!.length - 1 ) {
+      await client.query<IPhoto>('INSERT INTO photos (username, path, filename, name) VALUES ($1, $2, $3, $4)',
+        [req.userContext?.username, '', file.originalName, sanitizedName]);
+
+      if ( parseInt(fileEl) === req.files!.length - 1 ) {
         resolve();
       }
     }
@@ -46,6 +56,13 @@ export async function doGetOne(req: Request): Promise<undefined | Buffer> {
     return;
   }
 
+  // Now we want to check if the user is allowed to see this photo
+  const canSee = await verifyDigest(photo.filename, photo.username);
+
+  if (!canSee) {
+    return;
+  }
+
   return await fsp.readFile(path.join('uploads', photo.username, photo.path, photo.filename));
 }
 
@@ -55,14 +72,16 @@ export async function doGetAll(req: Request) {
 
   const photos = clone(photosResult.rows);
 
-  photos.forEach(p => {
-    p.fullPath = path.join(p.username, p.path, p.filename);
-  });
-
   return photos;
 }
 
-async function moveTmpFile(user: IUserContext, f: any) {
+/**
+ * Move the file from the /uploads folder into the /{username} folder
+ * 
+ * @param user The user data object 
+ * @param file The file object
+ */
+async function moveTmpFile(user: IUserContext, file: IFile) {
 
   const userDir = fs.existsSync(path.join('uploads', user.username));
 
@@ -70,5 +89,29 @@ async function moveTmpFile(user: IUserContext, f: any) {
     await fsp.mkdir(path.join('uploads', user.username));
   }
 
-  await fsp.rename(f.file, path.join('uploads', user.username, f.originalName));
+  await fsp.rename(file.file, path.join('uploads', user.username, file.originalName));
+}
+
+/**
+ * If the user does not pass a name for the file, then get the filename without extension
+ * 
+ * @param originalName The original filename
+ * @returns The original filename without extension
+ */
+function sanitizeFilename(originalName: string): string {
+  return originalName.split('.', 1)[0];
+}
+
+/**
+ * We want photos to have some sort of privacy and to achieve this we use a digest
+ * 
+ * @param username The user digest to verify photo access
+ * @param requestDigest The digest present on the request sent
+ * @returns A boolean value from the comparison of both digests
+ */
+function verifyDigest(username: string, requestDigest: string): boolean {
+
+  const { digest } = getUserData(username);
+
+  return digest === requestDigest;
 }

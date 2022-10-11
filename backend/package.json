@@ -21,6 +21,7 @@
   },
   "dependencies": {
     "@ricdotnet/upfile": "^0.0.10",
+    "argon2": "^0.29.1",
     "cors": "^2.8.5",
     "dotenv": "^16.0.3",
     "express": "^4.18.2",

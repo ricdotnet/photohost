@@ -2,7 +2,6 @@ import express, { Express, Request, Response } from 'express';
 import cors from 'cors';
 
 import { api } from './api';
-import { client } from './config/database';
 import { config } from './config';
 
 const app: Express = express();

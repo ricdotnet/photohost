@@ -13,7 +13,7 @@ declare global {
       NODE_ENV: 'development' | 'production';
       SECRET: string;
       DB_STRING: string;
-      PVT_KET: string;
+      DIGEST: string;
     }
   }
 }

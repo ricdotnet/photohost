@@ -1,6 +1,6 @@
 import { verify } from 'jsonwebtoken';
 import { NextFunction, Request, Response } from 'express';
-import { IUserContext } from '../../interfaces';
+import { getUserData } from '../../services/user';
 
 export const authorization = (req: Request, res: Response, next: NextFunction) => {
   const authHeader = req.header('authorization');
@@ -19,7 +19,8 @@ export const authorization = (req: Request, res: Response, next: NextFunction) =
   }
 
   try {
-    req.userContext = verifyToken(token) as IUserContext;
+    const { username } = verifyToken(token) as { username: string };
+    req.userContext = getUserData(username);
   } catch (err) {
     return res.status(401).send(err);
   }

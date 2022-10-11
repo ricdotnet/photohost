@@ -1,5 +1,6 @@
 export interface IUserContext {
   username: string;
+  digest: string;
 }
 
 export interface IPhoto {
