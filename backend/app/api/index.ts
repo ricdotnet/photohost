@@ -4,7 +4,7 @@ import { v1 } from './v1';
 
 export const api: Router = Router();
 
-api.use(authorization);
+// api.use(authorization);
 api.use('/v1', v1);
 
 api.get('/', (req: Request, res: Response) => {

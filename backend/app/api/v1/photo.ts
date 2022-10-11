@@ -1,16 +1,14 @@
 import { Router } from 'express';
-import { client } from '../../config/database';
-import { clone } from 'lodash';
-import path from 'path';
 import { upload } from '../middlwares/upload';
 import { doDelete, doGetAll, doGetOne, doInsert } from '../../services/photo';
 import { lookup } from 'mime-types';
+import { authorization } from '../middlwares/authorization';
 
 export const photo: Router = Router();
 
 // path by default will be blank which would then be populated by the current path the user is visiting in the app
 // say if the user is visiting /2022/holidays/night then the path would be the that
-photo.post('/', upload, async (req, res) => {
+photo.post('/', authorization, upload, async (req, res) => {
   if ( !req.files?.length ) {
     return res.status(401).send({ code: 401, message: 'No file was uploaded.' });
   }
@@ -20,7 +18,7 @@ photo.post('/', upload, async (req, res) => {
   res.status(200).send({ code: 200, message: 'upload success' });
 });
 
-photo.delete('/:name', async (req, res) => {
+photo.delete('/:name', authorization, async (req, res) => {
   try {
     await doDelete(req);
   } catch (err) {
@@ -31,13 +29,17 @@ photo.delete('/:name', async (req, res) => {
   res.status(200).send({ code: 200, message: 'delete success' });
 });
 
-photo.get('/all', async (req, res) => {
+photo.get('/all', authorization, async (req, res) => {
   const photos = await doGetAll(req);
 
   res.status(200).send(photos);
 });
 
 photo.get('/:name', async (req, res) => {
+  if ( !req.query.digest || req.query.digest !== process.env.DIGEST ) {
+    return res.status(404).send({ code: 404, message: 'photo not found' });
+  }
+
   const file: Buffer | undefined = await doGetOne(req);
 
   if ( !file ) {

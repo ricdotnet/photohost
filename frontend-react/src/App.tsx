@@ -17,7 +17,8 @@ function App() {
   return <div>
     {photos.map((photo: any) =>
       // (<div key={photo.filename}>{photo.fullPath}</div>)
-      (<img src={'http://localhost:4000/api/v1/photo/'+photo.fullPath} key={photo.filename} alt={photo.filename}/>)
+      (<img src={'http://localhost:4000/api/v1/photo/' + photo.filename + `?digest=${import.meta.env.VITE_DIGEST}`}
+            key={photo.filename} alt={photo.filename} width={100}/>)
     )}
   </div>;
 }

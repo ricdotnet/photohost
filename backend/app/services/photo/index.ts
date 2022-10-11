@@ -36,8 +36,9 @@ export async function doDelete(req: Request) {
 
 export async function doGetOne(req: Request): Promise<undefined | Buffer> {
   const photoResult =
-    await client.query<IPhoto>('SELECT * FROM photos WHERE username = $1 AND filename = $2',
-      [req.userContext?.username, req.params.name]);
+    // await client.query<IPhoto>('SELECT * FROM photos WHERE username = $1 AND filename = $2',
+    await client.query<IPhoto>('SELECT * FROM photos WHERE filename = $1',
+      [req.params.name]);
 
   const photo = photoResult.rows[0];
 
