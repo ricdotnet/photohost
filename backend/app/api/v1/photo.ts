@@ -46,6 +46,7 @@ photo.get('/all', authorization, async (req, res) => {
   res.status(200).send(photos);
 });
 
+// TODO: merge the following routes into one single route with permissions check?
 /**
  * @Get a single photo by name
  *
