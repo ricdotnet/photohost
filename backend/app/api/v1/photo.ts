@@ -1,14 +1,13 @@
 import { Router } from 'express';
 import { upload } from '../middlwares/upload';
 import { doDelete, doGetAll, doGetOne, doInsert } from '../../services/photo';
-import { lookup } from 'mime-types';
 import { authorization } from '../middlwares/authorization';
 
 export const photo: Router = Router();
 
 /**
  * @Post one or more photos
- * 
+ *
  * the path by default will be blank which would then be populated by the current path the user is visiting in the app
  * say if the user is visiting /2022/holidays/night then the path would be the that
  */
@@ -38,7 +37,7 @@ photo.delete('/:name', authorization, async (req, res) => {
 
 /**
  * @Get all photos from a user
- * 
+ *
  * TODO: pagination
  */
 photo.get('/all', authorization, async (req, res) => {
@@ -51,22 +50,20 @@ photo.get('/all', authorization, async (req, res) => {
  * @Get a single photo by name
  */
 photo.get('/:name', async (req, res) => {
-  if ( !req.query.digest || req.query.digest !== process.env.DIGEST ) {
+  if ( !req.query.digest ) {
     return res.status(404).send({ code: 404, message: 'photo not found' });
   }
 
-  const file: Buffer | undefined = await doGetOne(req);
+  const file = await doGetOne(req);
 
-  if ( !file ) {
+  if ( !file?.file ) {
     return res.status(404).send({ code: 404, message: 'photo not found' });
   }
 
-  const mimeType = lookup(req.params.name);
-
-  if ( !mimeType ) {
+  if ( !file?.mimeType ) {
     return res.status(401).send({ code: 401, message: 'not possible to determine mime-type' });
   }
 
-  res.setHeader('content-type', mimeType);
-  res.status(200).send(file);
+  res.setHeader('content-type', file?.mimeType as string);
+  res.status(200).send(file?.file);
 });

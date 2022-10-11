@@ -7,6 +7,7 @@ import { IPhoto, IUserContext } from '../../interfaces';
 import { clone } from 'lodash';
 import { IFile } from '@ricdotnet/upfile/src/types';
 import { getUserData } from '../user';
+import { lookup } from 'mime-types';
 
 export function doInsert(req: Request): Promise<void> {
   return new Promise(async (resolve) => {
@@ -15,7 +16,7 @@ export function doInsert(req: Request): Promise<void> {
       await moveTmpFile(req.userContext!, file);
 
       let sanitizedName;
-      if (!req.body['fileName']) {
+      if ( !req.body['fileName'] ) {
         sanitizedName = sanitizeFilename(file.originalName);
       } else {
         sanitizedName = req.body['fileName'];
@@ -44,10 +45,9 @@ export async function doDelete(req: Request) {
   await client.query('DELETE FROM photos WHERE filename = $1', [req.params.name]);
 }
 
-export async function doGetOne(req: Request): Promise<undefined | Buffer> {
+export async function doGetOne(req: Request): Promise<undefined | { file: Buffer, mimeType: string | boolean }> {
   const photoResult =
-    // await client.query<IPhoto>('SELECT * FROM photos WHERE username = $1 AND filename = $2',
-    await client.query<IPhoto>('SELECT * FROM photos WHERE filename = $1',
+    await client.query<IPhoto>('SELECT * FROM photos WHERE name = $1',
       [req.params.name]);
 
   const photo = photoResult.rows[0];
@@ -57,13 +57,25 @@ export async function doGetOne(req: Request): Promise<undefined | Buffer> {
   }
 
   // Now we want to check if the user is allowed to see this photo
-  const canSee = await verifyDigest(photo.filename, photo.username);
+  const canSee = verifyDigest(photo.username, req.query['digest'] as string);
 
-  if (!canSee) {
+  if ( !canSee ) {
     return;
   }
 
-  return await fsp.readFile(path.join('uploads', photo.username, photo.path, photo.filename));
+  const file = await fsp.readFile(path.join('uploads', photo.username, photo.path, photo.filename));
+
+  const mimeType = lookup(photo.filename);
+
+  if ( !mimeType ) {
+    console.log('Not possible to determine mime-type.');
+    return;
+  }
+
+  return {
+    file,
+    mimeType,
+  };
 }
 
 export async function doGetAll(req: Request) {
@@ -77,8 +89,8 @@ export async function doGetAll(req: Request) {
 
 /**
  * Move the file from the /uploads folder into the /{username} folder
- * 
- * @param user The user data object 
+ *
+ * @param user The user data object
  * @param file The file object
  */
 async function moveTmpFile(user: IUserContext, file: IFile) {
@@ -94,7 +106,7 @@ async function moveTmpFile(user: IUserContext, file: IFile) {
 
 /**
  * If the user does not pass a name for the file, then get the filename without extension
- * 
+ *
  * @param originalName The original filename
  * @returns The original filename without extension
  */
@@ -104,7 +116,7 @@ function sanitizeFilename(originalName: string): string {
 
 /**
  * We want photos to have some sort of privacy and to achieve this we use a digest
- * 
+ *
  * @param username The user digest to verify photo access
  * @param requestDigest The digest present on the request sent
  * @returns A boolean value from the comparison of both digests
