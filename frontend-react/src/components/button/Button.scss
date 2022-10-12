@@ -1,0 +1,19 @@
+.button {
+  @apply px-4 py-2 rounded;
+
+  &__primary {
+    @apply bg-indigo-700 text-white;
+
+    &:hover {
+      @apply bg-indigo-800;
+    }
+  }
+
+  &__secondary {
+    @apply border border-indigo-700 text-indigo-700;
+
+    &:hover {
+      @apply bg-indigo-50/50 border-indigo-800 text-indigo-800;
+    }
+  }
+}
