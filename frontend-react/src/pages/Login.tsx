@@ -1,6 +1,7 @@
 import GuestLayout from "../layouts/GuestLayout";
 import Input from "../components/input/Input";
 import Button from "../components/button/Button";
+import Logo from "../components/logo/Logo";
 import { useState } from "react";
 
 function Login() {
@@ -14,7 +15,8 @@ function Login() {
 
   return (
     <GuestLayout>
-      <div className="w-[300px] h-[400px] bg-white rounded p-10">
+      <div className="w-[90%] md:w-[400px] h-auto bg-white rounded p-10">
+        <Logo />
         <form onSubmit={handleSubmit} className="flex flex-col space-y-3">
           <Input handleChange={(d: string) => setUsername(d)} />
           <Input handleChange={(d: string) => setPassword(d)} type="password" />
