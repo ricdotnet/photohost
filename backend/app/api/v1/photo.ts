@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { upload } from '../middlwares/upload';
+import { multipart } from '../middlwares/multipart';
 import { doDelete, doGetAll, doGetOne, doInsert } from '../../services/photo';
 import { authorization } from '../middlwares/authorization';
 
@@ -11,14 +11,14 @@ export const photo: Router = Router();
  * the path by default will be blank which would then be populated by the current path the user is visiting in the app
  * say if the user is visiting /2022/holidays/night then the path would be the that
  */
-photo.post('/', authorization, upload, async (req, res) => {
+photo.post('/', authorization, multipart, async (req, res) => {
   if ( !req.files?.length ) {
     return res.status(401).send({ code: 401, message: 'No file was uploaded.' });
   }
 
   await doInsert(req);
 
-  res.status(200).send({ code: 200, message: 'upload success' });
+  res.status(200).send({ code: 200, message: 'multipart success' });
 });
 
 /**

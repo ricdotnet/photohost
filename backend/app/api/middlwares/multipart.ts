@@ -3,7 +3,7 @@ import { Upfile } from '@ricdotnet/upfile';
 
 const upfile = new Upfile('uploads');
 
-export const upload = (req: Request, res: Response, next: NextFunction) => {
+export const multipart = (req: Request, res: Response, next: NextFunction) => {
   try {
     upfile.parseIncomingBody(req, res, next);
   } catch (err) {
