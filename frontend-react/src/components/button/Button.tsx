@@ -1,4 +1,5 @@
 import './Button.scss';
+import { Link } from 'react-router-dom';
 
 type ButtonVariants = 'primary' | 'accent' | 'secondary' | 'disabled';
 type ButtonTypes = 'button' | 'submit' | 'reset';
@@ -18,9 +19,9 @@ function Button(props: IProps) {
 
   if ( props.href ) {
     return (
-      <a href={props.href} className={'button button__' + props.variant}>
+      <Link to={props.href} className={'button button__' + props.variant}>
         {props.value}
-      </a>
+      </Link>
     );
   }
 

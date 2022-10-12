@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { doLogin, doRegister } from '../../services/user';
+import { createToken } from '../middlwares/authorization';
 
 export const user: Router = Router();
 
@@ -21,7 +22,9 @@ user.post('/login', async (req, res) => {
     return res.status(401).send({ code: 401, message: 'wrong login data' });
   }
 
-  res.status(200).send({ code: 200, message: 'login success', user });
+  const token = createToken({ id: user.id, username: user.username });
+
+  res.status(200).send({ code: 200, message: 'login success', user, token });
 });
 
 /**

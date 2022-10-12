@@ -1,4 +1,4 @@
-import { verify } from 'jsonwebtoken';
+import { sign, verify } from 'jsonwebtoken';
 import { NextFunction, Request, Response } from 'express';
 import { getUserData } from '../../services/user';
 
@@ -26,11 +26,15 @@ export const authorization = (req: Request, res: Response, next: NextFunction) =
   }
 
   return next();
-}
+};
 
 // decode token
 function verifyToken(token: string) {
   const secret: string = process.env.JWT_SECRET;
 
   return verify(token, secret);
+}
+
+export function createToken(user: any) {
+  return sign(user, process.env.JWT_SECRET, { expiresIn: '365days' });
 }

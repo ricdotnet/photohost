@@ -1,17 +1,21 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../hooks/UseAuth';
 import GuestLayout from '../layouts/GuestLayout';
 import Input from '../components/input/Input';
 import Button from '../components/button/Button';
 import Logo from '../components/logo/Logo';
 
 function Login() {
+  const navigateTo = useNavigate();
+
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 
   const [usernameError, setUsernameError] = useState(false);
   const [passwordError, setPasswordError] = useState(false);
 
-  const handleSubmit = (e: any) => {
+  const handleSubmit = async (e: any) => {
     e.preventDefault();
     if ( !username ) {
       setUsernameError(true);
@@ -21,7 +25,12 @@ function Login() {
     }
     if ( !username || !password ) return;
 
-    console.log(username, password);
+    try {
+      await useAuth(username, password);
+      navigateTo('/');
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   const handleInputChange = (d: string, setter: string) => {
