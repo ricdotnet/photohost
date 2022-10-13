@@ -1,7 +1,7 @@
 import { UserStore } from '../contexts/UserContext';
 
 export const useAuth = async (username: string, password: string) => {
-  const response = await fetch('http://localhost:4000/api/v1/user/login', {
+  const response = await fetch(`${import.meta.env.VITE_API}user/login`, {
     method: 'POST',
     headers: {
       'content-type': 'application/json'
@@ -18,6 +18,8 @@ export const useAuth = async (username: string, password: string) => {
     UserStore.id = data.user.id;
     UserStore.username = data.user.username;
     UserStore.email = data.user.email;
+
+    localStorage.setItem('access-token', data.token);
 
     return Promise.resolve();
   }

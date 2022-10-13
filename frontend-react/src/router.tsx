@@ -1,4 +1,5 @@
-import { createBrowserRouter } from 'react-router-dom';
+import { createBrowserRouter, defer, redirect } from 'react-router-dom';
+import { useTokenAuth } from './hooks/UseTokenAuth';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import RequestAccess from './pages/RequestAccess';
@@ -6,7 +7,8 @@ import RequestAccess from './pages/RequestAccess';
 export const router = createBrowserRouter([
   {
     path: '/',
-    element: <Home/>
+    element: <Home/>,
+    loader: authedGuard,
   },
   {
     path: '/login',
@@ -20,20 +22,19 @@ export const router = createBrowserRouter([
   }
 ]);
 
+// TODO: these could be improved
 // if there is a token then the user is assumed "authenticated"
 // then we redirect to homepage
-function nonAuthedGuard(): boolean {
+function nonAuthedGuard() {
   const token = localStorage.getItem('access-token');
 
-  return token !== null;
-  // return new Promise((resolve, reject) => {
-  //   fetch('http://localhost:4000/api/v1/user/info', {
-  //     headers: {
-  //       'authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwidXNlcm5hbWUiOiJyaWNkb3RuZXQiLCJpYXQiOjE1MTYyMzkwMjIsImV4cCI6MTcxNzIzOTAyMn0.oRq6K2uvz0B2e7BEuqIYfJ3whumVhDmm5j4Z3mEsZAM'
-  //     }
-  //   })
-  //     .then((response) => response.json())
-  //     .then((data) => resolve(data))
-  //     .catch((err) => console.error(err));
-  // });
+  if (token) {
+    return redirect('/');
+  }
+}
+
+async function authedGuard() {
+  const tokenAuthRes = useTokenAuth();
+
+  return defer({ userData: tokenAuthRes });
 }

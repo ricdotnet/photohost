@@ -4,6 +4,9 @@ export const UserStore = {
   id: '',
   username: '',
   email: '',
+  created_at: '',
+  last_login: '',
+  last_updated: '',
 };
 
 export const UserContext = createContext(UserStore);

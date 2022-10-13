@@ -1,8 +1,13 @@
+import Nav from "../components/nav/Nav";
+
 function UserLayout({ children }: any) {
-  return (<>
-    <div className="h-[70px] bg-slate-500 w-full"></div>
-    <div>{children}</div>
-  </>)
+
+  return (
+    <>
+      <Nav />
+      <div>{children}</div>
+    </>
+  )
 }
 
 export default UserLayout;
