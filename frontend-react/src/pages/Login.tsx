@@ -52,13 +52,13 @@ function Login() {
         </div>
         <form onSubmit={handleSubmit} className="flex flex-col space-y-3">
           <Input id="username" label="Username" placeholder="Username"
-                  handleChange={(d: string) => handleInputChange(d, 'username')}
-                  type="text"
-                  hasError={usernameError}/>
+                 handleChange={(d: string) => handleInputChange(d, 'username')}
+                 type="text"
+                 hasError={usernameError}/>
           <Input id="password" label="Password" placeholder="Password"
-                  handleChange={(d: string) => handleInputChange(d, 'password')}
-                  type="password"
-                  hasError={passwordError}/>
+                 handleChange={(d: string) => handleInputChange(d, 'password')}
+                 type="password"
+                 hasError={passwordError}/>
 
           <Button value="Login" variant="primary" type="submit"/>
           <Button value="Request Access" variant="secondary" href="/request-access"/>

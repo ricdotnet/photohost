@@ -28,7 +28,7 @@ export const router = createBrowserRouter([
 function nonAuthedGuard() {
   const token = localStorage.getItem('access-token');
 
-  if (token) {
+  if ( token ) {
     return redirect('/');
   }
 }
