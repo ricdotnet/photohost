@@ -1,6 +1,6 @@
 import { Router } from 'express';
-import { doLogin, doRegister } from '../../services/user';
-import { createToken } from '../middlwares/authorization';
+import { doLogin, doRegister, getUserInfo } from '../../services/user';
+import { authorization, createToken } from '../middlwares/authorization';
 
 export const user: Router = Router();
 
@@ -48,4 +48,13 @@ user.post('/register', async (req, res) => {
   }
 
   res.status(200).send({ code: 200, message: 'register success' });
+});
+
+/**
+ * @Get the user info from the token
+ */
+user.get('/info', authorization, async (req, res) => {
+  const user = await getUserInfo(req);
+
+  res.status(200).send({ user });
 });

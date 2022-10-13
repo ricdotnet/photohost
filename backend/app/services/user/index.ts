@@ -30,23 +30,35 @@ export async function doRegister(req: Request) {
 export async function doLogin(req: Request) {
   const { username, password } = req.body;
 
-  const user = await findUserByUsername(username);
+  const [user] = await findUserByUsername(username);
 
-  if ( !user.length ) {
+  if ( !user ) {
     return { invalidUser: true };
   }
 
-  const isValidP = await verify(user[0].password, password, { secret: Buffer.from(process.env.ARGON_SECRET) });
+  const isValidP = await verify(user.password, password, { secret: Buffer.from(process.env.ARGON_SECRET) });
 
   if ( !isValidP ) {
     return { wrongData: true };
   }
 
-  const userClone = clone(user[0]);
+  const userClone = clone(user);
   delete userClone.password;
   userClone.last_login = new Date();
 
   updateLastLogin(username);
+
+  return userClone;
+}
+
+export async function getUserInfo(req: Request) {
+  const { username } = req.userContext!;
+
+  // destructure this array because it will have 1 row
+  const [user] = await findUserByUsername(username);
+
+  const userClone = clone(user);
+  delete userClone.password;
 
   return userClone;
 }
