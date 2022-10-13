@@ -1,0 +1,15 @@
+.nav {
+  @apply h-[50px] bg-slate-300 flex items-center;
+
+  &__content {
+    @apply w-[90%] md:w-[60%] flex mx-auto items-center justify-between;
+
+    &-left {
+      @apply flex items-center space-x-2;
+    }
+
+    &-right {
+      @apply flex justify-end space-x-2;
+    }
+  }
+}

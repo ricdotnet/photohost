@@ -7,6 +7,7 @@ export const UserStore = {
   created_at: '',
   last_login: '',
   last_updated: '',
+  digest: '',
 };
 
 export const UserContext = createContext(UserStore);

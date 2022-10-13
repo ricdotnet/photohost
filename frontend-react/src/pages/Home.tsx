@@ -1,41 +1,58 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { Await, useLoaderData } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { UserContext } from '../contexts/UserContext';
-import Loading from '../components/loading/Loading';
 import UserLayout from '../layouts/UserLayout';
 
 function Home() {
-  const tokenAuthRes = useLoaderData() as { userData: any };
-
-  const [user, setUser] = useState();
 
   return (
-    <UserLayout userData={user}>
-      <React.Suspense fallback={<Loading />}>
-        <Await resolve={tokenAuthRes.userData}>
-          {(userData) => (
-            <UserContext.Provider value={userData}>
-              <PageContent userSetter={setUser} />
-            </UserContext.Provider>
-          )}
-        </Await>
-      </React.Suspense>
+    <UserLayout>
+      <PageContent/>
     </UserLayout>
   );
 }
 
-function PageContent(props: any) {
+function PageContent() {
   const userContext = useContext(UserContext);
+  const [photos, setPhotos] = useState([]);
 
   useEffect(() => {
-    props.userSetter(userContext);
+    fetch(`${import.meta.env.VITE_API}photo/all`, {
+      headers: {
+        'authorization': `Bearer ${localStorage.getItem('access-token')}`
+      }
+    })
+      .then((response) => response.json())
+      .then((data) => setPhotos(data));
   }, []);
 
   return (
-    <div>
-      Current User:
-      <div>email: {userContext.email}</div>
-      <div>username: {userContext.username}</div>
+    <div className="w-[90%] mx-auto columns-1 md:columns-2 lg:columns-3 xl:columns-4 mt-10">
+      {photos.map((photo: any) => (
+        <RenderPhoto photo={photo} key={photo.id}/>
+      ))}
+    </div>
+  );
+}
+
+interface IRenderPhoto {
+  photo: {
+    id: number;
+    name: string;
+  };
+}
+
+function RenderPhoto(props: IRenderPhoto) {
+  const userContext = useContext(UserContext);
+
+  return (
+    <div className="rounded-md mb-4 relative">
+      <Link to={'/photo/' + props.photo.name} state={props.photo} key={props.photo.id}>
+        <img className="w-full rounded-md"
+             src={import.meta.env.VITE_API + 'photo/' + props.photo.name + '?digest=' + userContext.digest}
+             alt={props.photo.name}/>
+        <div className="absolute w-full h-full rounded-md bottom-0 hover:bg-white/20 transition ease-in-out"></div>
+      </Link>
     </div>
   );
 }

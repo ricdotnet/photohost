@@ -1,14 +1,18 @@
-import { createBrowserRouter, defer, redirect } from 'react-router-dom';
-import { useTokenAuth } from './hooks/UseTokenAuth';
+import { createBrowserRouter, redirect } from 'react-router-dom';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import RequestAccess from './pages/RequestAccess';
+import GuardedRoute from './guards/GuardedRoute';
+import Photo from './pages/Photo';
 
 export const router = createBrowserRouter([
   {
     path: '/',
-    element: <Home/>,
-    loader: authedGuard,
+    element: <GuardedRoute component={<Home/>} redirectTo="/login"/>,
+  },
+  {
+    path: '/photo/:name',
+    element: <GuardedRoute component={<Photo/>} redirectTo="/login"/>,
   },
   {
     path: '/login',
@@ -31,10 +35,4 @@ function nonAuthedGuard() {
   if ( token ) {
     return redirect('/');
   }
-}
-
-async function authedGuard() {
-  const tokenAuthRes = useTokenAuth();
-
-  return defer({ userData: tokenAuthRes });
 }
