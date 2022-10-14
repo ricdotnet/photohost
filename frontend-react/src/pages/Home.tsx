@@ -44,14 +44,21 @@ interface IRenderPhoto {
 
 function RenderPhoto(props: IRenderPhoto) {
   const userContext = useContext(UserContext);
+  const [loading, setLoading] = useState(true);
+
+  const handleOnLoad = () => {
+    setLoading(false);
+  };
 
   return (
     <div className="rounded-md mb-4 relative">
       <Link to={'/photo/' + props.photo.name} state={props.photo} key={props.photo.id}>
-        <img className="w-full rounded-md"
+        <div className={'w-full h-[100px] animate-pulse bg-gray-400 rounded-md ' + ((loading) ? 'block' : 'hidden')}></div>
+        <img className={'w-full rounded-md ' + ((loading) ? 'hidden' : 'block')}
              src={import.meta.env.VITE_API + 'photo/' + props.photo.name + '?digest=' + userContext.digest}
-             alt={props.photo.name}/>
-        <div className="absolute w-full h-full rounded-md bottom-0 hover:bg-white/20 transition ease-in-out"></div>
+             alt={props.photo.name} onLoad={handleOnLoad}/>
+        <div
+          className="absolute w-full h-full rounded-md bottom-0 hover:bg-white/20 transition ease-in-out"></div>
       </Link>
     </div>
   );
