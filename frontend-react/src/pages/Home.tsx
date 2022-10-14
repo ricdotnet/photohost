@@ -1,65 +1,62 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { UserContext } from '../contexts/UserContext';
 import UserLayout from '../layouts/UserLayout';
+import Button from '../components/button/Button';
+import Input from '../components/input/Input';
 
 function Home() {
 
+  const [albumName, setAlbumName] = useState('');
+
+  const handleAlbumNameSubmit = (e: any) => {
+    e.preventDefault();
+    alert(albumName);
+  };
+
   return (
     <UserLayout>
-      <PageContent/>
+      <form onSubmit={handleAlbumNameSubmit} className="flex space-x-3">
+        <Input handleChange={(d: string) => setAlbumName(d)} id="album-name" label="album-name"/>
+        <Button value="Add Album" variant="primary" type="submit"/>
+      </form>
+      <RenderAlbums/>
     </UserLayout>
   );
 }
 
-function PageContent() {
-  const userContext = useContext(UserContext);
-  const [photos, setPhotos] = useState([]);
+function RenderAlbums() {
+
+  const [albums, setAlbums] = useState([]);
 
   useEffect(() => {
-    fetch(`${import.meta.env.VITE_API}photo/all`, {
-      headers: {
-        'authorization': `Bearer ${localStorage.getItem('access-token')}`
-      }
-    })
-      .then((response) => response.json())
-      .then((data) => setPhotos(data));
+    console.log('effecting....');
   }, []);
 
   return (
-    <div className="w-[90%] mx-auto columns-1 md:columns-2 lg:columns-3 xl:columns-4 mt-10">
-      {photos.map((photo: any) => (
-        <RenderPhoto photo={photo} key={photo.id}/>
-      ))}
+    <div
+      className="grid gap-x-4 gap-y-10 grid-cols-2 md:grid-cols-4 lg:grid-cols-5 justify-items-center mt-10">
+      {
+        Array.from(Array(10)).map((a: any) => (
+          <Link to="/album/default-album">
+            <AlbumItem name="Default Album" photos={200}/>
+          </Link>
+        ))
+      }
     </div>
   );
 }
 
-interface IRenderPhoto {
-  photo: {
-    id: number;
-    name: string;
-  };
+interface IAlbumItemProps {
+  name: string;
+  photos: number;
 }
 
-function RenderPhoto(props: IRenderPhoto) {
-  const userContext = useContext(UserContext);
-  const [loading, setLoading] = useState(true);
-
-  const handleOnLoad = () => {
-    setLoading(false);
-  };
-
+function AlbumItem(props: IAlbumItemProps) {
   return (
-    <div className="rounded-md mb-4 relative">
-      <Link to={'/photo/' + props.photo.name} state={props.photo} key={props.photo.id}>
-        <div className={'w-full h-[100px] animate-pulse bg-gray-400 rounded-md ' + ((loading) ? 'block' : 'hidden')}></div>
-        <img className={'w-full rounded-md ' + ((loading) ? 'hidden' : 'block')}
-             src={import.meta.env.VITE_API + 'photo/' + props.photo.name + '?digest=' + userContext.digest}
-             alt={props.photo.name} onLoad={handleOnLoad}/>
-        <div
-          className="absolute w-full h-full rounded-md bottom-0 hover:bg-white/20 transition ease-in-out"></div>
-      </Link>
+    <div className="flex flex-col hover:bg-white/40 rounded-md transition ease-in-out">
+      <div className="w-[200px] h-[200px] bg-zinc-700 rounded-md"></div>
+      <span className="ml-5 text-lg">{props.name}</span>
+      <span className="ml-5 text-sm">{props.photos} photos</span>
     </div>
   );
 }

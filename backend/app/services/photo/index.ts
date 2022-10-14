@@ -84,8 +84,16 @@ export async function doGetOne(req: Request): Promise<undefined | { file: Buffer
 }
 
 export async function doGetAll(req: Request) {
+  let cols: string[] = [req.userContext!.username];
+  let query = 'SELECT * FROM photos WHERE username = $1 ';
+
+  if ( req.query['album'] !== 'default-album' ) {
+    cols.push(req.query['album'] as string);
+    query += 'AND album = $2';
+  }
+
   const photosResult =
-    await client.query<IPhoto>('SELECT * FROM photos WHERE username = $1 LIMIT 10', [req.userContext?.username]);
+    await client.query<IPhoto>(`${query} LIMIT 10`, [...cols]);
 
   return clone(photosResult.rows);
 }

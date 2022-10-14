@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { multipart } from '../middlwares/multipart';
 import { doDelete, doGetAll, doGetOne, doInsert } from '../../services/photo';
 import { authorization } from '../middlwares/authorization';
+import validator from 'validator';
 
 export const photo: Router = Router();
 
@@ -41,6 +42,12 @@ photo.delete('/:name', authorization, async (req, res) => {
  * TODO: pagination
  */
 photo.get('/all', authorization, async (req, res) => {
+  if ( req.query['album'] !== 'default-album' ) {
+    if ( !validator.isUUID(req.query['album'] as string) ) {
+      return res.status(404).send({ code: 404, message: 'invalid uuid so, album does not exist' });
+    }
+  }
+
   const photos = await doGetAll(req);
 
   res.status(200).send(photos);

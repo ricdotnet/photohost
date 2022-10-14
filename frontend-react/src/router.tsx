@@ -1,14 +1,19 @@
 import { createBrowserRouter, redirect } from 'react-router-dom';
+import GuardedRoute from './guards/GuardedRoute';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import RequestAccess from './pages/RequestAccess';
-import GuardedRoute from './guards/GuardedRoute';
 import Photo from './pages/Photo';
+import Album from './pages/Album';
 
 export const router = createBrowserRouter([
   {
     path: '/',
     element: <GuardedRoute component={<Home/>} redirectTo="/login"/>,
+  },
+  {
+    path: '/album/:slug',
+    element: <GuardedRoute component={<Album/>} redirectTo="/login"/>,
   },
   {
     path: '/photo/:name',
