@@ -4,7 +4,8 @@ export const useTokenAuth = async () => {
   const token = localStorage.getItem('access-token');
 
   if ( !token ) {
-    return location.href = '/login';
+    location.href = '/login';
+    return Promise.reject();
   }
 
   const response = await fetch(`${import.meta.env.VITE_API}user/info`, {

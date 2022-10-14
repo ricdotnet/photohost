@@ -1,5 +1,5 @@
 .button {
-  @apply px-4 py-2 rounded text-center;
+  @apply px-4 py-2 rounded-md text-center h-$btn flex items-center justify-center;
 
   &__primary {
     @apply text-white bg-$primary;
@@ -10,10 +10,10 @@
   }
 
   &__secondary {
-    @apply border border-$primary text-$primary;
+    @apply bg-$gray;
 
     &:hover {
-      @apply bg-$primary/5 border-$primary-hover text-$primary-hover;
+      @apply bg-$gray-hover;
     }
   }
 }
