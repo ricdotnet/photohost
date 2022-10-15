@@ -1,15 +1,18 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { UserContext } from '../contexts/UserContext';
 import { PhotosContext } from '../contexts/PhotosContext';
 import UserLayout from '../layouts/UserLayout';
+import Button from '../components/button/Button';
 
-function Album(props: any) {
+function Album() {
 
   const { slug } = useParams();
+  const navigateTo = useNavigate();
 
   const [photos, setPhotos] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     const url = new URL(`${import.meta.env.VITE_API}photo/all`);
@@ -27,9 +30,30 @@ function Album(props: any) {
       });
   }, []);
 
+  const handleDeleteAlbum = () => {
+    setIsDeleting(true);
+    const url = new URL(`${import.meta.env.VITE_API}album`);
+    url.searchParams.append('album', slug as string);
+
+    fetch(url, {
+      method: 'DELETE',
+      headers: {
+        authorization: `Bearer ${localStorage.getItem('access-token')}`
+      },
+      body: JSON.stringify({ album: slug })
+    })
+      .then((response) => response.json())
+      .then(() => {
+        setIsDeleting(false);
+        navigateTo('/');
+      });
+  };
+
   return (
     <UserLayout>
-      <div className="border-b border-b-gray-300 py-4">
+      <div className="border-b border-b-gray-300 py-4 flex justify-end">
+        <Button value="Delete" variant="danger" handleClick={handleDeleteAlbum} type="button"
+                isActioning={isDeleting}/>
       </div>
       {
         loading ? (<div>Loading photos...</div>)
@@ -59,14 +83,14 @@ function RenderPhotoList() {
   );
 }
 
-interface IRenderPhotoProps {
+interface RendePhotoPropsInterface {
   photo: {
     id: number;
     name: string;
   };
 }
 
-function RenderPhoto(props: IRenderPhotoProps) {
+function RenderPhoto(props: RendePhotoPropsInterface) {
   const userContext = useContext(UserContext);
   const [loading, setLoading] = useState(true);
 

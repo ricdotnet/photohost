@@ -18,7 +18,7 @@ function Input(props: IProps, ref: any) {
     props.handleChange(e.target.value);
   };
 
-  const hasError = (props.hasError) ? 'border-red-500' : 'border-slate-300';
+  const hasError = (props.hasError) ? 'border-red-500 shake-animation' : 'border-slate-300';
 
   useImperativeHandle(ref, () => {
     return {

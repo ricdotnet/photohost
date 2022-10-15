@@ -34,3 +34,9 @@ export async function doGetAlbums(req: Request) {
 
   return { albums: albumsResponse.rows, noAlbumCount: noAlbumResponse.rows };
 }
+
+export function doDeleteAlbum(req: Request) {
+  const { album } = req.query;
+
+  return client.query('DELETE FROM albums WHERE id = $1', [album]);
+}

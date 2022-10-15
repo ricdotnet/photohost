@@ -17,6 +17,7 @@ function Home() {
 
   const [albums, setAlbums] = useState<AlbumInterface[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isAdding, setIsAdding] = useState(false);
 
   const inputRef = useRef<InputRefInterface>(null);
 
@@ -44,6 +45,7 @@ function Home() {
     if ( !albumName ) {
       return setAlbumNameError(true);
     }
+    setIsAdding(true);
 
     fetch(`${import.meta.env.VITE_API}album`, {
       method: 'POST',
@@ -59,6 +61,7 @@ function Home() {
         const newAlbums = [...albums];
         newAlbums.push(data.album);
         setAlbums(newAlbums);
+        setIsAdding(false);
       });
   };
 
@@ -70,7 +73,7 @@ function Home() {
                handleChange={handleAlbumNameChange} id="album-name"
                label="album-name"
                hasError={albumNameError}/>
-        <Button value="Add Album" variant="primary" type="submit"/>
+        <Button value="Add Album" variant="primary" type="submit" isActioning={isAdding}/>
       </form>
       {
         loading ? (<div>Loading albums...</div>)
@@ -112,9 +115,10 @@ function AlbumItem(props: IAlbumItemProps) {
   return (
     <div className="flex flex-col hover:bg-white/40 rounded-md transition ease-in-out">
       <div className="w-[200px] h-[200px] bg-zinc-700 rounded-md overflow-hidden">
-        <img className="rounded-md hover:scale-125 hover:rotate-6 transition ease-in-out duration-200"
-             src={`https://picsum.photos/seed/${props.name}/200/200`}
-             alt="Album Cover"/>
+        <img
+          className="rounded-md hover:scale-125 hover:rotate-6 transition ease-in-out duration-200"
+          src={`https://picsum.photos/seed/${props.name}/200/200`}
+          alt="Album Cover"/>
       </div>
       <span className="ml-5 text-lg">{props.name}</span>
       <span className="ml-5 text-sm">{props.photos} photos</span>

@@ -15,6 +15,8 @@ function Login() {
   const [usernameError, setUsernameError] = useState(false);
   const [passwordError, setPasswordError] = useState(false);
 
+  const [isSigningIn, setIsSigningIn] = useState(false);
+
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     if ( !username ) {
@@ -24,9 +26,11 @@ function Login() {
       setPasswordError(true);
     }
     if ( !username || !password ) return;
+    setIsSigningIn(true);
 
     try {
       await useAuth(username, password);
+      setIsSigningIn(false);
       navigateTo('/');
     } catch (err) {
       console.log(err);
@@ -60,7 +64,7 @@ function Login() {
                  type="password"
                  hasError={passwordError}/>
 
-          <Button value="Login" variant="primary" type="submit"/>
+          <Button value="Login" variant="primary" type="submit" isActioning={isSigningIn}/>
           <Button value="Request Access" variant="secondary" href="/request-access"/>
         </form>
       </div>

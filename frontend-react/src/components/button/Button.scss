@@ -16,4 +16,12 @@
       @apply bg-$gray-hover;
     }
   }
+
+  &__danger {
+    @apply bg-red-600 text-white;
+
+    &:hover {
+      @apply bg-red-700;
+    }
+  }
 }

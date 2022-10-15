@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { authorization } from '../middlwares/authorization';
-import { doCreateAlbum, doGetAlbums } from '../../services/album';
+import { doCreateAlbum, doDeleteAlbum, doGetAlbums } from '../../services/album';
 
 export const album: Router = Router();
 
@@ -26,4 +26,14 @@ album.get('/all', authorization, async (req, res) => {
   albums.unshift({ id: 'default-album', name: 'Default Album', photos: noAlbumCount[0].count });
 
   res.status(200).send({ code: 200, albums });
+});
+
+/**
+ * @Delete delete one or more albums
+ */
+album.delete('/', authorization, async (req, res) => {
+
+  await doDeleteAlbum(req);
+
+  res.status(200).send({ code: 200, message: 'album deleted with success' });
 });
