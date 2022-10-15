@@ -1,4 +1,5 @@
 export interface IUserContext {
+  id: number;
   username: string;
   digest: string;
 }

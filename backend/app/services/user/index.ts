@@ -86,6 +86,7 @@ function updateLastLogin(username: string) {
 // TODO: add a db call to get user data
 export function getUserData(username: string): IUserContext {
   return {
+    id: 1,
     username: username,
     digest: process.env.DIGEST
   };

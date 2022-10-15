@@ -1,13 +1,15 @@
-import { Link, useParams } from 'react-router-dom';
 import React, { useContext, useEffect, useState } from 'react';
+import { Link, useParams } from 'react-router-dom';
 import { UserContext } from '../contexts/UserContext';
+import { PhotosContext } from '../contexts/PhotosContext';
 import UserLayout from '../layouts/UserLayout';
 
-function Album() {
+function Album(props: any) {
 
   const { slug } = useParams();
 
   const [photos, setPhotos] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const url = new URL(`${import.meta.env.VITE_API}photo/all`);
@@ -19,24 +21,41 @@ function Album() {
       },
     })
       .then((response) => response.json())
-      .then((data) => setPhotos(data));
+      .then((data) => {
+        setPhotos(data);
+        setLoading(false);
+      });
   }, []);
-
-  if ( !photos.length ) {
-    return (
-      <UserLayout>
-        <div>You have no photos here.</div>
-      </UserLayout>);
-  }
 
   return (
     <UserLayout>
-      <div className="w-[90%] mx-auto my-10 columns-1 md:columns-2 lg:columns-3 xl: columns-4">
-        {photos.map((photo: any) => (
-          <RenderPhoto photo={photo} key={photo.id}/>
-        ))}
+      <div className="border-b border-b-gray-300 py-4">
       </div>
+      {
+        loading ? (<div>Loading photos...</div>)
+          : (
+            <PhotosContext.Provider value={photos}>
+              <RenderPhotoList/>
+            </PhotosContext.Provider>
+          )
+      }
     </UserLayout>
+  );
+}
+
+function RenderPhotoList() {
+  const photosContext = useContext(PhotosContext);
+
+  if ( !photosContext.length ) {
+    return (<div>You have no photos on this Album.</div>);
+  }
+
+  return (
+    <div className="w-[90%] mx-auto my-10 columns-1 md:columns-2 lg:columns-3 xl: columns-4">
+      {photosContext.map((photo: any) => (
+        <RenderPhoto photo={photo} key={photo.id}/>
+      ))}
+    </div>
   );
 }
 

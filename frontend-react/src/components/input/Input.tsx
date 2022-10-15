@@ -1,4 +1,4 @@
-import { BaseSyntheticEvent } from 'react';
+import { BaseSyntheticEvent, forwardRef, useImperativeHandle, useRef } from 'react';
 import './Input.scss';
 
 interface IProps {
@@ -10,7 +10,9 @@ interface IProps {
   hasError?: boolean;
 }
 
-function Input(props: IProps) {
+function Input(props: IProps, ref: any) {
+
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const onChange = (e: BaseSyntheticEvent) => {
     props.handleChange(e.target.value);
@@ -18,10 +20,18 @@ function Input(props: IProps) {
 
   const hasError = (props.hasError) ? 'border-red-500' : 'border-slate-300';
 
+  useImperativeHandle(ref, () => {
+    return {
+      reset() {
+        inputRef.current!.value = '';
+      }
+    }
+  }, []);
+
   return (
     <>
       <div id={props.id} className="hidden">{props.label}</div>
-      <input name={props.id} className={'input ' + hasError}
+      <input ref={inputRef} name={props.id} className={'input ' + hasError}
              type={props.type ?? 'text'}
              onChange={onChange}
              placeholder={props.placeholder}
@@ -31,4 +41,4 @@ function Input(props: IProps) {
   );
 }
 
-export default Input;
+export default forwardRef(Input);

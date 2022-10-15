@@ -90,6 +90,8 @@ export async function doGetAll(req: Request) {
   if ( req.query['album'] !== 'default-album' ) {
     cols.push(req.query['album'] as string);
     query += 'AND album = $2';
+  } else {
+    query += 'AND album IS NULL';
   }
 
   const photosResult =

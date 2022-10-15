@@ -5,6 +5,7 @@ import Login from './pages/Login';
 import RequestAccess from './pages/RequestAccess';
 import Photo from './pages/Photo';
 import Album from './pages/Album';
+import { AlbumsContext } from './contexts/AlbumsContext';
 
 export const router = createBrowserRouter([
   {

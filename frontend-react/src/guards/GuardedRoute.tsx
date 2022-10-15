@@ -1,4 +1,4 @@
-import { ReactElement, useCallback, useContext, useEffect, useState } from 'react';
+import { ReactElement, useEffect, useState } from 'react';
 import { UserContext } from '../contexts/UserContext';
 import { useTokenAuth } from '../hooks/UseTokenAuth';
 import { Navigate } from 'react-router-dom';
@@ -9,30 +9,28 @@ interface IProps {
 }
 
 function GuardedRoute(props: IProps) {
-  const userContext = useContext(UserContext);
-
   const [isAuthed, setIsAuthed] = useState(false);
-
-  const tokenAuth = useCallback(async () => {
-    await useTokenAuth();
-  }, []);
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
-    tokenAuth()
-      .then(() => setIsAuthed(true))
-      .catch(() => (<Navigate to="/login" />));
-  }, [tokenAuth]);
+    useTokenAuth()
+      .then((data) => {
+        setUser(data);
+        setIsAuthed(true);
+      })
+      .catch(() => <Navigate to="/login"/>);
+  }, []);
 
   const renderChildren = () => {
     return (
       <>
-      {isAuthed ? (<div>{props.component}</div>) : (<div>Loading....</div>)}
+        {isAuthed ? (<div>{props.component}</div>) : (<div>Loading....</div>)}
       </>
     );
   };
 
   return (
-    <UserContext.Provider value={userContext}>
+    <UserContext.Provider value={user!}>
       {renderChildren()}
     </UserContext.Provider>
   );

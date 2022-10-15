@@ -1,5 +1,3 @@
-import { UserStore } from '../contexts/UserContext';
-
 export const useTokenAuth = async () => {
   const token = localStorage.getItem('access-token');
 
@@ -21,12 +19,6 @@ export const useTokenAuth = async () => {
   }
 
   if ( response.ok && data.user ) {
-    const userStore: Record<string, any> = UserStore;
-
-    for ( const [key, value] of Object.entries(data.user) ) {
-      userStore[key] = value;
-    }
-
     return Promise.resolve(data.user);
   }
 };

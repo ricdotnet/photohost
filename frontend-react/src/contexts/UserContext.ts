@@ -1,6 +1,6 @@
 import { createContext } from 'react';
 
-export const UserStore = {
+const UserStore = {
   id: '',
   username: '',
   email: '',
