@@ -1,25 +1,18 @@
-import React, { memo, useContext, useEffect, useRef, useState } from 'react';
+import React, { BaseSyntheticEvent, memo, useContext, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { AlbumsContext } from '../contexts/AlbumsContext';
 import { AlbumInterface } from '../interfaces/AlbumInterface';
 import UserLayout from '../layouts/UserLayout';
 import Button from '../components/button/Button';
-import Input from '../components/input/Input';
-
-interface InputRefInterface {
-  reset: () => void;
-}
+import NewAlbumDialog from '../blocks/dialogs/NewAlbumDialog';
 
 function Home() {
 
-  const [albumName, setAlbumName] = useState('');
-  const [albumNameError, setAlbumNameError] = useState(false);
-
   const [albums, setAlbums] = useState<AlbumInterface[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isAdding, setIsAdding] = useState(false);
 
-  const inputRef = useRef<InputRefInterface>(null);
+  const [isAddingNewAlbum, setIsAddingNewAlbum] = useState(false);
+  const [isOpenAddNewAlbum, setIsOpenAddNewAlbum] = useState(false);
 
   useEffect(() => {
     fetch(`${import.meta.env.VITE_API}album/all`, {
@@ -34,18 +27,17 @@ function Home() {
       });
   }, []);
 
-  const handleAlbumNameChange = (d: string) => {
-    if ( albumNameError ) setAlbumNameError(false);
-    setAlbumName(d);
+  const onOpenAddNewAlbum = () => {
+    setIsOpenAddNewAlbum(true);
   };
 
-  const handleAlbumNameSubmit = (e: any) => {
-    e.preventDefault();
+  const onCancelAddNewAlbum = () => {
+    setIsOpenAddNewAlbum(false);
+  };
 
-    if ( !albumName ) {
-      return setAlbumNameError(true);
-    }
-    setIsAdding(true);
+  const onConfirmAddNewAlbum = (e: BaseSyntheticEvent, albumName: string) => {
+    e.preventDefault();
+    setIsAddingNewAlbum(true);
 
     fetch(`${import.meta.env.VITE_API}album`, {
       method: 'POST',
@@ -56,25 +48,19 @@ function Home() {
       body: JSON.stringify({ name: albumName }),
     }).then((response) => response.json())
       .then((data) => {
-        inputRef.current!.reset();
-        setAlbumName('');
         const newAlbums = [...albums];
         newAlbums.push(data.album);
         setAlbums(newAlbums);
-        setIsAdding(false);
+        setIsAddingNewAlbum(false);
+        setIsOpenAddNewAlbum(false);
       });
   };
 
   return (
     <UserLayout>
-      <form onSubmit={handleAlbumNameSubmit}
-            className="flex space-x-3 py-4 justify-end border-b border-b-gray-300">
-        <Input ref={inputRef}
-               handleChange={handleAlbumNameChange} id="album-name"
-               label="album-name"
-               hasError={albumNameError}/>
-        <Button value="Add Album" variant="primary" type="submit" isActioning={isAdding}/>
-      </form>
+      <div className="flex space-x-3 py-4 justify-end border-b border-b-gray-300">
+        <Button value="Add Album" variant="primary" handleClick={onOpenAddNewAlbum} type="button"/>
+      </div>
       {
         loading ? (<div>Loading albums...</div>)
           : (
@@ -83,6 +69,13 @@ function Home() {
             </AlbumsContext.Provider>
           )
       }
+      {isOpenAddNewAlbum ? (
+        <NewAlbumDialog
+          onConfirm={onConfirmAddNewAlbum}
+          onCancel={onCancelAddNewAlbum}
+          dialogIsActioning={isAddingNewAlbum}
+        />
+      ) : null}
     </UserLayout>
   );
 }
@@ -120,7 +113,8 @@ function AlbumItem(props: IAlbumItemProps) {
           src={`https://picsum.photos/seed/${props.name}/200/200`}
           alt="Album Cover"/>
       </div>
-      <span className="ml-5 text-lg">{props.name}</span>
+      <span
+        className="w-[200px] pl-4 text-lg whitespace-nowrap text-ellipsis overflow-hidden">{props.name}</span>
       <span className="ml-5 text-sm">{props.photos} photos</span>
     </div>
   );

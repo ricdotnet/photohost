@@ -1,4 +1,4 @@
-import { ButtonHTMLAttributes } from 'react';
+import { BaseSyntheticEvent, ButtonHTMLAttributes } from 'react';
 import { Link } from 'react-router-dom';
 import Spinner from '../loading/Spinner';
 import './Button.scss';
@@ -10,8 +10,9 @@ interface ButtonPropsInterface {
   value: string;
   variant: ButtonVariants;
   type?: ButtonTypes;
-  handleClick?: () => void;
+  handleClick?: (e: BaseSyntheticEvent) => void;
   isActioning?: boolean;
+  disabled?: boolean;
   href?: string;
 }
 
@@ -19,7 +20,8 @@ function Button(props: ButtonPropsInterface) {
 
   // kill me please 😭
   const bgColor = props.variant === 'primary' ? ' bg-[#5C5ABC]'
-    : props.variant === 'danger' ? ' bg-red-600' : '';
+    : props.variant === 'secondary' ? ' bg-[#F5F5F5]'
+      : props.variant === 'danger' ? ' bg-red-600' : '';
 
   if ( props.href ) {
     return (
@@ -36,7 +38,9 @@ function Button(props: ButtonPropsInterface) {
 
   return (
     <button className={'flex space-x-2 button button__' + props.variant + bgColor}
-            type={props.type} {...events}>
+            type={props.type}
+            disabled={props.disabled}
+            {...events}>
       <span>{props.value}</span>
       {props.isActioning ? (<Spinner className="w-5 h-5 animate-spin text-white"/>) : null}
     </button>

@@ -4,6 +4,7 @@ import { UserContext } from '../contexts/UserContext';
 import { PhotosContext } from '../contexts/PhotosContext';
 import UserLayout from '../layouts/UserLayout';
 import Button from '../components/button/Button';
+import DeleteAlbumDialog from '../blocks/dialogs/DeleteAlbumDialog';
 
 function Album() {
   const { slug } = useParams();
@@ -11,7 +12,17 @@ function Album() {
 
   const [photos, setPhotos] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
+
+  const [isDeletingAlbum, setIsDeletingAlbum] = useState(false);
+  const [isOpenDeleteAlbum, setIsOpenDeleteAlbum] = useState(false);
+
+  const onOpenDeleteAlbum = () => {
+    setIsOpenDeleteAlbum(true);
+  };
+
+  const onCancelDeleteAlbum = () => {
+    setIsOpenDeleteAlbum(false);
+  };
 
   useEffect(() => {
     const url = new URL(`${import.meta.env.VITE_API}photo/all`);
@@ -29,8 +40,8 @@ function Album() {
       });
   }, []);
 
-  const handleDeleteAlbum = () => {
-    setIsDeleting(true);
+  const onConfirmDeleteAlbum = () => {
+    setIsDeletingAlbum(true);
     const url = new URL(`${import.meta.env.VITE_API}album`);
     url.searchParams.append('album', slug as string);
 
@@ -43,7 +54,7 @@ function Album() {
     })
       .then((response) => response.json())
       .then(() => {
-        setIsDeleting(false);
+        setIsDeletingAlbum(false);
         navigateTo('/');
       });
   };
@@ -51,8 +62,11 @@ function Album() {
   return (
     <UserLayout>
       <div className="border-b border-b-gray-300 py-4 flex justify-between items-center">
-        <Button value="Delete" variant="danger" handleClick={handleDeleteAlbum} type="button"
-                isActioning={isDeleting}/>
+        <Button value="Delete"
+                variant="danger"
+                handleClick={onOpenDeleteAlbum}
+                type="button"
+                disabled={slug === 'default-album'}/>
       </div>
       {
         loading ? (<div>Loading photos...</div>)
@@ -62,6 +76,13 @@ function Album() {
             </PhotosContext.Provider>
           )
       }
+      {isOpenDeleteAlbum ? (
+        <DeleteAlbumDialog
+          onConfirm={onConfirmDeleteAlbum}
+          onCancel={onCancelDeleteAlbum}
+          dialogIsActioning={isDeletingAlbum}
+        />
+      ) : null}
     </UserLayout>
   );
 }
@@ -70,7 +91,7 @@ function RenderPhotoList() {
   const photosContext = useContext(PhotosContext);
 
   if ( !photosContext.length ) {
-    return (<div>You have no photos on this Album.</div>);
+    return (<div>You have no photos on this album.</div>);
   }
 
   return (
