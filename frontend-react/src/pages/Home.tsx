@@ -93,11 +93,11 @@ const RenderAlbums = memo(function RenderAlbums() {
 
   return (
     <div
-      className="grid gap-x-4 gap-y-10 grid-cols-2 md:grid-cols-4 lg:grid-cols-5 justify-items-center mt-10">
+      className="grid gap-x-4 gap-y-10 grid-cols-2 md:grid-cols-4 justify-items-center mt-10">
       {
         !albumsContext.length ? (<div>You have no albums here</div>)
           : albumsContext.map((album) => (
-            <Link to={'/album/' + album.id} key={album.id} state="hello world from album">
+            <Link to={'/album/' + album.id} key={album.id}>
               <AlbumItem name={album.name} photos={album.photos ?? 0}/>
             </Link>
           ))

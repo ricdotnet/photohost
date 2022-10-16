@@ -6,7 +6,7 @@ function UserLayout({ children }: any) {
     <>
       <Nav/>
       <div className="px-10">
-        <div className="max-w-[1280px] mx-auto">{children}</div>
+        <div className="max-w-[960px] mx-auto">{children}</div>
       </div>
     </>
   );

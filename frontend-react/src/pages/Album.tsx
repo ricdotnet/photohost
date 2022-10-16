@@ -6,7 +6,6 @@ import UserLayout from '../layouts/UserLayout';
 import Button from '../components/button/Button';
 
 function Album() {
-
   const { slug } = useParams();
   const navigateTo = useNavigate();
 
@@ -51,7 +50,7 @@ function Album() {
 
   return (
     <UserLayout>
-      <div className="border-b border-b-gray-300 py-4 flex justify-end">
+      <div className="border-b border-b-gray-300 py-4 flex justify-between items-center">
         <Button value="Delete" variant="danger" handleClick={handleDeleteAlbum} type="button"
                 isActioning={isDeleting}/>
       </div>
@@ -75,7 +74,7 @@ function RenderPhotoList() {
   }
 
   return (
-    <div className="w-[90%] mx-auto my-10 columns-1 md:columns-2 lg:columns-3 xl: columns-4">
+    <div className="mx-auto p-3 columns-1 md:columns-2 lg:columns-3">
       {photosContext.map((photo: any) => (
         <RenderPhoto photo={photo} key={photo.id}/>
       ))}
@@ -99,7 +98,7 @@ function RenderPhoto(props: RendePhotoPropsInterface) {
   };
 
   return (
-    <div className="rounded-md mb-4 relative bg-white p-3 break-inside-avoid">
+    <div className="rounded-md mb-4 relative bg-white p-2 break-inside-avoid">
       <Link to={'/photo/' + props.photo.name} state={props.photo} key={props.photo.id}>
         <div
           className={'w-full h-[100px] animate-pulse bg-gray-400 rounded-md ' + ((loading) ? 'block' : 'hidden')}></div>
