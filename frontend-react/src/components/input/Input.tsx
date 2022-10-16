@@ -1,7 +1,7 @@
 import { BaseSyntheticEvent, forwardRef, useImperativeHandle, useRef } from 'react';
 import './Input.scss';
 
-interface IProps {
+interface InputPropsInterface {
   handleChange: (data: string) => void;
   id: string;
   label: string;
@@ -10,7 +10,7 @@ interface IProps {
   hasError?: boolean;
 }
 
-function Input(props: IProps, ref: any) {
+function Input(props: InputPropsInterface, ref: any) {
 
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -25,7 +25,7 @@ function Input(props: IProps, ref: any) {
       reset() {
         inputRef.current!.value = '';
       }
-    }
+    };
   }, []);
 
   return (
@@ -36,7 +36,8 @@ function Input(props: IProps, ref: any) {
              onChange={onChange}
              placeholder={props.placeholder}
              aria-labelledby={props.id}
-             autoComplete="off"/>
+             autoComplete="off"
+      />
     </>
   );
 }

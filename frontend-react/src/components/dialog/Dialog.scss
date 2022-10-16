@@ -1,8 +1,8 @@
 .background {
-  @apply absolute w-full h-full top-0 left-0 bg-black/50 grid items-center justify-center;
+  @apply absolute w-full h-full top-0 left-0 bg-black/50 grid items-center justify-center px-5;
 
   .dialog-box {
-    @apply relative w-[350px] bg-white h-auto p-[25px] rounded-md flex flex-col space-y-6;
+    @apply relative md:max-w-[400px] bg-white h-auto p-[25px] rounded-md flex flex-col space-y-6;
 
     &__title {
       @apply text-xl;

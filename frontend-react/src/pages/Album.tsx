@@ -6,6 +6,8 @@ import UserLayout from '../layouts/UserLayout';
 import Button from '../components/button/Button';
 import DeleteAlbumDialog from '../blocks/dialogs/DeleteAlbumDialog';
 
+import './Album.scss';
+
 function Album() {
   const { slug } = useParams();
   const navigateTo = useNavigate();
@@ -61,7 +63,7 @@ function Album() {
 
   return (
     <UserLayout>
-      <div className="border-b border-b-gray-300 py-4 flex justify-between items-center">
+      <div className="page-top">
         <Button value="Delete"
                 variant="danger"
                 handleClick={onOpenDeleteAlbum}
@@ -95,7 +97,7 @@ function RenderPhotoList() {
   }
 
   return (
-    <div className="mx-auto p-3 columns-1 md:columns-2 lg:columns-3">
+    <div className="photo-grid">
       {photosContext.map((photo: any) => (
         <RenderPhoto photo={photo} key={photo.id}/>
       ))}
@@ -103,14 +105,14 @@ function RenderPhotoList() {
   );
 }
 
-interface RendePhotoPropsInterface {
+interface RenderPhotoPropsInterface {
   photo: {
     id: number;
     name: string;
   };
 }
 
-function RenderPhoto(props: RendePhotoPropsInterface) {
+function RenderPhoto(props: RenderPhotoPropsInterface) {
   const userContext = useContext(UserContext);
   const [loading, setLoading] = useState(true);
 
@@ -119,15 +121,13 @@ function RenderPhoto(props: RendePhotoPropsInterface) {
   };
 
   return (
-    <div className="rounded-md mb-4 relative bg-white p-2 break-inside-avoid">
+    <div className="photo-item">
       <Link to={'/photo/' + props.photo.name} state={props.photo} key={props.photo.id}>
-        <div
-          className={'w-full h-[100px] animate-pulse bg-gray-400 rounded-md ' + ((loading) ? 'block' : 'hidden')}></div>
-        <img className={'w-full rounded-md ' + ((loading) ? 'hidden' : 'block')}
+        <div className={'photo-item__skeleton ' + (loading ? 'block' : 'hidden')}></div>
+        <img className={'w-full rounded ' + (loading ? 'hidden' : 'block')}
              src={import.meta.env.VITE_API + 'photo/' + props.photo.name + '?digest=' + userContext.digest}
              alt={props.photo.name} onLoad={handleOnLoad}/>
-        <div
-          className="absolute w-full h-full rounded-md left-0 bottom-0 hover:bg-white/20 transition ease-in-out"></div>
+        <div className="photo-item__hover-effect"></div>
       </Link>
     </div>
   );

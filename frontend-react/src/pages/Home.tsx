@@ -6,6 +6,8 @@ import UserLayout from '../layouts/UserLayout';
 import Button from '../components/button/Button';
 import NewAlbumDialog from '../blocks/dialogs/NewAlbumDialog';
 
+import './Home.scss';
+
 function Home() {
 
   const [albums, setAlbums] = useState<AlbumInterface[]>([]);
@@ -58,8 +60,12 @@ function Home() {
 
   return (
     <UserLayout>
-      <div className="flex space-x-3 py-4 justify-end border-b border-b-gray-300">
-        <Button value="Add Album" variant="primary" handleClick={onOpenAddNewAlbum} type="button"/>
+      <div className="page-top">
+        <Button value="Add Album"
+                variant="primary"
+                handleClick={onOpenAddNewAlbum}
+                type="button"
+        />
       </div>
       {
         loading ? (<div>Loading albums...</div>)
@@ -85,37 +91,36 @@ const RenderAlbums = memo(function RenderAlbums() {
   const albumsContext = useContext(AlbumsContext);
 
   return (
-    <div
-      className="grid gap-x-4 gap-y-10 grid-cols-2 md:grid-cols-4 justify-items-center mt-10">
+    <div className="album-grid">
       {
         !albumsContext.length ? (<div>You have no albums here</div>)
           : albumsContext.map((album) => (
-            <Link to={'/album/' + album.id} key={album.id}>
-              <AlbumItem name={album.name} photos={album.photos ?? 0}/>
-            </Link>
+            <AlbumItem name={album.name} photos={album.photos ?? 0} id={album.id} key={album.id}/>
           ))
       }
     </div>
   );
 });
 
-interface IAlbumItemProps {
+interface AlbumItemPropsInterface {
+  id: string;
   name: string;
   photos: number;
 }
 
-function AlbumItem(props: IAlbumItemProps) {
+function AlbumItem(props: AlbumItemPropsInterface) {
   return (
-    <div className="flex flex-col hover:bg-white/40 rounded-md transition ease-in-out">
-      <div className="w-[200px] h-[200px] bg-zinc-700 rounded-md overflow-hidden">
-        <img
-          className="rounded-md hover:scale-125 hover:rotate-6 transition ease-in-out duration-200"
-          src={`https://picsum.photos/seed/${props.name}/200/200`}
-          alt="Album Cover"/>
-      </div>
-      <span
-        className="w-[200px] pl-4 text-lg whitespace-nowrap text-ellipsis overflow-hidden">{props.name}</span>
-      <span className="ml-5 text-sm">{props.photos} photos</span>
+    <div className="album-item">
+      <Link to={'/album/' + props.id} key={props.id}>
+        <div className="album-item__cover">
+          <img className="album-item__cover-item"
+               src={`https://picsum.photos/seed/${props.name}/800/800`}
+               alt="Album Cover"
+          />
+        </div>
+      </Link>
+      <span className="album-item__name">{props.name}</span>
+      <span className="pl-4 text-sm">{props.photos} photos</span>
     </div>
   );
 }

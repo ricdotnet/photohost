@@ -14,7 +14,7 @@ body {
 }
 
 .shake-animation {
-  animation: shake-animation 0.82s cubic-bezier(.36,.07,.19,.97) both;
+  animation: shake-animation 0.82s cubic-bezier(.36, .07, .19, .97) both;
   transform: translate3d(0, 0, 0);
 }
 
@@ -34,4 +34,8 @@ body {
   40%, 60% {
     transform: translate3d(4px, 0, 0);
   }
+}
+
+.page-top {
+  @apply flex space-x-3 py-4 justify-end border-b border-b-gray-300;
 }

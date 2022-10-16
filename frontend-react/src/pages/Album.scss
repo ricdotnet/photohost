@@ -1,0 +1,16 @@
+.photo-grid {
+  @apply mx-auto p-3 columns-1 md:columns-2 lg:columns-3;
+}
+
+.photo-item {
+  @apply rounded-md mb-4 relative bg-white p-1 break-inside-avoid shadow-md overflow-hidden;
+
+  &__skeleton {
+    @apply w-full h-[100px] animate-pulse bg-gray-400 rounded-md;
+  }
+
+  &__hover-effect {
+    @apply absolute w-full h-full left-0 bottom-0 hover:bg-white/20;
+    @apply rounded-md transition ease-in-out;
+  }
+}

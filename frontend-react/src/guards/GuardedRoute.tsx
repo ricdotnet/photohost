@@ -1,14 +1,14 @@
 import { ReactElement, useEffect, useState } from 'react';
+import { Navigate } from 'react-router-dom';
 import { UserContext } from '../contexts/UserContext';
 import { useTokenAuth } from '../hooks/UseTokenAuth';
-import { Navigate } from 'react-router-dom';
 
-interface IProps {
+interface GuardRoutePropsInterface {
   component: ReactElement;
   redirectTo: string;
 }
 
-function GuardedRoute(props: IProps) {
+function GuardedRoute(props: GuardRoutePropsInterface) {
   const [isAuthed, setIsAuthed] = useState(false);
   const [user, setUser] = useState(null);
 
