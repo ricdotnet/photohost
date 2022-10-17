@@ -1,0 +1,13 @@
+@import "./src/index";
+
+.background {
+  @apply fixed w-full h-full bg-black/80;
+}
+
+.foreground {
+  @apply w-[90%] h-[90%] my-10 mx-auto rounded-md px-10 py-5;
+}
+
+.overlay-actions {
+  @apply absolute top-0 right-0 pr-10 py-5 flex space-x-3;
+}
