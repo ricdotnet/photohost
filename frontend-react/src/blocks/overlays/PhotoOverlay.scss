@@ -2,12 +2,36 @@
 
 .background {
   @apply fixed w-full h-full bg-black/80;
-}
 
-.foreground {
-  @apply w-[90%] h-[90%] my-10 mx-auto rounded-md px-10 py-5;
-}
+  .foreground {
+    @apply w-[90%] h-[90%] my-10 mx-auto rounded-md px-10 py-5;
+  }
 
-.overlay-actions {
-  @apply absolute top-0 right-0 pr-10 py-5 flex space-x-3;
+  .overlay-actions {
+    @apply absolute top-0 right-0 pr-10 py-5 flex space-x-3;
+
+    .button-action {
+      @apply p-3 hover:bg-white/10 text-white rounded transition ease-in-out duration-100;
+    }
+  }
+
+  .button-cursor {
+    @apply p-3 hover:bg-white/10 transition ease-in-out duration-100 text-white rounded cursor-pointer absolute;
+
+    &:disabled {
+      @apply text-white/50;
+
+      &:hover {
+        @apply bg-white/0 cursor-default;
+      }
+    }
+  }
+
+  .previous {
+    @apply left-2 top-1/2 -translate-y-1/2;
+  }
+
+  .next {
+    @apply right-2 top-1/2 -translate-y-1/2;
+  }
 }

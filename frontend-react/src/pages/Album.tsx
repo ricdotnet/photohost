@@ -1,17 +1,17 @@
 import React, { BaseSyntheticEvent, useContext, useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import { UserContext } from '../contexts/UserContext';
 import { PhotosContext } from '../contexts/PhotosContext';
+import { PhotoInterface } from '../interfaces/PhotoInterface';
 import UserLayout from '../layouts/UserLayout';
 import Button from '../components/button/Button';
 import DeleteAlbumDialog from '../blocks/dialogs/DeleteAlbumDialog';
+import PhotoOverlay from '../blocks/overlays/PhotoOverlay';
 
 import './Album.scss';
-import PhotoOverlay from '../blocks/overlays/PhotoOverlay';
-import { PhotoInterface } from '../interfaces/PhotoInterface';
 
 function Album() {
-  const { slug } = useParams();
+  const { album } = useParams();
   const navigateTo = useNavigate();
 
   const [photos, setPhotos] = useState([]);
@@ -30,7 +30,7 @@ function Album() {
 
   useEffect(() => {
     const url = new URL(`${import.meta.env.VITE_API}photo/all`);
-    url.searchParams.append('album', slug as string);
+    url.searchParams.append('album', album as string);
 
     fetch(url, {
       headers: {
@@ -47,14 +47,14 @@ function Album() {
   const onConfirmDeleteAlbum = () => {
     setIsDeletingAlbum(true);
     const url = new URL(`${import.meta.env.VITE_API}album`);
-    url.searchParams.append('album', slug as string);
+    url.searchParams.append('album', album as string);
 
     fetch(url, {
       method: 'DELETE',
       headers: {
         authorization: `Bearer ${localStorage.getItem('access-token')}`
       },
-      body: JSON.stringify({ album: slug })
+      body: JSON.stringify({ album: album })
     })
       .then((response) => response.json())
       .then(() => {
@@ -70,7 +70,7 @@ function Album() {
                 variant="danger"
                 handleClick={onOpenDeleteAlbum}
                 type="button"
-                disabled={slug === 'default-album'}/>
+                disabled={album === 'default-album'}/>
       </div>
       {
         loading ? (<div>Loading photos...</div>)
@@ -80,19 +80,24 @@ function Album() {
             </PhotosContext.Provider>
           )
       }
-      {isOpenDeleteAlbum ? (
-        <DeleteAlbumDialog
-          onConfirm={onConfirmDeleteAlbum}
-          onCancel={onCancelDeleteAlbum}
-          dialogIsActioning={isDeletingAlbum}
-        />
-      ) : null}
+      {!isOpenDeleteAlbum ? null :
+        (
+          <DeleteAlbumDialog
+            onConfirm={onConfirmDeleteAlbum}
+            onCancel={onCancelDeleteAlbum}
+            dialogIsActioning={isDeletingAlbum}
+          />
+        )
+      }
     </UserLayout>
   );
 }
 
 function RenderPhotoList() {
   const photosContext = useContext(PhotosContext);
+
+  const { album, name } = useParams();
+  const navigateTo = useNavigate();
 
   const [photo, setPhoto] = useState<PhotoInterface | null>(null);
   const [isViewingPhoto, setIsViewingPhoto] = useState(false);
@@ -101,9 +106,15 @@ function RenderPhotoList() {
     return (<div>You have no photos on this album.</div>);
   }
 
+  if ( !isViewingPhoto && name ) {
+    // return navigateTo(`/photo/${name}`);
+    return <Navigate to={`/photo/${name}`}/>;
+  }
+
   const handleOnClickPhoto = (e: BaseSyntheticEvent, photo: PhotoInterface) => {
     setIsViewingPhoto(true);
     setPhoto(photo);
+    navigateTo(`/album/${album}/${photo.name}`);
 
     document.body.classList.add('overflow-hidden');
   };
@@ -111,6 +122,7 @@ function RenderPhotoList() {
   const handleOnCloseViewer = () => {
     setIsViewingPhoto(false);
     setPhoto(null);
+    navigateTo(`/album/${album}`);
 
     document.body.classList.remove('overflow-hidden');
   };
@@ -118,13 +130,21 @@ function RenderPhotoList() {
   return (
     <div className="photo-grid">
       {photosContext.map((photo: any) => (
-        <RenderPhoto photo={photo} key={photo.id} onClick={handleOnClickPhoto}/>
-      ))}
-      {isViewingPhoto ? (
-        <PhotoOverlay photo={photo!}
-                      onClose={handleOnCloseViewer}
+        <RenderPhoto
+          photo={photo}
+          key={photo.id}
+          onClick={handleOnClickPhoto}
         />
-      ) : null}
+      ))}
+      {!isViewingPhoto ? null :
+        (
+          <PhotoOverlay
+            album={album!}
+            photo={photo!}
+            onClose={handleOnCloseViewer}
+          />
+        )
+      }
     </div>
   );
 }
@@ -148,13 +168,13 @@ function RenderPhoto(props: RenderPhotoPropsInterface) {
 
   return (
     <div className="photo-item" onClick={handleOnClick}>
-      {/*<Link to={'/photo/' + props.photo.name} state={props.photo} key={props.photo.id}>*/}
       <div className={'photo-item__skeleton ' + (loading ? 'block' : 'hidden')}></div>
-      <img className={'w-full rounded ' + (loading ? 'hidden' : 'block')}
-           src={import.meta.env.VITE_API + 'photo/' + props.photo.name + '?digest=' + userContext.digest}
-           alt={props.photo.name} onLoad={handleOnLoad}/>
+      <img
+        className={'w-full rounded ' + (loading ? 'hidden' : 'block')}
+        src={import.meta.env.VITE_API + 'photo/' + props.photo.name + '?digest=' + userContext.digest}
+        alt={props.photo.name} onLoad={handleOnLoad}
+      />
       <div className="photo-item__hover-effect"></div>
-      {/*</Link>*/}
     </div>
   );
 }

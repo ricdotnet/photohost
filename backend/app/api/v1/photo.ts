@@ -1,10 +1,24 @@
 import { Router } from 'express';
 import { multipart } from '../middlwares/multipart';
-import { doDelete, doGetAll, doGetOne, doInsert } from '../../services/photo';
+import {
+  doDelete,
+  doGetAll,
+  doGetCursors,
+  doGetOne,
+  doInsert,
+  getPhotoData
+} from '../../services/photo';
 import { authorization } from '../middlwares/authorization';
 import validator from 'validator';
 
 export const photo: Router = Router();
+
+// TODO: refactor this later on
+photo.get('/cursors', authorization, async (req, res) => {
+  const cursors = await doGetCursors(req);
+
+  res.status(200).send({ code: 200, cursors });
+});
 
 /**
  * @Post one or more photos
@@ -99,4 +113,17 @@ photo.get('/p/:name', async (req, res) => {
 
   res.setHeader('content-type', file?.mimeType as string);
   res.status(200).send(file?.file);
+});
+
+/**
+ * @Get a single photo data
+ *
+ * This route will be used to get data from a photo such as path, name, original filename, id,
+ *  upload date...
+ */
+photo.get('/meta/:name', authorization, async (req, res) => {
+
+  const photoData = await getPhotoData(req);
+
+  res.status(200).send({ code: 200, photo: photoData[0] });
 });

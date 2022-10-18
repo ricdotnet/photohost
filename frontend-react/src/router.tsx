@@ -3,9 +3,8 @@ import GuardedRoute from './guards/GuardedRoute';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import RequestAccess from './pages/RequestAccess';
-import Photo from './pages/Photo';
 import Album from './pages/Album';
-import { AlbumsContext } from './contexts/AlbumsContext';
+import Photo from './pages/Photo';
 
 export const router = createBrowserRouter([
   {
@@ -13,8 +12,12 @@ export const router = createBrowserRouter([
     element: <GuardedRoute component={<Home/>} redirectTo="/login"/>,
   },
   {
-    path: '/album/:slug',
+    path: '/album/:album',
     element: <GuardedRoute component={<Album/>} redirectTo="/login"/>,
+  },
+  {
+    path: '/album/:album/:name',
+    element: <GuardedRoute component={<Album/>} redirectTo="/login"/>
   },
   {
     path: '/photo/:name',

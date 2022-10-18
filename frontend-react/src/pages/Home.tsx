@@ -61,10 +61,11 @@ function Home() {
   return (
     <UserLayout>
       <div className="page-top">
-        <Button value="Add Album"
-                variant="primary"
-                handleClick={onOpenAddNewAlbum}
-                type="button"
+        <Button
+          value="Add Album"
+          variant="primary"
+          handleClick={onOpenAddNewAlbum}
+          type="button"
         />
       </div>
       {
@@ -75,13 +76,15 @@ function Home() {
             </AlbumsContext.Provider>
           )
       }
-      {isOpenAddNewAlbum ? (
-        <NewAlbumDialog
-          onConfirm={onConfirmAddNewAlbum}
-          onCancel={onCancelAddNewAlbum}
-          dialogIsActioning={isAddingNewAlbum}
-        />
-      ) : null}
+      {!isOpenAddNewAlbum ? null :
+        (
+          <NewAlbumDialog
+            onConfirm={onConfirmAddNewAlbum}
+            onCancel={onCancelAddNewAlbum}
+            dialogIsActioning={isAddingNewAlbum}
+          />
+        )
+      }
     </UserLayout>
   );
 }
@@ -113,9 +116,10 @@ function AlbumItem(props: AlbumItemPropsInterface) {
     <div className="album-item">
       <Link to={'/album/' + props.id} key={props.id}>
         <div className="album-item__cover">
-          <img className="album-item__cover-item"
-               src={`https://picsum.photos/seed/${props.name}/800/800`}
-               alt="Album Cover"
+          <img
+            className="album-item__cover-item"
+            src={`https://picsum.photos/seed/${props.name}/800/800`}
+            alt="Album Cover"
           />
         </div>
       </Link>

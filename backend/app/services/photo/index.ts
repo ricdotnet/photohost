@@ -91,13 +91,45 @@ export async function doGetAll(req: Request) {
     cols.push(req.query['album'] as string);
     query += 'AND album = $2';
   } else {
-    query += 'AND album IS NULL';
+    query += 'AND album IS NULL ORDER BY id';
   }
 
   const photosResult =
     await client.query<IPhoto>(`${query} LIMIT 10`, [...cols]);
 
   return clone(photosResult.rows);
+}
+
+export async function getPhotoData(req: Request) {
+  const { name } = req.params;
+  const { username } = req.userContext!;
+
+  const photoDataResult =
+    await client.query('SELECT * FROM photos WHERE username = $1 AND name = $2',
+      [username, name]);
+
+  return photoDataResult.rows;
+}
+
+/**
+ * Get the current viewing photo cursors (previous and next)
+ *
+ * @param {e.Request} req
+ * @returns {Promise<any>}
+ */
+export async function doGetCursors(req: Request) {
+  const { name } = req.query;
+  const { username } = req.userContext!;
+
+  const cursorsResult =
+    await client.query('select * ' +
+      'from (select name, ' +
+      'lag(name) over (order by id)  as prev, ' +
+      'lead(name) over (order by id) as next ' +
+      'from photos where username = $1) x ' +
+      'where name = $2', [username, name]);
+
+  return cursorsResult.rows[0];
 }
 
 /**
