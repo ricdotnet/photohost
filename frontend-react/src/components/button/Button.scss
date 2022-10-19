@@ -1,5 +1,6 @@
 .button {
   @apply px-4 py-2 rounded-md text-center h-$btn flex items-center justify-center;
+  @apply transition ease-in-out duration-200;
 
   &__primary {
     @apply text-white bg-$primary;

@@ -9,6 +9,7 @@ import DeleteAlbumDialog from '../blocks/dialogs/DeleteAlbumDialog';
 import PhotoOverlay from '../blocks/overlays/PhotoOverlay';
 
 import './Album.scss';
+import UploadPhotoDialog from '../blocks/dialogs/UploadPhotoDialog';
 
 function Album() {
   const { album } = useParams();
@@ -20,13 +21,8 @@ function Album() {
   const [isDeletingAlbum, setIsDeletingAlbum] = useState(false);
   const [isOpenDeleteAlbum, setIsOpenDeleteAlbum] = useState(false);
 
-  const onOpenDeleteAlbum = () => {
-    setIsOpenDeleteAlbum(true);
-  };
-
-  const onCancelDeleteAlbum = () => {
-    setIsOpenDeleteAlbum(false);
-  };
+  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
+  const [isOpenUploadPhoto, setIsOpenUploadPhoto] = useState(false);
 
   useEffect(() => {
     const url = new URL(`${import.meta.env.VITE_API}photo/all`);
@@ -43,6 +39,14 @@ function Album() {
         setLoading(false);
       });
   }, []);
+
+  const onOpenDeleteAlbum = () => {
+    setIsOpenDeleteAlbum(true);
+  };
+
+  const onCancelDeleteAlbum = () => {
+    setIsOpenDeleteAlbum(false);
+  };
 
   const onConfirmDeleteAlbum = () => {
     setIsDeletingAlbum(true);
@@ -63,14 +67,45 @@ function Album() {
       });
   };
 
+  const onOpenUploadPhoto = () => {
+    setIsOpenUploadPhoto(true);
+  };
+
+  const onCancelUploadPhoto = () => {
+    setIsOpenUploadPhoto(false);
+  };
+
+  const onConfirmUploadPhoto = (e: BaseSyntheticEvent, formData: FormData) => {
+    setIsUploadingPhoto(true);
+
+    fetch(`${import.meta.env.VITE_API}test-upload`, {
+      method: 'POST',
+      body: formData,
+    })
+      .then((res) => res.json())
+      .then(() => {
+        setIsUploadingPhoto(false);
+        setIsOpenUploadPhoto(false);
+      })
+      .catch((err) => console.log(err));
+  };
+
   return (
     <UserLayout>
       <div className="page-top">
-        <Button value="Delete"
-                variant="danger"
-                handleClick={onOpenDeleteAlbum}
-                type="button"
-                disabled={album === 'default-album'}/>
+        <Button
+          value="Upload"
+          variant="primary"
+          handleClick={onOpenUploadPhoto}
+          type="button"
+        />
+        <Button
+          value="Delete"
+          variant="danger"
+          handleClick={onOpenDeleteAlbum}
+          type="button"
+          disabled={album === 'default-album'}
+        />
       </div>
       {
         loading ? (<div>Loading photos...</div>)
@@ -86,6 +121,15 @@ function Album() {
             onConfirm={onConfirmDeleteAlbum}
             onCancel={onCancelDeleteAlbum}
             dialogIsActioning={isDeletingAlbum}
+          />
+        )
+      }
+      {!isOpenUploadPhoto ? null :
+        (
+          <UploadPhotoDialog
+            dialogIsActioning={isUploadingPhoto}
+            onConfirm={onConfirmUploadPhoto}
+            onCancel={onCancelUploadPhoto}
           />
         )
       }
@@ -107,7 +151,6 @@ function RenderPhotoList() {
   }
 
   if ( !isViewingPhoto && name ) {
-    // return navigateTo(`/photo/${name}`);
     return <Navigate to={`/photo/${name}`}/>;
   }
 

@@ -1,6 +1,6 @@
 import { BaseSyntheticEvent, ButtonHTMLAttributes } from 'react';
 import { Link } from 'react-router-dom';
-import Spinner from '../loading/Spinner';
+import SpinnerIcon from '../icons/SpinnerIcon';
 import './Button.scss';
 
 type ButtonVariants = 'primary' | 'accent' | 'secondary' | 'danger' | 'disabled';
@@ -42,7 +42,7 @@ function Button(props: ButtonPropsInterface) {
             disabled={props.disabled}
             {...events}>
       <span>{props.value}</span>
-      {props.isActioning ? (<Spinner className="w-5 h-5 animate-spin text-white"/>) : null}
+      {props.isActioning ? (<SpinnerIcon className="w-5 h-5 animate-spin text-white"/>) : null}
     </button>
   );
 }

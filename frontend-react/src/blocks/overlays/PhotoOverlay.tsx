@@ -1,4 +1,4 @@
-import { BaseSyntheticEvent, memo, useContext, useEffect, useState } from 'react';
+import { BaseSyntheticEvent, useContext, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { UserContext } from '../../contexts/UserContext';
 import { PhotoInterface } from '../../interfaces/PhotoInterface';
@@ -8,6 +8,7 @@ import PreviousIcon from '../../components/icons/PreviousIcon';
 import NextIcon from '../../components/icons/NextIcon';
 
 import './PhotoOverlay.scss';
+import SpinnerIcon from '../../components/icons/SpinnerIcon';
 
 interface PhotoOverlayPropsInterface {
   photo: PhotoInterface;
@@ -94,7 +95,13 @@ function PhotoOverlay(props: PhotoOverlayPropsInterface) {
           <CrossIcon className="w-6"/>
         </button>
       </div>
-      {isLoadingNext ? null :
+      {isLoadingNext ?
+        (
+          <>
+            <SpinnerIcon className="absolute top-1/2 left-1/2 w-10 h-10 text-white animate-spin"/>
+          </>
+        )
+        :
         (
           <div className="foreground">
             <img

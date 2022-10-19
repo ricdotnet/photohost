@@ -1,6 +1,6 @@
 import { Request, Response, Router } from 'express';
-import { authorization } from './middlwares/authorization';
 import { v1 } from './v1';
+import { multipart } from './middlwares/multipart';
 
 export const api: Router = Router();
 

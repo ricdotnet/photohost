@@ -1,0 +1,17 @@
+.draggable-zone {
+  @apply border-4 border-dashed w-full h-[250px] rounded-md relative;
+  @apply transition ease-in-out duration-100;
+
+  label {
+    @apply w-full h-full flex justify-center text-center items-center cursor-pointer;
+  }
+
+  &:hover {
+    @apply border-gray-800;
+  }
+}
+
+.remove-button {
+  @apply p-1 hover:bg-gray-100 rounded-md;
+  @apply transition ease-in-out duration-200;
+}
