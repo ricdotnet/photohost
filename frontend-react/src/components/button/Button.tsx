@@ -37,10 +37,12 @@ function Button(props: ButtonPropsInterface) {
   }
 
   return (
-    <button className={'flex space-x-2 button button__' + props.variant + bgColor}
-            type={props.type}
-            disabled={props.disabled}
-            {...events}>
+    <button
+      className={'flex space-x-2 button button__' + props.variant + bgColor}
+      type={props.type}
+      disabled={props.disabled}
+      {...events}
+    >
       <span>{props.value}</span>
       {props.isActioning ? (<SpinnerIcon className="w-5 h-5 animate-spin text-white"/>) : null}
     </button>

@@ -10,11 +10,13 @@ interface DeleteAlbumDialogPropsInterface {
 function DeleteAlbumDialog(props: DeleteAlbumDialogPropsInterface) {
 
   return (
-    <Dialog title="Delete album"
-            controls={true}
-            onConfirm={props.onConfirm}
-            onCancel={props.onCancel}
-            isConfirming={props.dialogIsActioning}>
+    <Dialog
+      title="Delete album"
+      controls={true}
+      onConfirm={props.onConfirm}
+      onCancel={props.onCancel}
+      isConfirming={props.dialogIsActioning}
+    >
       <span>
         Are you sure you want to delete this album?
         Any photos here will be moved to 'default-album'.

@@ -42,9 +42,11 @@ function Dialog({
         <span className="dialog-box__title">{title}</span>
         {children}
         {controls ? (
-          <DialogControls isActioning={{ isConfirming, isCanceling }}
-                          onCancel={onCancel}
-                          onConfirm={onConfirm}/>
+          <DialogControls
+            isActioning={{ isConfirming, isCanceling }}
+            onCancel={onCancel}
+            onConfirm={onConfirm}
+          />
         ) : null}
       </div>
     </div>
@@ -54,18 +56,22 @@ function Dialog({
 function DialogControls(props: any) {
   return (
     <div className="dialog-box__buttons">
-      <Button value="Cancel"
-              variant="secondary"
-              type="button"
-              isActioning={props.isActioning.isCanceling}
-              disabled={props.isActioning.isActioning || props.isActioning.isConfirming}
-              handleClick={props.onCancel}/>
-      <Button value="Confirm"
-              variant="primary"
-              type="button"
-              isActioning={props.isActioning.isConfirming}
-              disabled={props.isActioning.isActioning || props.isActioning.isConfirming}
-              handleClick={props.onConfirm}/>
+      <Button
+        value="Cancel"
+        variant="secondary"
+        type="button"
+        isActioning={props.isActioning.isCanceling}
+        disabled={props.isActioning.isActioning || props.isActioning.isConfirming}
+        handleClick={props.onCancel}
+      />
+      <Button
+        value="Confirm"
+        variant="primary"
+        type="button"
+        isActioning={props.isActioning.isConfirming}
+        disabled={props.isActioning.isActioning || props.isActioning.isConfirming}
+        handleClick={props.onConfirm}
+      />
     </div>
   );
 }

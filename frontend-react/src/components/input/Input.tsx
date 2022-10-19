@@ -31,12 +31,13 @@ function Input(props: InputPropsInterface, ref: any) {
   return (
     <>
       <div id={props.id} className="hidden">{props.label}</div>
-      <input ref={inputRef} name={props.id} className={'input ' + hasError}
-             type={props.type ?? 'text'}
-             onChange={onChange}
-             placeholder={props.placeholder}
-             aria-labelledby={props.id}
-             autoComplete="off"
+      <input
+        ref={inputRef} name={props.id} className={'input ' + hasError}
+        type={props.type ?? 'text'}
+        onChange={onChange}
+        placeholder={props.placeholder}
+        aria-labelledby={props.id}
+        autoComplete="off"
       />
     </>
   );

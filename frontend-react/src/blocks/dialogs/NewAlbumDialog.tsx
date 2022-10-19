@@ -31,16 +31,20 @@ function NewAlbumDialog(props: NewAlbumDialogPropsInterface) {
   };
 
   return (
-    <Dialog title="Create a new album"
-            controls={true}
-            onConfirm={handleOnConfirm}
-            onCancel={handleOnCancel}
-            isConfirming={props.dialogIsActioning}>
-      <Input ref={inputRef}
-             handleChange={handleAlbumNameChange} id="album-name"
-             label="album-name"
-             placeholder="New album name"
-             hasError={albumNameError}/>
+    <Dialog
+      title="Create a new album"
+      controls={true}
+      onConfirm={handleOnConfirm}
+      onCancel={handleOnCancel}
+      isConfirming={props.dialogIsActioning}
+    >
+      <Input
+        ref={inputRef}
+        handleChange={handleAlbumNameChange} id="album-name"
+        label="album-name"
+        placeholder="New album name"
+        hasError={albumNameError}
+      />
     </Dialog>
   );
 }
