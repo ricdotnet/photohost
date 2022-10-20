@@ -6,9 +6,9 @@ import CrossIcon from '../../components/icons/CrossIcon';
 import DownloadIcon from '../../components/icons/DownloadIcon';
 import PreviousIcon from '../../components/icons/PreviousIcon';
 import NextIcon from '../../components/icons/NextIcon';
+import SpinnerIcon from '../../components/icons/SpinnerIcon';
 
 import './PhotoOverlay.scss';
-import SpinnerIcon from '../../components/icons/SpinnerIcon';
 
 interface PhotoOverlayPropsInterface {
   photo: PhotoInterface;
@@ -22,9 +22,10 @@ function PhotoOverlay(props: PhotoOverlayPropsInterface) {
   const navigateTo = useNavigate();
   const { name } = useParams();
 
-  const [cursors, setCursors] = useState<any>();
+  const [cursors, setCursors] = useState<{ next: string; prev: string; }>();
 
-  const [isLoadingNext, setIsLoadingNext] = useState(false);
+  // initiate the loading state when the user clicks a photo
+  const [isLoadingNext, setIsLoadingNext] = useState(true);
 
   useEffect(() => {
     document.addEventListener('keyup', (e: KeyboardEvent) => {
@@ -58,22 +59,26 @@ function PhotoOverlay(props: PhotoOverlayPropsInterface) {
       .then((response) => response.json())
       .then((data) => {
         setCursors(data.cursors);
-        setIsLoadingNext(false);
+        // setIsLoadingNext(false);
       });
   };
 
   const handleNextClick = () => {
-    if ( cursors.next === null ) return;
+    if ( cursors!.next === null ) return;
     setIsLoadingNext(true);
-    navigateTo(`/album/${props.album}/${cursors.next}`);
-    getCursors(cursors.next);
+    navigateTo(`/album/${props.album}/${cursors!.next}`);
+    getCursors(cursors!.next);
   };
 
   const handlePrevClick = () => {
-    if ( cursors.prev === null ) return;
+    if ( cursors!.prev === null ) return;
     setIsLoadingNext(true);
-    navigateTo(`/album/${props.album}/${cursors.prev}`);
-    getCursors(cursors.prev);
+    navigateTo(`/album/${props.album}/${cursors!.prev}`);
+    getCursors(cursors!.prev);
+  };
+
+  const handleOnLoaded = () => {
+    setIsLoadingNext(false);
   };
 
   return (
@@ -95,23 +100,17 @@ function PhotoOverlay(props: PhotoOverlayPropsInterface) {
           <CrossIcon className="w-6"/>
         </button>
       </div>
-      {isLoadingNext ?
-        (
-          <>
-            <SpinnerIcon className="absolute top-1/2 left-1/2 w-10 h-10 text-white animate-spin"/>
-          </>
-        )
-        :
-        (
-          <div className="foreground">
-            <img
-              className="mx-auto w-full h-full object-scale-down"
-              src={import.meta.env.VITE_API + 'photo/' + name + '?digest=' + userContext.digest}
-              alt={name}
-            />
-          </div>
-        )
-      }
+      <div className={'loader ' + (!isLoadingNext ? 'hidden' : '')}>
+        <SpinnerIcon className="w-10 h-10 text-white animate-spin"/>
+      </div>
+      <div className="foreground">
+        <img
+          className={isLoadingNext ? 'hidden' : ''}
+          src={import.meta.env.VITE_API + 'photo/' + name + '?digest=' + userContext.digest}
+          alt={name}
+          onLoad={handleOnLoaded}
+        />
+      </div>
     </div>
   );
 }

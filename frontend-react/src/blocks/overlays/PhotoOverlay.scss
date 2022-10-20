@@ -5,6 +5,10 @@
 
   .foreground {
     @apply w-[90%] h-[90%] my-10 mx-auto rounded-md px-10 py-5;
+
+    img {
+      @apply mx-auto w-full h-full object-scale-down;
+    }
   }
 
   .overlay-actions {
@@ -33,5 +37,9 @@
 
   .next {
     @apply right-2 top-1/2 -translate-y-1/2;
+  }
+
+  .loader {
+    @apply absolute w-10 h-10 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2;
   }
 }
