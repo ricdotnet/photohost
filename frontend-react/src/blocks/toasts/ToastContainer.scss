@@ -1,0 +1,18 @@
+.toast-container {
+  @apply absolute bottom-4 left-0 w-full px-3 md:w-[350px];
+}
+
+.toast-enter {
+  transform: translateX(-350px);
+}
+.toast-enter-active {
+  transform: translateX(0);
+  transition: transform 150ms;
+}
+.toast-exit {
+  transform: translateX(0);
+}
+.toast-exit-active {
+  transform: translateX(-350px);
+  transition: transform 150ms;
+}

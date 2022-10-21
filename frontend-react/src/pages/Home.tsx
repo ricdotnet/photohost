@@ -7,6 +7,7 @@ import Button from '../components/button/Button';
 import NewAlbumDialog from '../blocks/dialogs/NewAlbumDialog';
 
 import './Home.scss';
+import { toastEventChannel } from '../bus/ToastEventChannel';
 
 function Home() {
 
@@ -58,9 +59,19 @@ function Home() {
       });
   };
 
+  const handleAddToast = () => {
+    toastEventChannel.emit('onAddToast', Date.now().toString());
+  }
+
   return (
     <UserLayout>
       <div className="page-top">
+        <Button
+          value="Add Toast"
+          variant="primary"
+          handleClick={handleAddToast}
+          type="button"
+        />
         <Button
           value="Add Album"
           variant="primary"
