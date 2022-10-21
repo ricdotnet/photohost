@@ -1,8 +1,10 @@
-import Dialog from '../../components/dialog/Dialog';
 import { BaseSyntheticEvent, useRef, useState } from 'react';
+import { toastEventChannel } from '../../bus/ToastEventChannel';
+import { ToastInterface } from '../../components/toast/Toast';
+import Dialog from '../../components/dialog/Dialog';
+import CrossIcon from '../../components/icons/CrossIcon';
 
 import './UploadPhotoDialog.scss';
-import CrossIcon from '../../components/icons/CrossIcon';
 
 interface UploadPhotoDialogPropsInterface {
   dialogIsActioning: boolean;
@@ -57,7 +59,18 @@ function UploadPhotoDialog(props: UploadPhotoDialogPropsInterface) {
   const handleFileSelect = (fileList: FileList) => {
     let tmp: File[] = [];
     for ( let i = 0; i < fileList.length; i++ ) {
-      if (i === 5) break;
+      if ( i === 5 ) break;
+
+      if ( !fileList[i].type.includes('image/') ) {
+        const toast: ToastInterface = {
+          id: Date.now(),
+          content: 'Please select only images.',
+          type: 'warning',
+        };
+        toastEventChannel.dispatch('onAddToast', toast);
+        break;
+      }
+
       if ( !files.find(f => f.name === fileList[i].name) ) {
         tmp.push(fileList[i]);
       }

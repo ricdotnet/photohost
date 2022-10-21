@@ -58,7 +58,7 @@ export async function doGetOne(req: Request): Promise<undefined | { file: Buffer
 
   // Now we want to check if the user is allowed to see this photo
   let canSee;
-  if ( req.path.includes('/p/') ) {
+  if ( req.path.includes('/public/') ) {
     canSee = !photo.private;
   } else {
     canSee = verifyDigest(photo.username, req.query['digest'] as string);

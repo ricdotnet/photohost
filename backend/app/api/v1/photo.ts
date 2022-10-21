@@ -55,7 +55,7 @@ photo.delete('/:name', authorization, async (req, res) => {
  *
  * TODO: pagination
  */
-photo.get('/all', authorization, async (req, res) => {
+photo.get('/private/all', authorization, async (req, res) => {
   if ( req.query['album'] !== 'default-album' ) {
     if ( !validator.isUUID(req.query['album'] as string) ) {
       return res.status(404).send({ code: 404, message: 'invalid uuid so, album does not exist' });
@@ -74,7 +74,7 @@ photo.get('/all', authorization, async (req, res) => {
  * This route will get the image inside the frontend app. When the user is navigating through their album
  *  or looking at a single photo page.
  */
-photo.get('/:name', async (req, res) => {
+photo.get('/private/:name', async (req, res) => {
   if ( !req.query.digest ) {
     return res.status(404).send({ code: 404, message: 'photo not found' });
   }
@@ -99,7 +99,7 @@ photo.get('/:name', async (req, res) => {
  * This will be used by users to allow access to their photos. Whoever gets this link will be able to see
  *  the photo, BUT, only if the photo is not set to private
  */
-photo.get('/p/:name', async (req, res) => {
+photo.get('/public/:name', async (req, res) => {
 
   const file = await doGetOne(req);
 

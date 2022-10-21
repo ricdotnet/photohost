@@ -7,9 +7,9 @@ import UserLayout from '../layouts/UserLayout';
 import Button from '../components/button/Button';
 import DeleteAlbumDialog from '../blocks/dialogs/DeleteAlbumDialog';
 import PhotoOverlay from '../blocks/overlays/PhotoOverlay';
+import UploadPhotoDialog from '../blocks/dialogs/UploadPhotoDialog';
 
 import './Album.scss';
-import UploadPhotoDialog from '../blocks/dialogs/UploadPhotoDialog';
 
 function Album() {
   const { album } = useParams();
@@ -25,7 +25,7 @@ function Album() {
   const [isOpenUploadPhoto, setIsOpenUploadPhoto] = useState(false);
 
   useEffect(() => {
-    const url = new URL(`${import.meta.env.VITE_API}photo/all`);
+    const url = new URL(`${import.meta.env.VITE_API}photo/private/all`);
     url.searchParams.append('album', album as string);
 
     fetch(url, {
@@ -78,7 +78,10 @@ function Album() {
   const onConfirmUploadPhoto = (e: BaseSyntheticEvent, formData: FormData) => {
     setIsUploadingPhoto(true);
 
-    fetch(`${import.meta.env.VITE_API}test-upload`, {
+    // append the current album
+    formData.append('album', album as string);
+
+    fetch(`${import.meta.env.VITE_API}photo`, {
       method: 'POST',
       body: formData,
     })
@@ -214,7 +217,7 @@ function RenderPhoto(props: RenderPhotoPropsInterface) {
       <div className={'photo-item__skeleton ' + (loading ? 'block' : 'hidden')}></div>
       <img
         className={'w-full rounded ' + (loading ? 'hidden' : 'block')}
-        src={import.meta.env.VITE_API + 'photo/' + props.photo.name + '?digest=' + userContext.digest}
+        src={import.meta.env.VITE_API + 'photo/private/' + props.photo.name + '?digest=' + userContext.digest}
         alt={props.photo.name} onLoad={handleOnLoad}
       />
       <div className="photo-item__hover-effect"></div>

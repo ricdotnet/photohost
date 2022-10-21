@@ -106,7 +106,7 @@ function PhotoOverlay(props: PhotoOverlayPropsInterface) {
       <div className="foreground">
         <img
           className={isLoadingNext ? 'hidden' : ''}
-          src={import.meta.env.VITE_API + 'photo/' + name + '?digest=' + userContext.digest}
+          src={import.meta.env.VITE_API + 'photo/private/' + name + '?digest=' + userContext.digest}
           alt={name}
           onLoad={handleOnLoaded}
         />

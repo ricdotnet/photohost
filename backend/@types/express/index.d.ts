@@ -5,6 +5,7 @@ declare global {
     interface Request {
       userContext?: IUserContext;
       files?: any[];
+      formData?: any;
     }
   }
   namespace NodeJS {
