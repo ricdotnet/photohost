@@ -1,4 +1,4 @@
-import { memo, useEffect, useState, Ref, forwardRef } from 'react';
+import { forwardRef, Ref, useEffect } from 'react';
 
 import './Toast.scss';
 
@@ -13,10 +13,10 @@ function Toast(props: ToastPropsInterface, ref: any) {
 
   useEffect(() => {
     const timer = setTimeout(() => props.onRemove(props.id), 10000);
-    
+
     return () => {
       clearTimeout(timer);
-    }
+    };
   }, []);
 
   return (
@@ -27,7 +27,7 @@ function Toast(props: ToastPropsInterface, ref: any) {
     >
       {props.content}
     </div>
-  )
+  );
 }
 
 export default forwardRef(Toast);

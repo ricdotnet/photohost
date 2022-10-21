@@ -1,31 +1,40 @@
 type EventKey = string;
 type EventHandler<T = any> = (payload: T) => void;
 type EventMap = Record<EventKey, EventHandler>;
-type Events<E> = Record<keyof E, EventHandler>;
+type Events = Record<keyof EventMap, EventHandler>
+type EventPayload = unknown[];
 
-interface EventBusInterface<T extends EventMap> {
-  on<Key extends keyof T>(key: Key, handler: T[Key]): void;
+interface EventBusInterface<T = EventMap> {
+  subscribe<Key extends keyof T>(key: Key, handler: EventHandler): void;
 
-  emit<Key extends keyof T>(key: Key, ...payload: Parameters<T[Key]>): void;
+  dispatch<Key extends keyof T>(key: Key, ...payload: EventPayload): void;
 
-  off<Key extends keyof T>(key: Key): void;
+  unsubscribe<Key extends keyof T>(key: Key): void;
 }
 
-export function EventBus<E extends EventMap>(): EventBusInterface<E> {
-  const events: Partial<Events<E>> = {};
+export class EventBus implements EventBusInterface {
+  private static instance: EventBus;
 
-  const on: EventBusInterface<E>['on'] = (key, handler) => {
-    events[key] = handler;
-  };
+  private events: Events = {};
 
-  const emit: EventBusInterface<E>['emit'] = (key, payload) => {
-    const evt = events[key]!;
-    evt(payload);
-  };
+  public static getInstance(): EventBus {
+    if ( !this.instance ) {
+      this.instance = new EventBus();
+    }
+    return this.instance;
+  }
 
-  const off: EventBusInterface<E>['off'] = (key) => {
-    delete events[key];
-  };
+  subscribe(key: EventKey, handler: EventHandler): void {
+    this.events[key] = handler;
+  }
 
-  return { on, emit, off };
+  dispatch(key: EventKey, ...payload: EventPayload): void {
+    if ( this.events[key] ) {
+      this.events[key](payload);
+    }
+  }
+
+  unsubscribe(key: EventKey): void {
+    delete this.events[key];
+  }
 }

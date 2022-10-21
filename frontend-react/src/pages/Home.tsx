@@ -60,8 +60,8 @@ function Home() {
   };
 
   const handleAddToast = () => {
-    toastEventChannel.emit('onAddToast', Date.now().toString());
-  }
+    toastEventChannel.dispatch('onAddToast', Date.now().toString());
+  };
 
   return (
     <UserLayout>
