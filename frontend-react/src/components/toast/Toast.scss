@@ -1,3 +1,15 @@
 .toast {
-  @apply w-full px-5 py-3 bg-white rounded-md shadow-sm;
+  @apply w-full px-5 py-4 bg-white rounded-md shadow-sm border cursor-pointer;
+}
+
+.info {
+  @apply border-blue-300 text-blue-800;
+}
+
+.warning {
+  @apply border-amber-300 text-amber-800;
+}
+
+.danger {
+  @apply border-red-500 text-red-800;
 }

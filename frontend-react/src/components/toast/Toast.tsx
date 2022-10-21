@@ -2,11 +2,15 @@ import { forwardRef, Ref, useEffect } from 'react';
 
 import './Toast.scss';
 
-interface ToastPropsInterface {
+export interface ToastInterface {
   id: number;
   content: string;
+  type: 'info' | 'warning' | 'danger';
+}
+
+interface ToastPropsInterface extends ToastInterface {
   onRemove: (c: number) => void;
-  ref: Ref<any>;
+  ref: Ref<HTMLDivElement>;
 }
 
 function Toast(props: ToastPropsInterface, ref: any) {
@@ -22,7 +26,7 @@ function Toast(props: ToastPropsInterface, ref: any) {
   return (
     <div
       ref={ref}
-      className={'toast'}
+      className={'toast ' + props.type}
       onClick={() => props.onRemove(props.id)}
     >
       {props.content}

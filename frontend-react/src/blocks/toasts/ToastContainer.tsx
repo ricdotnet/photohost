@@ -1,24 +1,25 @@
 import { ReactNode, useEffect, useRef, useState } from 'react';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
 import { toastEventChannel } from '../../bus/ToastEventChannel';
-import Toast from '../../components/toast/Toast';
+import Toast, { ToastInterface } from '../../components/toast/Toast';
 
 import './ToastContainer.scss';
 
-interface ToastContainerPropsInterdace {
+interface ToastContainerPropsInterface {
   children?: ReactNode;
 }
 
-function ToastContainer(props: ToastContainerPropsInterdace) {
+function ToastContainer(props: ToastContainerPropsInterface) {
 
   const [toasts, setToasts] = useState<any[]>([]);
   const nodeRef = useRef(null);
 
   useEffect(() => {
-    toastEventChannel.subscribe('onAddToast', (content) => {
+    toastEventChannel.subscribe('onAddToast', (toast: ToastInterface) => {
       const tt = {
         id: Date.now(),
-        content: content,
+        content: toast.content,
+        type: toast.type,
         nodeRef: nodeRef,
       };
       setToasts((tts) => [...tts, tt]);
@@ -42,8 +43,13 @@ function ToastContainer(props: ToastContainerPropsInterdace) {
               timeout={200}
               ref={toast.nodeRef}
             >
-              <Toast ref={toast.nodeRef} content={toast.content} onRemove={handleRemoveToast}
-                     id={toast.id}/>
+              <Toast
+                ref={toast.nodeRef}
+                content={toast.content}
+                onRemove={handleRemoveToast}
+                id={toast.id}
+                type={toast.type}
+              />
             </CSSTransition>
           );
         })
