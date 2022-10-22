@@ -7,6 +7,7 @@ import Button from '../components/button/Button';
 import NewAlbumDialog from '../blocks/dialogs/NewAlbumDialog';
 
 import './Home.scss';
+import AlbumsDropdown from '../blocks/dropdowns/AlbumsDropdown';
 
 export default function Home() {
   const [albums, setAlbums] = useState<AlbumInterface[]>([]);
@@ -60,11 +61,8 @@ export default function Home() {
   return (
     <UserLayout>
       <div className="page-top">
-        <Button
-          value="Add Album"
-          variant="primary"
-          handleClick={onOpenAddNewAlbum}
-          type="button"
+        <AlbumsDropdown
+          onAddAlbumClick={onOpenAddNewAlbum}
         />
       </div>
       {
