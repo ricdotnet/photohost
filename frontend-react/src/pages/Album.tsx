@@ -12,6 +12,9 @@ import UploadPhotoDialog from '../blocks/dialogs/UploadPhotoDialog';
 import './Album.scss';
 
 function Album() {
+
+  const userContext = useContext(UserContext);
+
   const { album } = useParams();
   const navigateTo = useNavigate();
 
@@ -152,6 +155,8 @@ function RenderPhotoList() {
   const [photo, setPhoto] = useState<PhotoInterface | null>(null);
   const [isViewingPhoto, setIsViewingPhoto] = useState(false);
 
+  const [selection, setSelection] = useState<string[]>([]);
+
   if ( !photosContext.length ) {
     return (<div>You have no photos on this album.</div>);
   }
@@ -176,6 +181,15 @@ function RenderPhotoList() {
     document.body.classList.remove('overflow-hidden');
   };
 
+  const handleOnSelect = (e: BaseSyntheticEvent, photoId: string) => {
+    if ( !e.target.checked ) {
+      const tmp = selection.filter(s => s !== photoId);
+      setSelection(tmp);
+    } else {
+      setSelection((s) => [...s, photoId]);
+    }
+  };
+
   return (
     <div className="photo-grid">
       {photosContext.map((photo: any) => (
@@ -183,6 +197,7 @@ function RenderPhotoList() {
           photo={photo}
           key={photo.id}
           onClick={handleOnClickPhoto}
+          onSelect={handleOnSelect}
         />
       ))}
       {!isViewingPhoto ? null :
@@ -201,6 +216,7 @@ function RenderPhotoList() {
 interface RenderPhotoPropsInterface {
   photo: PhotoInterface;
   onClick: (e: BaseSyntheticEvent, photo: PhotoInterface) => void;
+  onSelect: (e: BaseSyntheticEvent, photoId: string) => void;
 }
 
 function RenderPhoto(props: RenderPhotoPropsInterface) {
@@ -215,6 +231,11 @@ function RenderPhoto(props: RenderPhotoPropsInterface) {
     props.onClick(e, props.photo);
   };
 
+  const handleOnSelect = (e: BaseSyntheticEvent) => {
+    e.stopPropagation();
+    props.onSelect(e, props.photo.id);
+  };
+
   return (
     <div className="photo-item" onClick={handleOnClick}>
       <div className={'photo-item__skeleton ' + (loading ? 'block' : 'hidden')}></div>
@@ -223,7 +244,13 @@ function RenderPhoto(props: RenderPhotoPropsInterface) {
         src={import.meta.env.VITE_API + 'photo/single?photoId=' + props.photo.id + '&digest=' + userContext.digest}
         alt={props.photo.name} onLoad={handleOnLoad}
       />
-      <div className="photo-item__hover-effect"></div>
+      <div className="photo-item__hover-effect">
+        <input
+          onClick={handleOnSelect}
+          type="checkbox"
+          className="checkbox"
+        />
+      </div>
     </div>
   );
 }

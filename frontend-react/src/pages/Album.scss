@@ -13,4 +13,16 @@
     @apply absolute w-full h-full left-0 bottom-0 hover:bg-white/20;
     @apply rounded-md transition ease-in-out;
   }
+
+  .checkbox {
+    @apply hidden appearance-none w-8 h-8 bg-white rounded-full m-3 cursor-pointer opacity-50;
+    @apply checked:block checked:bg-$primary checked:opacity-100;
+    @apply border border-8 outline-white;
+  }
+
+  &:hover {
+    .checkbox {
+      @apply block;
+    }
+  }
 }
