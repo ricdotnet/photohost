@@ -1,6 +1,3 @@
-import fs from 'fs';
-import path from 'path';
-import fsp from 'fs/promises';
 import { Request } from 'express';
 import { client } from '../../config/database';
 import { IPhoto, IUserContext } from '../../interfaces';
@@ -8,12 +5,16 @@ import { clone } from 'lodash';
 import { IFile } from '@ricdotnet/upfile/src/types';
 import { getUserData } from '../user';
 import { lookup } from 'mime-types';
+import { SQLColumnValue } from '../../types';
+import fs from 'fs';
+import path from 'path';
+import fsp from 'fs/promises';
 
 export function doInsert(req: Request): Promise<void> {
   return new Promise(async (resolve) => {
+    const { album } = req.formData;
     for ( let fileEl in req.files! ) {
       const file: IFile = req.files![fileEl];
-      await moveTmpFile(req.userContext!, file);
 
       let sanitizedName;
       if ( !req.body['fileName'] ) {
@@ -22,8 +23,14 @@ export function doInsert(req: Request): Promise<void> {
         sanitizedName = req.body['fileName'];
       }
 
-      await client.query<IPhoto>('INSERT INTO photos (username, path, filename, name) VALUES ($1, $2, $3, $4)',
-        [req.userContext?.username, '', file.originalName, sanitizedName]);
+      // do not set an album if default-album
+      const albumToSave = album === 'default-album' ? null : album;
+
+      await client.query<IPhoto>('INSERT INTO photos ("user", path, filename, name, album) VALUES ($1, $2, $3, $4, $5)',
+        [req.userContext!.id, '', file.originalName, sanitizedName, albumToSave]);
+
+      // if the insert is successful then move the file
+      await moveTmpFile(req.userContext!, file);
 
       if ( parseInt(fileEl) === req.files!.length - 1 ) {
         resolve();
@@ -33,22 +40,25 @@ export function doInsert(req: Request): Promise<void> {
 }
 
 export async function doDelete(req: Request) {
-  const photoResult = await client.query<IPhoto>('SELECT * FROM photos WHERE username = $1 AND filename = $2',
-    [req.userContext?.username, req.params.name]);
+  const { id, username } = req.userContext!;
+
+  const photoResult = await client.query<IPhoto>('SELECT * FROM photos WHERE "user" = $1 AND filename = $2',
+    [id, req.query.photoId]);
 
   const photo = photoResult.rows[0];
 
   // remove the file first
-  await fsp.rm(path.join('uploads', photo.username, photo.path, photo.filename));
+  await fsp.rm(path.join('uploads', username, photo.path, photo.filename));
 
   // then delete entry from the database
   await client.query('DELETE FROM photos WHERE filename = $1', [req.params.name]);
 }
 
+// TODO: get user data from digest?
 export async function doGetOne(req: Request): Promise<undefined | { file: Buffer, mimeType: string | boolean }> {
   const photoResult =
-    await client.query<IPhoto>('SELECT * FROM photos WHERE name = $1',
-      [req.params.name]);
+    await client.query<IPhoto>('SELECT * FROM photos WHERE id = $1',
+      [req.query.photoId]);
 
   const photo = photoResult.rows[0];
 
@@ -61,14 +71,14 @@ export async function doGetOne(req: Request): Promise<undefined | { file: Buffer
   if ( req.path.includes('/public/') ) {
     canSee = !photo.private;
   } else {
-    canSee = verifyDigest(photo.username, req.query['digest'] as string);
+    canSee = await verifyDigest(photo.user, req.query['digest'] as string);
   }
 
   if ( !canSee ) {
     return;
   }
 
-  const file = await fsp.readFile(path.join('uploads', photo.username, photo.path, photo.filename));
+  const file = await fsp.readFile(path.join('uploads', 'ricdotnet', photo.path, photo.filename));
 
   const mimeType = lookup(photo.filename);
 
@@ -84,29 +94,29 @@ export async function doGetOne(req: Request): Promise<undefined | { file: Buffer
 }
 
 export async function doGetAll(req: Request) {
-  let cols: string[] = [req.userContext!.username];
-  let query = 'SELECT * FROM photos WHERE username = $1 ';
+  let columnValues: SQLColumnValue[] = [req.userContext!.id];
+  let query = 'SELECT * FROM photos WHERE "user" = $1 ';
 
   if ( req.query['album'] !== 'default-album' ) {
-    cols.push(req.query['album'] as string);
+    columnValues.push(req.query['album'] as string);
     query += 'AND album = $2';
   } else {
     query += 'AND album IS NULL ORDER BY id';
   }
 
   const photosResult =
-    await client.query<IPhoto>(`${query} LIMIT 10`, [...cols]);
+    await client.query<IPhoto>(`${query} LIMIT 10`, [...columnValues]);
 
   return clone(photosResult.rows);
 }
 
 export async function getPhotoData(req: Request) {
-  const { name } = req.params;
-  const { username } = req.userContext!;
+  const { photoId } = req.query;
+  const { id } = req.userContext!;
 
   const photoDataResult =
-    await client.query('SELECT * FROM photos WHERE username = $1 AND name = $2',
-      [username, name]);
+    await client.query('SELECT * FROM photos WHERE "user" = $1 AND name = $2',
+      [id, photoId]);
 
   return photoDataResult.rows;
 }
@@ -118,16 +128,23 @@ export async function getPhotoData(req: Request) {
  * @returns {Promise<any>}
  */
 export async function doGetCursors(req: Request) {
-  const { name } = req.query;
-  const { username } = req.userContext!;
+  const { photoId, album } = req.query;
+  const { id } = req.userContext!;
+
+  const columnValues: SQLColumnValue[] = [id, photoId as string];
+  let albumQuery = 'album IS NULL';
+  if (album !== 'default-album') {
+    albumQuery = 'album = $3';
+    columnValues.push(album as string);
+  }
 
   const cursorsResult =
-    await client.query('select * ' +
-      'from (select name, ' +
-      'lag(name) over (order by id)  as prev, ' +
-      'lead(name) over (order by id) as next ' +
-      'from photos where username = $1) x ' +
-      'where name = $2', [username, name]);
+    await client.query('SELECT * ' +
+      'FROM (SELECT id, ' +
+      'LAG(id) OVER (ORDER by id) AS prev, ' +
+      'LEAD(id) OVER (ORDER by id) AS next ' +
+      `FROM photos WHERE "user" = $1 AND ${albumQuery}) x ` +
+      'WHERE id = $2', [...columnValues]);
 
   return cursorsResult.rows[0];
 }
@@ -162,13 +179,13 @@ function sanitizeFilename(originalName: string): string {
 /**
  * We want photos to have some sort of privacy and to achieve this we use a digest
  *
- * @param username The user digest to verify photo access
+ * @param userId The user to get a digest from
  * @param requestDigest The digest present on the request sent
  * @returns A boolean value from the comparison of both digests
  */
-function verifyDigest(username: string, requestDigest: string): boolean {
+async function verifyDigest(userId: number, requestDigest: string): Promise<boolean> {
 
-  const { digest } = getUserData(username);
+  const { digest } = await getUserData(userId);
 
   return digest === requestDigest;
 }

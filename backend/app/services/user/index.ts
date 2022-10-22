@@ -77,17 +77,26 @@ async function findUserByEmail(email: string) {
   return userResult.rows;
 }
 
+async function findUserById(id: number) {
+  const userResult =
+    await client.query('SELECT * FROM users WHERE id = $1', [id]);
+
+  return userResult.rows;
+}
+
 function updateLastLogin(username: string) {
   client.query('UPDATE users SET last_login = now() WHERE username = $1', [username]);
 }
 
 // if the token is valid then we will get the user data from the username...
-// just data related to photos...
-// TODO: add a db call to get user data
-export function getUserData(username: string): IUserContext {
+// just data related to photos... id, username and digest
+export async function getUserData(userId: number): Promise<IUserContext> {
+
+  const [user] = await findUserById(userId);
+
   return {
-    id: 1,
-    username: username,
-    digest: process.env.DIGEST
+    id: user.id,
+    username: user.username,
+    digest: user.digest,
   };
 }

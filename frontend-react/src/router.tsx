@@ -16,11 +16,11 @@ export const router = createBrowserRouter([
     element: <GuardedRoute component={<Album/>} redirectTo="/login"/>,
   },
   {
-    path: '/album/:album/:name',
+    path: '/:album/:photoId',
     element: <GuardedRoute component={<Album/>} redirectTo="/login"/>
   },
   {
-    path: '/photo/:name',
+    path: '/photo/:photoId',
     element: <GuardedRoute component={<Photo/>} redirectTo="/login"/>,
   },
   {

@@ -25,7 +25,7 @@ function Album() {
   const [isOpenUploadPhoto, setIsOpenUploadPhoto] = useState(false);
 
   useEffect(() => {
-    const url = new URL(`${import.meta.env.VITE_API}photo/private/all`);
+    const url = new URL(`${import.meta.env.VITE_API}photo/all`);
     url.searchParams.append('album', album as string);
 
     fetch(url, {
@@ -81,8 +81,11 @@ function Album() {
     // append the current album
     formData.append('album', album as string);
 
-    fetch(`${import.meta.env.VITE_API}photo`, {
+    fetch(`${import.meta.env.VITE_API}photo/upload`, {
       method: 'POST',
+      headers: {
+        authorization: `Bearer ${localStorage.getItem('access-token')}`
+      },
       body: formData,
     })
       .then((res) => res.json())
@@ -143,7 +146,7 @@ function Album() {
 function RenderPhotoList() {
   const photosContext = useContext(PhotosContext);
 
-  const { album, name } = useParams();
+  const { album, photoId } = useParams();
   const navigateTo = useNavigate();
 
   const [photo, setPhoto] = useState<PhotoInterface | null>(null);
@@ -153,14 +156,14 @@ function RenderPhotoList() {
     return (<div>You have no photos on this album.</div>);
   }
 
-  if ( !isViewingPhoto && name ) {
-    return <Navigate to={`/photo/${name}`}/>;
+  if ( !isViewingPhoto && photoId ) {
+    return <Navigate to={`/photo/${photoId}`}/>;
   }
 
   const handleOnClickPhoto = (e: BaseSyntheticEvent, photo: PhotoInterface) => {
     setIsViewingPhoto(true);
     setPhoto(photo);
-    navigateTo(`/album/${album}/${photo.name}`);
+    navigateTo(`/${album}/${photo.id}`);
 
     document.body.classList.add('overflow-hidden');
   };
@@ -217,7 +220,7 @@ function RenderPhoto(props: RenderPhotoPropsInterface) {
       <div className={'photo-item__skeleton ' + (loading ? 'block' : 'hidden')}></div>
       <img
         className={'w-full rounded ' + (loading ? 'hidden' : 'block')}
-        src={import.meta.env.VITE_API + 'photo/private/' + props.photo.name + '?digest=' + userContext.digest}
+        src={import.meta.env.VITE_API + 'photo/single?photoId=' + props.photo.id + '&digest=' + userContext.digest}
         alt={props.photo.name} onLoad={handleOnLoad}
       />
       <div className="photo-item__hover-effect"></div>

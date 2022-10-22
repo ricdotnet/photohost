@@ -15,11 +15,11 @@ export async function doCreateAlbum(req: Request) {
 }
 
 export async function doGetAlbums(req: Request) {
-  const { username, id } = req.userContext!;
+  const { id } = req.userContext!;
 
   const noAlbumResponse =
-    await client.query('SELECT count(*) FROM photos WHERE username = $1 AND album IS NULL',
-      [username]);
+    await client.query('SELECT count(*) FROM photos WHERE "user" = $1 AND album IS NULL',
+      [id]);
 
   const query = `
       SELECT albums.id, albums.name, count(photos.*) as photos

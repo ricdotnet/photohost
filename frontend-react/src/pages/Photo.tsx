@@ -5,13 +5,13 @@ import { UserContext } from '../contexts/UserContext';
 
 function Photo() {
   const userContext = useContext(UserContext);
-  const { name } = useParams();
+  const { photoId } = useParams();
 
   return (
     <UserLayout>
       <img
-        src={import.meta.env.VITE_API + 'photo/private/' + name + '?digest=' + userContext.digest}
-        alt={name}/>
+        src={import.meta.env.VITE_API + 'photo/single?photoId=' + photoId + '&digest=' + userContext.digest}
+        alt={photoId}/>
     </UserLayout>
   );
 }

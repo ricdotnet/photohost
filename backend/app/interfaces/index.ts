@@ -6,7 +6,7 @@ export interface IUserContext {
 
 export interface IPhoto {
   id: number;
-  username: string;
+  user: number;
   path: string;
   filename: string;
   fullPath: string;

@@ -2,7 +2,7 @@ import { sign, verify } from 'jsonwebtoken';
 import { NextFunction, Request, Response } from 'express';
 import { getUserData } from '../../services/user';
 
-export const authorization = (req: Request, res: Response, next: NextFunction) => {
+export const authorization = async (req: Request, res: Response, next: NextFunction) => {
   const authHeader = req.header('authorization');
 
   if ( !authHeader ) {
@@ -19,10 +19,10 @@ export const authorization = (req: Request, res: Response, next: NextFunction) =
   }
 
   try {
-    const { username } = verifyToken(token) as { username: string };
-    req.userContext = getUserData(username);
+    const { id } = verifyToken(token) as { id: number };
+    req.userContext = await getUserData(id);
   } catch (err) {
-    return res.status(401).send(err);
+    return res.status(401).send({ code: 401, message: 'something went wrong' });
   }
 
   return next();

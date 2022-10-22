@@ -1,5 +1,5 @@
 export interface PhotoInterface {
-  id: number;
+  id: string;
   name: string;
   filename: string;
   // date_added: string;

@@ -9,6 +9,7 @@ import NextIcon from '../../components/icons/NextIcon';
 import SpinnerIcon from '../../components/icons/SpinnerIcon';
 
 import './PhotoOverlay.scss';
+import album from '../../pages/Album';
 
 interface PhotoOverlayPropsInterface {
   photo: PhotoInterface;
@@ -20,7 +21,7 @@ function PhotoOverlay(props: PhotoOverlayPropsInterface) {
   const userContext = useContext(UserContext);
 
   const navigateTo = useNavigate();
-  const { name } = useParams();
+  const { photoId } = useParams();
 
   const [cursors, setCursors] = useState<{ next: string; prev: string; }>();
 
@@ -35,7 +36,7 @@ function PhotoOverlay(props: PhotoOverlayPropsInterface) {
       }
     });
 
-    getCursors(props.photo.name);
+    getCursors(props.photo.id);
 
     return () => {
       document.removeEventListener('keyup', () => {
@@ -49,7 +50,8 @@ function PhotoOverlay(props: PhotoOverlayPropsInterface) {
 
   const getCursors = (currentPhoto: string) => {
     const url = new URL(`${import.meta.env.VITE_API}photo/cursors`);
-    url.searchParams.append('name', currentPhoto);
+    url.searchParams.append('album', props.album);
+    url.searchParams.append('photoId', currentPhoto);
 
     fetch(url, {
       headers: {
@@ -66,14 +68,14 @@ function PhotoOverlay(props: PhotoOverlayPropsInterface) {
   const handleNextClick = () => {
     if ( cursors!.next === null ) return;
     setIsLoadingNext(true);
-    navigateTo(`/album/${props.album}/${cursors!.next}`);
+    navigateTo(`/${props.album}/${cursors!.next}`);
     getCursors(cursors!.next);
   };
 
   const handlePrevClick = () => {
     if ( cursors!.prev === null ) return;
     setIsLoadingNext(true);
-    navigateTo(`/album/${props.album}/${cursors!.prev}`);
+    navigateTo(`/${props.album}/${cursors!.prev}`);
     getCursors(cursors!.prev);
   };
 
@@ -106,8 +108,8 @@ function PhotoOverlay(props: PhotoOverlayPropsInterface) {
       <div className="foreground">
         <img
           className={isLoadingNext ? 'hidden' : ''}
-          src={import.meta.env.VITE_API + 'photo/private/' + name + '?digest=' + userContext.digest}
-          alt={name}
+          src={import.meta.env.VITE_API + 'photo/single?photoId=' + photoId + '&digest=' + userContext.digest}
+          alt={photoId}
           onLoad={handleOnLoaded}
         />
       </div>
