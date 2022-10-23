@@ -9,7 +9,6 @@ import NextIcon from '../../components/icons/NextIcon';
 import SpinnerIcon from '../../components/icons/SpinnerIcon';
 
 import './PhotoOverlay.scss';
-import album from '../../pages/Album';
 
 interface PhotoOverlayPropsInterface {
   photo: PhotoInterface;
@@ -29,20 +28,21 @@ function PhotoOverlay(props: PhotoOverlayPropsInterface) {
   const [isLoadingNext, setIsLoadingNext] = useState(true);
 
   useEffect(() => {
-    document.addEventListener('keyup', (e: KeyboardEvent) => {
-      if ( !props.onClose ) return;
-      if ( e.key === 'Escape' ) {
-        props.onClose(e);
-      }
-    });
+    document.addEventListener('keyup', handleKeyUpEvent);
 
     getCursors(props.photo.id);
 
     return () => {
-      document.removeEventListener('keyup', () => {
-      });
+      document.removeEventListener('keyup', handleKeyUpEvent);
     };
   }, []);
+
+  const handleKeyUpEvent = (e: KeyboardEvent) => {
+    if ( !props.onClose ) return;
+    if ( e.key === 'Escape' ) {
+      props.onClose(e);
+    }
+  };
 
   const handleOnClickClose = (e: BaseSyntheticEvent) => {
     props.onClose(e);
@@ -83,6 +83,8 @@ function PhotoOverlay(props: PhotoOverlayPropsInterface) {
     setIsLoadingNext(false);
   };
 
+  const imgUrl = import.meta.env.VITE_API + 'photo/single?photoId=' + photoId + '&digest=' + userContext.digest;
+
   return (
     <div className="background">
       {!cursors ? null :
@@ -95,9 +97,13 @@ function PhotoOverlay(props: PhotoOverlayPropsInterface) {
         )
       }
       <div className="overlay-actions">
-        <button className="button-action">
+        <a
+          href={imgUrl}
+          className="button-action"
+          target="_blank"
+        >
           <DownloadIcon className="w-6"/>
-        </button>
+        </a>
         <button className="button-action" onClick={handleOnClickClose}>
           <CrossIcon className="w-6"/>
         </button>
@@ -108,7 +114,7 @@ function PhotoOverlay(props: PhotoOverlayPropsInterface) {
       <div className="foreground">
         <img
           className={isLoadingNext ? 'hidden' : ''}
-          src={import.meta.env.VITE_API + 'photo/single?photoId=' + photoId + '&digest=' + userContext.digest}
+          src={imgUrl}
           alt={photoId}
           onLoad={handleOnLoaded}
         />

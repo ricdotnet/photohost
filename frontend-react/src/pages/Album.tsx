@@ -4,16 +4,14 @@ import { UserContext } from '../contexts/UserContext';
 import { PhotosContext } from '../contexts/PhotosContext';
 import { PhotoInterface } from '../interfaces/PhotoInterface';
 import UserLayout from '../layouts/UserLayout';
-import Button from '../components/button/Button';
 import DeleteAlbumDialog from '../blocks/dialogs/DeleteAlbumDialog';
 import PhotoOverlay from '../blocks/overlays/PhotoOverlay';
 import UploadPhotoDialog from '../blocks/dialogs/UploadPhotoDialog';
+import PhotosDropdown from '../blocks/dropdowns/PhotosDropdown';
 
 import './Album.scss';
 
 function Album() {
-
-  const userContext = useContext(UserContext);
 
   const { album } = useParams();
   const navigateTo = useNavigate();
@@ -26,6 +24,8 @@ function Album() {
 
   const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
   const [isOpenUploadPhoto, setIsOpenUploadPhoto] = useState(false);
+
+  const [selectedPhotos, setSelectedPhotos] = useState<string[]>([]);
 
   useEffect(() => {
     const url = new URL(`${import.meta.env.VITE_API}photo/all`);
@@ -99,32 +99,45 @@ function Album() {
       .catch((err) => console.log(err));
   };
 
+  const handleOnSelectionChange = (e: BaseSyntheticEvent, photoId: string) => {
+    if ( !e.target.checked ) {
+      const tmp = selectedPhotos.filter(s => s !== photoId);
+      setSelectedPhotos(tmp);
+    } else {
+      setSelectedPhotos((s) => [...s, photoId]);
+    }
+  };
+
+  const handleMoveAllSelected = () => {
+    console.log('moving all selected photos...');
+  };
+
+  const handleDeleteAllSelected = () => {
+    console.log('deleting all selected photos...');
+  };
+
   return (
     <UserLayout>
       <div className="page-top">
-        <Button
-          value="Upload"
-          variant="primary"
-          handleClick={onOpenUploadPhoto}
-          type="button"
-        />
-        <Button
-          value="Delete"
-          variant="danger"
-          handleClick={onOpenDeleteAlbum}
-          type="button"
-          disabled={album === 'default-album'}
+        <PhotosDropdown
+          onClickUploadPhotos={onOpenUploadPhoto}
+          onClickDeleteAlbum={onOpenDeleteAlbum}
+          onClickMoveAllSelected={handleMoveAllSelected}
+          onClickDeleteAllSelected={handleDeleteAllSelected}
+          showSelectionOptions={selectedPhotos.length > 0}
         />
       </div>
       {
         loading ? (<div>Loading photos...</div>)
           : (
             <PhotosContext.Provider value={photos}>
-              <RenderPhotoList/>
+              <RenderPhotoList
+                onSelectionChange={handleOnSelectionChange}
+              />
             </PhotosContext.Provider>
           )
       }
-      {!isOpenDeleteAlbum ? null :
+      {isOpenDeleteAlbum &&
         (
           <DeleteAlbumDialog
             onConfirm={onConfirmDeleteAlbum}
@@ -133,7 +146,7 @@ function Album() {
           />
         )
       }
-      {!isOpenUploadPhoto ? null :
+      {isOpenUploadPhoto &&
         (
           <UploadPhotoDialog
             dialogIsActioning={isUploadingPhoto}
@@ -146,7 +159,11 @@ function Album() {
   );
 }
 
-function RenderPhotoList() {
+interface RenderPhotoListPropsInterface {
+  onSelectionChange: (e: BaseSyntheticEvent, selection: string) => void;
+}
+
+function RenderPhotoList(props: RenderPhotoListPropsInterface) {
   const photosContext = useContext(PhotosContext);
 
   const { album, photoId } = useParams();
@@ -154,8 +171,6 @@ function RenderPhotoList() {
 
   const [photo, setPhoto] = useState<PhotoInterface | null>(null);
   const [isViewingPhoto, setIsViewingPhoto] = useState(false);
-
-  const [selection, setSelection] = useState<string[]>([]);
 
   if ( !photosContext.length ) {
     return (<div>You have no photos on this album.</div>);
@@ -182,12 +197,7 @@ function RenderPhotoList() {
   };
 
   const handleOnSelect = (e: BaseSyntheticEvent, photoId: string) => {
-    if ( !e.target.checked ) {
-      const tmp = selection.filter(s => s !== photoId);
-      setSelection(tmp);
-    } else {
-      setSelection((s) => [...s, photoId]);
-    }
+    props.onSelectionChange(e, photoId);
   };
 
   return (
@@ -200,7 +210,7 @@ function RenderPhotoList() {
           onSelect={handleOnSelect}
         />
       ))}
-      {!isViewingPhoto ? null :
+      {isViewingPhoto &&
         (
           <PhotoOverlay
             album={album!}

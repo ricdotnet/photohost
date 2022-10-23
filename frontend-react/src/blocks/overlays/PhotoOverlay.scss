@@ -15,7 +15,7 @@
     @apply absolute top-0 right-0 pr-10 py-5 flex space-x-3;
 
     .button-action {
-      @apply p-3 hover:bg-white/10 text-white rounded transition ease-in-out duration-100;
+      @apply p-3 hover:bg-white/10 text-white rounded transition ease-in-out duration-100 cursor-pointer;
     }
   }
 
