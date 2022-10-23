@@ -9,32 +9,34 @@ interface DropdownPropsInterface {
   handleRemoteClose: () => void;
 }
 
+type RemoteCloseEvent = KeyboardEvent | MouseEvent;
+
 export default function Dropdown(props: DropdownPropsInterface) {
 
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-
-    document.addEventListener('keyup', (e: KeyboardEvent) => {
-      if ( props.isOpen ) {
-        console.log('closing with esc....');
-        if ( e.key === 'Escape' ) {
-          props.handleRemoteClose();
-        }
-      }
-    });
-
-    // document.addEventListener('click', (e: MouseEvent) => {
-      // if ( props.isOpen ) {
-      //   props.handleRemoteClose();
-      // }
-    // });
+    document.addEventListener('keyup', handleRemoteClose);
+    document.addEventListener('mouseup', handleRemoteClose);
 
     return () => {
-      document.removeEventListener('click', () => {
-      });
+      document.removeEventListener('keyup', handleRemoteClose);
+      document.removeEventListener('mouseup', handleRemoteClose);
     };
   }, [props.isOpen]);
+
+  const handleRemoteClose = (e: RemoteCloseEvent) => {
+    if ( props.isOpen ) {
+      if ( ('key' in e && e.key === 'Escape') ) {
+        props.handleRemoteClose();
+      }
+      if ( e.type === 'mouseup'
+        && dropdownRef.current
+        && !dropdownRef.current.contains(e.target as Node) ) {
+        props.handleRemoteClose();
+      }
+    }
+  };
 
   return (
     <>
