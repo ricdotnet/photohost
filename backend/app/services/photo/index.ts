@@ -107,7 +107,7 @@ export async function doMove(req: Request) {
   const { album, photos } = req.body;
 
   const albumValue = (album === 'default-album') ? null : album;
-  let columnValues = [];
+  let columnValues: SQLColumnValue[] = [];
   let preparedColumns = '';
 
   for ( const photo of photos ) {
