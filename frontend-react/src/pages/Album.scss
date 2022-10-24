@@ -4,6 +4,7 @@
 
 .photo-item {
   @apply rounded-md mb-4 relative bg-white p-1 break-inside-avoid shadow-md overflow-hidden;
+  @apply transition duration-150 ease-in-out;
 
   &__skeleton {
     @apply w-full h-[100px] animate-pulse bg-gray-400 rounded-md;

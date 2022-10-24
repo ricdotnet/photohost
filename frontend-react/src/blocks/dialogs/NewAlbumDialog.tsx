@@ -8,7 +8,7 @@ interface NewAlbumDialogPropsInterface {
   onCancel: (e: BaseSyntheticEvent | KeyboardEvent) => void;
 }
 
-function NewAlbumDialog(props: NewAlbumDialogPropsInterface) {
+export default function NewAlbumDialog(props: NewAlbumDialogPropsInterface) {
 
   const inputRef = useRef(null);
 
@@ -48,5 +48,3 @@ function NewAlbumDialog(props: NewAlbumDialogPropsInterface) {
     </Dialog>
   );
 }
-
-export default NewAlbumDialog;

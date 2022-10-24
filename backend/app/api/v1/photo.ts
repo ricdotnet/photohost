@@ -6,6 +6,7 @@ import {
   doGetCursors,
   doGetOne,
   doInsert,
+  doMove,
   getPhotoData
 } from '../../services/photo';
 import { authorization } from '../middlwares/authorization';
@@ -44,7 +45,7 @@ photo.delete('/delete', authorization, async (req, res) => {
     await doDelete(req);
   } catch (err) {
     // general error catching for now
-    return res.status(400).send({ code: 400, message: 'photo could not be deleted' });
+    return res.status(400).send({ code: 400, message: 'photos could not be deleted' });
   }
 
   res.status(200).send({ code: 200, message: 'delete success' });
@@ -91,6 +92,13 @@ photo.get('/single', async (req, res) => {
 
   res.setHeader('content-type', file?.mimeType as string);
   res.status(200).send(file?.file);
+});
+
+photo.post('/move', authorization, async (req, res) => {
+
+  await doMove(req);
+
+  res.status(200).send({ code: 200, message: 'photos moved' });
 });
 
 /**

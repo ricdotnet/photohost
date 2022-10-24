@@ -40,7 +40,7 @@ export default function Dropdown(props: DropdownPropsInterface) {
 
   return (
     <>
-      {!props.isOpen ? null :
+      {props.isOpen &&
         (
           <div
             ref={dropdownRef}

@@ -42,16 +42,9 @@ export function doInsert(req: Request): Promise<void> {
 export async function doDelete(req: Request) {
   const { id, username } = req.userContext!;
 
-  const photoResult = await client.query<IPhoto>('SELECT * FROM photos WHERE "user" = $1 AND filename = $2',
-    [id, req.query.photoId]);
-
-  const photo = photoResult.rows[0];
-
-  // remove the file first
-  await fsp.rm(path.join('uploads', username, photo.path, photo.filename));
-
-  // then delete entry from the database
-  await client.query('DELETE FROM photos WHERE filename = $1', [req.params.name]);
+  for ( const photo of req.body.photos ) {
+    await deletePhoto(id, username, photo);
+  }
 }
 
 // TODO: get user data from digest?
@@ -110,6 +103,28 @@ export async function doGetAll(req: Request) {
   return clone(photosResult.rows);
 }
 
+export async function doMove(req: Request) {
+  const { album, photos } = req.body;
+
+  const albumValue = (album === 'default-album') ? null : album;
+  let columnValues = [];
+  let preparedColumns = '';
+
+  for ( const photo of photos ) {
+    columnValues.push(photo);
+    // +1 because we already have 1 prepared statement
+    preparedColumns += `$${columnValues.length + 1}`;
+    if ( columnValues.length < photos.length ) {
+      preparedColumns += ',';
+    }
+  }
+
+  await client.query(`UPDATE photos
+                      SET album = $1
+                      WHERE id IN (${preparedColumns})`,
+    [albumValue, ...columnValues]);
+}
+
 export async function getPhotoData(req: Request) {
   const { photoId } = req.query;
   const { id } = req.userContext!;
@@ -133,20 +148,36 @@ export async function doGetCursors(req: Request) {
 
   const columnValues: SQLColumnValue[] = [id, photoId as string];
   let albumQuery = 'album IS NULL';
-  if (album !== 'default-album') {
+  if ( album !== 'default-album' ) {
     albumQuery = 'album = $3';
     columnValues.push(album as string);
   }
 
   const cursorsResult =
-    await client.query('SELECT * ' +
-      'FROM (SELECT id, ' +
-      'LAG(id) OVER (ORDER by id) AS prev, ' +
-      'LEAD(id) OVER (ORDER by id) AS next ' +
-      `FROM photos WHERE "user" = $1 AND ${albumQuery}) x ` +
-      'WHERE id = $2', [...columnValues]);
+    await client.query(`SELECT *
+                        FROM (SELECT id,
+                                     LAG(id) OVER (ORDER by id)  AS prev,
+                                     LEAD(id) OVER (ORDER by id) AS next
+                              FROM photos
+                              WHERE "user" = $1
+                                AND ${albumQuery}) x
+                        WHERE id = $2`,
+      [...columnValues]);
 
   return cursorsResult.rows[0];
+}
+
+async function deletePhoto(userId: number, username: string, photoId: string) {
+  const photoResult = await client.query<IPhoto>('SELECT * FROM photos WHERE "user" = $1 AND id = $2',
+    [userId, photoId]);
+
+  const photo = photoResult.rows[0];
+
+  // remove the file first
+  await fsp.rm(path.join('uploads', username, photo.path, photo.filename));
+
+  // then delete entry from the database
+  await client.query('DELETE FROM photos WHERE id = $1', [photoId]);
 }
 
 /**

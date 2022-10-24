@@ -10,21 +10,23 @@ import UploadPhotoDialog from '../blocks/dialogs/UploadPhotoDialog';
 import PhotosDropdown from '../blocks/dropdowns/PhotosDropdown';
 
 import './Album.scss';
+import DeletePhotosDialog from '../blocks/dialogs/DeletePhotosDialog';
+import MovePhotosDialog from '../blocks/dialogs/MovePhotosDialog';
 
 function Album() {
-
   const { album } = useParams();
   const navigateTo = useNavigate();
 
   const [photos, setPhotos] = useState([]);
   const [loading, setLoading] = useState(false);
-
   const [isDeletingAlbum, setIsDeletingAlbum] = useState(false);
   const [isOpenDeleteAlbum, setIsOpenDeleteAlbum] = useState(false);
-
   const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
   const [isOpenUploadPhoto, setIsOpenUploadPhoto] = useState(false);
-
+  const [isMovingPhotos, setIsMovingPhotos] = useState(false);
+  const [isOpenMovePhotos, setIsOpenMovePhotos] = useState(false);
+  const [isDeletingPhotos, setIsDeletingPhotos] = useState(false);
+  const [isOpenDeletePhotos, setIsOpenDeletePhotos] = useState(false);
   const [selectedPhotos, setSelectedPhotos] = useState<string[]>([]);
 
   useEffect(() => {
@@ -109,11 +111,66 @@ function Album() {
   };
 
   const handleMoveAllSelected = () => {
-    console.log('moving all selected photos...');
+    setIsOpenMovePhotos(true);
+  };
+
+  const onMovePhotosCancel = () => {
+    setIsOpenMovePhotos(false);
+  };
+
+  const onMovePhotosConfirm = (e: BaseSyntheticEvent, albumId: string) => {
+    if ( albumId === album ) return;
+    setIsMovingPhotos(true);
+
+    const body = {
+      album: albumId,
+      photos: selectedPhotos
+    };
+
+    const url = new URL(`${import.meta.env.VITE_API}photo/move`);
+
+    fetch(url, {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        authorization: `Bearer ${localStorage.getItem('access-token')}`
+      },
+      body: JSON.stringify(body),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        // console.log(data)
+        setIsMovingPhotos(false);
+        setIsOpenMovePhotos(false);
+      });
   };
 
   const handleDeleteAllSelected = () => {
-    console.log('deleting all selected photos...');
+    setIsOpenDeletePhotos(true);
+  };
+
+  const onDeletePhotosCancel = () => {
+    setIsOpenDeletePhotos(false);
+  };
+
+  const onDeletePhotosConfirm = () => {
+    setIsDeletingPhotos(true);
+    const url = new URL(`${import.meta.env.VITE_API}photo/delete`);
+
+    fetch(url, {
+      method: 'DELETE',
+      headers: {
+        'content-type': 'application/json',
+        authorization: `Bearer ${localStorage.getItem('access-token')}`,
+      },
+      body: JSON.stringify({ photos: selectedPhotos }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        // console.log(data)
+        setIsDeletingPhotos(false);
+        setIsOpenDeletePhotos(false);
+      });
   };
 
   return (
@@ -152,6 +209,24 @@ function Album() {
             dialogIsActioning={isUploadingPhoto}
             onConfirm={onConfirmUploadPhoto}
             onCancel={onCancelUploadPhoto}
+          />
+        )
+      }
+      {isOpenMovePhotos &&
+        (
+          <MovePhotosDialog
+            dialogIsActioning={isMovingPhotos}
+            onConfirm={onMovePhotosConfirm}
+            onCancel={onMovePhotosCancel}
+          />
+        )
+      }
+      {isOpenDeletePhotos &&
+        (
+          <DeletePhotosDialog
+            dialogIsActioning={isDeletingPhotos}
+            onConfirm={onDeletePhotosConfirm}
+            onCancel={onDeletePhotosCancel}
           />
         )
       }
@@ -232,6 +307,7 @@ interface RenderPhotoPropsInterface {
 function RenderPhoto(props: RenderPhotoPropsInterface) {
   const userContext = useContext(UserContext);
   const [loading, setLoading] = useState(true);
+  const [isSelected, setIsSelected] = useState(false);
 
   const handleOnLoad = () => {
     setLoading(false);
@@ -244,10 +320,11 @@ function RenderPhoto(props: RenderPhotoPropsInterface) {
   const handleOnSelect = (e: BaseSyntheticEvent) => {
     e.stopPropagation();
     props.onSelect(e, props.photo.id);
+    setIsSelected(!isSelected);
   };
 
   return (
-    <div className="photo-item" onClick={handleOnClick}>
+    <div className={'photo-item ' + (isSelected ? 'scale-90' : '')} onClick={handleOnClick}>
       <div className={'photo-item__skeleton ' + (loading ? 'block' : 'hidden')}></div>
       <img
         className={'w-full rounded ' + (loading ? 'hidden' : 'block')}

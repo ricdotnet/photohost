@@ -12,7 +12,7 @@ interface UploadPhotoDialogPropsInterface {
   onCancel: (e: BaseSyntheticEvent | KeyboardEvent) => void;
 }
 
-function UploadPhotoDialog(props: UploadPhotoDialogPropsInterface) {
+export default function UploadPhotoDialog(props: UploadPhotoDialogPropsInterface) {
 
   const fileInput = useRef<HTMLInputElement>(null);
   const [isDraggingOver, setIsDraggingOver] = useState(false);
@@ -140,5 +140,3 @@ function UploadPhotoDialog(props: UploadPhotoDialogPropsInterface) {
     </Dialog>
   );
 }
-
-export default UploadPhotoDialog;
