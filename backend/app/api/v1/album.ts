@@ -32,7 +32,7 @@ album.get('/all', authorization, async (req, res) => {
  * @Delete delete one or more albums
  */
 album.delete('/', authorization, async (req, res) => {
-  if ( req.query['album'] === 'default-album' ) {
+  if ( req.query['id'] === 'default-album' ) {
     return res.status(403).send({ code: 403, message: 'default-album cannot be deleted' });
   }
 

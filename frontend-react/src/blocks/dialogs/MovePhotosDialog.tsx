@@ -13,7 +13,7 @@ export default function MovePhotosDialog(props: MovePhotosDialogPropsInterface) 
   const [albums, setAlbums] = useState<any[]>([]);
 
   useEffect(() => {
-    const url = new URL(`${import.meta.env.VITE_API}album/all`);
+    const url = new URL(`${import.meta.env.VITE_API}/album/all`);
 
     fetch(url, {
       headers: {

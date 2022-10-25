@@ -2,6 +2,7 @@ import { BaseSyntheticEvent, useContext, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { UserContext } from '../../contexts/UserContext';
 import { PhotoInterface } from '../../interfaces/PhotoInterface';
+import { useApiRequest } from '../../hooks/UseApiRequest';
 import CrossIcon from '../../components/icons/CrossIcon';
 import DownloadIcon from '../../components/icons/DownloadIcon';
 import PreviousIcon from '../../components/icons/PreviousIcon';
@@ -23,9 +24,10 @@ function PhotoOverlay(props: PhotoOverlayPropsInterface) {
   const { photoId } = useParams();
 
   const [cursors, setCursors] = useState<{ next: string; prev: string; }>();
-
   // initiate the loading state when the user clicks a photo
   const [isLoadingNext, setIsLoadingNext] = useState(true);
+
+  const { get } = useApiRequest(true);
 
   useEffect(() => {
     document.addEventListener('keyup', handleKeyUpEvent);
@@ -48,21 +50,21 @@ function PhotoOverlay(props: PhotoOverlayPropsInterface) {
     props.onClose(e);
   };
 
-  const getCursors = (currentPhoto: string) => {
-    const url = new URL(`${import.meta.env.VITE_API}photo/cursors`);
-    url.searchParams.append('album', props.album);
-    url.searchParams.append('photoId', currentPhoto);
-
-    fetch(url, {
-      headers: {
-        authorization: `Bearer ${localStorage.getItem('access-token')}`
+  const getCursors = async (currentPhoto: string) => {
+    const { data, error } = await get('/photo/cursors', {
+      params: {
+        album: props.album,
+        photoId: currentPhoto,
       }
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        setCursors(data.cursors);
-        // setIsLoadingNext(false);
-      });
+    });
+
+    if ( data ) {
+      setCursors(data.cursors);
+    }
+
+    if ( error ) {
+      throw new Error(error);
+    }
   };
 
   const handleNextClick = () => {
@@ -83,7 +85,7 @@ function PhotoOverlay(props: PhotoOverlayPropsInterface) {
     setIsLoadingNext(false);
   };
 
-  const imgUrl = import.meta.env.VITE_API + 'photo/single?photoId=' + photoId + '&digest=' + userContext.digest;
+  const imgUrl = import.meta.env.VITE_API + '/photo/single?photoId=' + photoId + '&digest=' + userContext.digest;
 
   return (
     <div className="background">

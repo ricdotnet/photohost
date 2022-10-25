@@ -6,7 +6,7 @@ export const useTokenAuth = async () => {
     return Promise.reject();
   }
 
-  const response = await fetch(`${import.meta.env.VITE_API}user/info`, {
+  const response = await fetch(`${import.meta.env.VITE_API}/user/info`, {
     headers: {
       'authorization': `Bearer ${token}`
     }

@@ -36,7 +36,7 @@ export async function doGetAlbums(req: Request) {
 }
 
 export function doDeleteAlbum(req: Request) {
-  const { album } = req.query;
+  const { id } = req.query;
 
-  return client.query('DELETE FROM albums WHERE id = $1', [album]);
+  return client.query('DELETE FROM albums WHERE id = $1', [id]);
 }

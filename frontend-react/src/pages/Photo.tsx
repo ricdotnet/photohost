@@ -10,7 +10,7 @@ function Photo() {
   return (
     <UserLayout>
       <img
-        src={import.meta.env.VITE_API + 'photo/single?photoId=' + photoId + '&digest=' + userContext.digest}
+        src={import.meta.env.VITE_API + '/photo/single?photoId=' + photoId + '&digest=' + userContext.digest}
         alt={photoId}/>
     </UserLayout>
   );

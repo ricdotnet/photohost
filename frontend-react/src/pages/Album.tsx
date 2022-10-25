@@ -1,24 +1,25 @@
-import React, { BaseSyntheticEvent, useContext, useEffect, useState } from 'react';
+import React, { BaseSyntheticEvent, useCallback, useContext, useEffect, useState } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import { UserContext } from '../contexts/UserContext';
 import { PhotosContext } from '../contexts/PhotosContext';
 import { PhotoInterface } from '../interfaces/PhotoInterface';
+import { useApiRequest } from '../hooks/UseApiRequest';
 import UserLayout from '../layouts/UserLayout';
 import DeleteAlbumDialog from '../blocks/dialogs/DeleteAlbumDialog';
 import PhotoOverlay from '../blocks/overlays/PhotoOverlay';
 import UploadPhotoDialog from '../blocks/dialogs/UploadPhotoDialog';
 import PhotosDropdown from '../blocks/dropdowns/PhotosDropdown';
-
-import './Album.scss';
 import DeletePhotosDialog from '../blocks/dialogs/DeletePhotosDialog';
 import MovePhotosDialog from '../blocks/dialogs/MovePhotosDialog';
+
+import './Album.scss';
 
 function Album() {
   const { album } = useParams();
   const navigateTo = useNavigate();
 
   const [photos, setPhotos] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [isDeletingAlbum, setIsDeletingAlbum] = useState(false);
   const [isOpenDeleteAlbum, setIsOpenDeleteAlbum] = useState(false);
   const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
@@ -29,20 +30,25 @@ function Album() {
   const [isOpenDeletePhotos, setIsOpenDeletePhotos] = useState(false);
   const [selectedPhotos, setSelectedPhotos] = useState<string[]>([]);
 
-  useEffect(() => {
-    const url = new URL(`${import.meta.env.VITE_API}photo/all`);
-    url.searchParams.append('album', album as string);
+  const { get, post, del } = useApiRequest(true);
 
-    fetch(url, {
-      headers: {
-        'authorization': `Bearer ${localStorage.getItem('access-token')}`
-      },
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        setPhotos(data);
-        setLoading(false);
-      });
+  const getAllPhotos = useCallback(async () => {
+    const searchParams = new URLSearchParams();
+    searchParams.append('album', album as string);
+
+    const { data, error } = await get('/photo/all?' + searchParams);
+
+    if ( data ) {
+      setPhotos(data);
+      setLoading(false);
+    }
+    if ( error ) {
+      throw new Error(error);
+    }
+  }, []);
+
+  useEffect(() => {
+    getAllPhotos();
   }, []);
 
   const onOpenDeleteAlbum = () => {
@@ -53,23 +59,15 @@ function Album() {
     setIsOpenDeleteAlbum(false);
   };
 
-  const onConfirmDeleteAlbum = () => {
+  const onConfirmDeleteAlbum = async () => {
     setIsDeletingAlbum(true);
-    const url = new URL(`${import.meta.env.VITE_API}album`);
-    url.searchParams.append('album', album as string);
+    const searchParams = new URLSearchParams();
+    searchParams.append('id', album as string);
 
-    fetch(url, {
-      method: 'DELETE',
-      headers: {
-        authorization: `Bearer ${localStorage.getItem('access-token')}`
-      },
-      body: JSON.stringify({ album: album })
-    })
-      .then((response) => response.json())
-      .then(() => {
-        setIsDeletingAlbum(false);
-        navigateTo('/');
-      });
+    const { data, error } = await del('/album?' + searchParams);
+
+    setIsDeletingAlbum(false);
+    navigateTo('/');
   };
 
   const onOpenUploadPhoto = () => {
@@ -80,25 +78,16 @@ function Album() {
     setIsOpenUploadPhoto(false);
   };
 
-  const onConfirmUploadPhoto = (e: BaseSyntheticEvent, formData: FormData) => {
+  const onConfirmUploadPhoto = async (e: BaseSyntheticEvent, formData: FormData) => {
     setIsUploadingPhoto(true);
 
     // append the current album
     formData.append('album', album as string);
 
-    fetch(`${import.meta.env.VITE_API}photo/upload`, {
-      method: 'POST',
-      headers: {
-        authorization: `Bearer ${localStorage.getItem('access-token')}`
-      },
-      body: formData,
-    })
-      .then((res) => res.json())
-      .then(() => {
-        setIsUploadingPhoto(false);
-        setIsOpenUploadPhoto(false);
-      })
-      .catch((err) => console.log(err));
+    const { data, error } = await post('/photo/upload', formData);
+
+    setIsUploadingPhoto(false);
+    setIsOpenUploadPhoto(false);
   };
 
   const handleOnSelectionChange = (e: BaseSyntheticEvent, photoId: string) => {
@@ -118,7 +107,7 @@ function Album() {
     setIsOpenMovePhotos(false);
   };
 
-  const onMovePhotosConfirm = (e: BaseSyntheticEvent, albumId: string) => {
+  const onMovePhotosConfirm = async (e: BaseSyntheticEvent, albumId: string) => {
     if ( albumId === album ) return;
     setIsMovingPhotos(true);
 
@@ -127,22 +116,10 @@ function Album() {
       photos: selectedPhotos
     };
 
-    const url = new URL(`${import.meta.env.VITE_API}photo/move`);
+    const { data, error } = await post('/photo/move', body);
 
-    fetch(url, {
-      method: 'POST',
-      headers: {
-        'content-type': 'application/json',
-        authorization: `Bearer ${localStorage.getItem('access-token')}`
-      },
-      body: JSON.stringify(body),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        // console.log(data)
-        setIsMovingPhotos(false);
-        setIsOpenMovePhotos(false);
-      });
+    setIsMovingPhotos(false);
+    setIsOpenMovePhotos(false);
   };
 
   const handleDeleteAllSelected = () => {
@@ -153,24 +130,17 @@ function Album() {
     setIsOpenDeletePhotos(false);
   };
 
-  const onDeletePhotosConfirm = () => {
+  const onDeletePhotosConfirm = async () => {
     setIsDeletingPhotos(true);
-    const url = new URL(`${import.meta.env.VITE_API}photo/delete`);
 
-    fetch(url, {
-      method: 'DELETE',
-      headers: {
-        'content-type': 'application/json',
-        authorization: `Bearer ${localStorage.getItem('access-token')}`,
-      },
-      body: JSON.stringify({ photos: selectedPhotos }),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        // console.log(data)
-        setIsDeletingPhotos(false);
-        setIsOpenDeletePhotos(false);
-      });
+    const body = {
+      photos: selectedPhotos,
+    };
+
+    const { data, error } = await del('/photo/delete', { data: body });
+
+    setIsDeletingPhotos(false);
+    setIsOpenDeletePhotos(false);
   };
 
   return (
@@ -328,7 +298,7 @@ function RenderPhoto(props: RenderPhotoPropsInterface) {
       <div className={'photo-item__skeleton ' + (loading ? 'block' : 'hidden')}></div>
       <img
         className={'w-full rounded ' + (loading ? 'hidden' : 'block')}
-        src={import.meta.env.VITE_API + 'photo/single?photoId=' + props.photo.id + '&digest=' + userContext.digest}
+        src={import.meta.env.VITE_API + '/photo/single?photoId=' + props.photo.id + '&digest=' + userContext.digest}
         alt={props.photo.name} onLoad={handleOnLoad}
       />
       <div className="photo-item__hover-effect">

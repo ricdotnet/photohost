@@ -1,13 +1,20 @@
-import React, { BaseSyntheticEvent, memo, useContext, useEffect, useState } from 'react';
+import React, {
+  BaseSyntheticEvent,
+  memo,
+  useCallback,
+  useContext,
+  useEffect,
+  useState
+} from 'react';
 import { Link } from 'react-router-dom';
 import { AlbumsContext } from '../contexts/AlbumsContext';
 import { AlbumInterface } from '../interfaces/AlbumInterface';
+import { useApiRequest } from '../hooks/UseApiRequest';
 import UserLayout from '../layouts/UserLayout';
-import Button from '../components/button/Button';
 import NewAlbumDialog from '../blocks/dialogs/NewAlbumDialog';
+import AlbumsDropdown from '../blocks/dropdowns/AlbumsDropdown';
 
 import './Home.scss';
-import AlbumsDropdown from '../blocks/dropdowns/AlbumsDropdown';
 
 export default function Home() {
   const [albums, setAlbums] = useState<AlbumInterface[]>([]);
@@ -16,18 +23,26 @@ export default function Home() {
   const [isAddingNewAlbum, setIsAddingNewAlbum] = useState(false);
   const [isOpenAddNewAlbum, setIsOpenAddNewAlbum] = useState(false);
 
-  useEffect(() => {
-    fetch(`${import.meta.env.VITE_API}album/all`, {
-      headers: {
-        authorization: `Bearer ${localStorage.getItem('access-token')}`
-      }
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        setAlbums(data.albums);
-        setLoading(false);
-      });
+  const { get, post } = useApiRequest(true);
+
+  const getAllAlbums = useCallback(async () => {
+
+    const { data, error } = await get('/album/all');
+
+    if ( data ) {
+      setAlbums(data.albums);
+      setLoading(false);
+    }
+
+    if ( error ) {
+      throw new Error(error);
+    }
+
   }, []);
+
+  useEffect(() => {
+    getAllAlbums();
+  }, [getAllAlbums]);
 
   const onOpenAddNewAlbum = () => {
     setIsOpenAddNewAlbum(true);
@@ -37,25 +52,27 @@ export default function Home() {
     setIsOpenAddNewAlbum(false);
   };
 
-  const onConfirmAddNewAlbum = (e: BaseSyntheticEvent, albumName: string) => {
+  const onConfirmAddNewAlbum = async (e: BaseSyntheticEvent, albumName: string) => {
     e.preventDefault();
     setIsAddingNewAlbum(true);
 
-    fetch(`${import.meta.env.VITE_API}album`, {
-      method: 'POST',
-      headers: {
-        authorization: `Bearer ${localStorage.getItem('access-token')}`,
-        'content-type': 'application/json'
-      },
-      body: JSON.stringify({ name: albumName }),
-    }).then((response) => response.json())
-      .then((data) => {
-        const newAlbums = [...albums];
-        newAlbums.push(data.album);
-        setAlbums(newAlbums);
-        setIsAddingNewAlbum(false);
-        setIsOpenAddNewAlbum(false);
-      });
+    const body = {
+      name: albumName,
+    };
+
+    const { data, error } = await post('/album', body);
+
+    if ( data ) {
+      const newAlbums = [...albums];
+      newAlbums.push(data.album);
+      setAlbums(newAlbums);
+      setIsAddingNewAlbum(false);
+      setIsOpenAddNewAlbum(false);
+    }
+
+    if ( error ) {
+      throw new Error(error);
+    }
   };
 
   return (
