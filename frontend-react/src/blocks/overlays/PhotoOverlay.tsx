@@ -27,7 +27,7 @@ function PhotoOverlay(props: PhotoOverlayPropsInterface) {
   // initiate the loading state when the user clicks a photo
   const [isLoadingNext, setIsLoadingNext] = useState(true);
 
-  const { get } = useApiRequest(true);
+  const { request } = useApiRequest();
 
   useEffect(() => {
     document.addEventListener('keyup', handleKeyUpEvent);
@@ -51,7 +51,9 @@ function PhotoOverlay(props: PhotoOverlayPropsInterface) {
   };
 
   const getCursors = async (currentPhoto: string) => {
-    const { data, error } = await get('/photo/cursors', {
+    const { data, error } = await request({
+      route: '/photo/cursors',
+      withAuth: true,
       params: {
         album: props.album,
         photoId: currentPhoto,
@@ -111,7 +113,7 @@ function PhotoOverlay(props: PhotoOverlayPropsInterface) {
         </button>
       </div>
       <div className={'loader ' + (!isLoadingNext ? 'hidden' : '')}>
-        <SpinnerIcon className="w-10 h-10 text-white animate-spin"/>
+        <SpinnerIcon className="w-10 h-10 text-white"/>
       </div>
       <div className="foreground">
         <img

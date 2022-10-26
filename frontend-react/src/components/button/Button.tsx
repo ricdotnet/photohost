@@ -49,7 +49,7 @@ function Button(props: ButtonPropsInterface) {
           <span>{props.value}</span>
         )
       }
-      {props.isActioning ? (<SpinnerIcon className="w-5 h-5 animate-spin text-white"/>) : null}
+      {props.isActioning ? (<SpinnerIcon className="w-5 h-5 text-white"/>) : null}
     </button>
   );
 }

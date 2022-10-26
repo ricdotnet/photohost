@@ -1,4 +1,4 @@
-import React, { BaseSyntheticEvent, useCallback, useContext, useEffect, useState } from 'react';
+import { BaseSyntheticEvent, useCallback, useContext, useEffect, useState } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import { UserContext } from '../contexts/UserContext';
 import { PhotosContext } from '../contexts/PhotosContext';
@@ -30,20 +30,22 @@ function Album() {
   const [isOpenDeletePhotos, setIsOpenDeletePhotos] = useState(false);
   const [selectedPhotos, setSelectedPhotos] = useState<string[]>([]);
 
-  const { get, post, del } = useApiRequest(true);
+  const { request } = useApiRequest();
 
   const getAllPhotos = useCallback(async () => {
     const searchParams = new URLSearchParams();
     searchParams.append('album', album as string);
 
-    const { data, error } = await get('/photo/all?' + searchParams);
+    const { data, error } = await request({
+      route: '/photo/all?' + searchParams,
+      withAuth: true,
+    });
+    
+    if (error) throw new Error(error);
 
     if ( data ) {
       setPhotos(data);
       setLoading(false);
-    }
-    if ( error ) {
-      throw new Error(error);
     }
   }, []);
 
@@ -64,7 +66,13 @@ function Album() {
     const searchParams = new URLSearchParams();
     searchParams.append('id', album as string);
 
-    const { data, error } = await del('/album?' + searchParams);
+    const { data, error } = await request({
+      route: '/album?' + searchParams,
+      method: 'delete',
+      withAuth: true,
+    });
+
+    if (error) throw new Error(error);
 
     setIsDeletingAlbum(false);
     navigateTo('/');
@@ -84,8 +92,16 @@ function Album() {
     // append the current album
     formData.append('album', album as string);
 
-    const { data, error } = await post('/photo/upload', formData);
+    const { data, error } = await request({
+      route: '/photo/upload',
+      method: 'post',
+      withAuth: true,
+      payload: formData,
+    });
 
+    if (error) throw new Error(error);
+    // TODO: add uploaded photos to the list?
+    
     setIsUploadingPhoto(false);
     setIsOpenUploadPhoto(false);
   };
@@ -116,7 +132,16 @@ function Album() {
       photos: selectedPhotos
     };
 
-    const { data, error } = await post('/photo/move', body);
+    const { data, error } = await request({
+      route: '/photo/move',
+      method: 'post',
+      withAuth: true,
+      payload: body,
+    });
+
+    if (error) throw new Error(error);
+
+    removePhotosFromList();
 
     setIsMovingPhotos(false);
     setIsOpenMovePhotos(false);
@@ -137,11 +162,28 @@ function Album() {
       photos: selectedPhotos,
     };
 
-    const { data, error } = await del('/photo/delete', { data: body });
+    const { data, error } = await request({
+      route: '/photo/delete',
+      method: 'delete',
+      withAuth: true,
+      payload: body,
+    });
+
+    if (error) throw new Error(error);
+
+    removePhotosFromList();
 
     setIsDeletingPhotos(false);
     setIsOpenDeletePhotos(false);
   };
+
+  const removePhotosFromList = () => {
+    const tmp = [...photos].filter((p: PhotoInterface) => !selectedPhotos.includes(p.id));
+
+    // whilst removing.... get the next amount of photos equal to the amount taken out of the list
+
+    setPhotos(tmp);
+  }
 
   return (
     <UserLayout>

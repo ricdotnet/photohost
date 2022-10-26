@@ -1,5 +1,7 @@
-import { BaseSyntheticEvent, useEffect, useRef, useState } from 'react';
+import { BaseSyntheticEvent, useCallback, useEffect, useRef, useState } from 'react';
+import { useApiRequest } from '../../hooks/UseApiRequest';
 import Dialog from '../../components/dialog/Dialog';
+import SpinnerIcon from '../../components/icons/SpinnerIcon';
 
 interface MovePhotosDialogPropsInterface {
   dialogIsActioning: boolean;
@@ -11,18 +13,28 @@ export default function MovePhotosDialog(props: MovePhotosDialogPropsInterface) 
 
   const selectRef = useRef<HTMLSelectElement>(null);
   const [albums, setAlbums] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const { request } = useApiRequest();
+
+  const getAllAlbums = useCallback(async () => {
+    const {data, error} = await request({
+      route: '/album/all',
+      withAuth: true,
+    });
+
+    if (error) throw new Error(error);
+
+    if (data) {
+      setAlbums(data.albums);
+      setIsLoading(false);
+    }
+
+  }, []);
 
   useEffect(() => {
-    const url = new URL(`${import.meta.env.VITE_API}/album/all`);
-
-    fetch(url, {
-      headers: {
-        authorization: `Bearer ${localStorage.getItem('access-token')}`
-      }
-    })
-      .then((response) => response.json())
-      .then((data) => setAlbums(data.albums));
-  }, []);
+    getAllAlbums();
+  }, [getAllAlbums]);
 
   const onConfirmClick = (e: BaseSyntheticEvent) => {
     props.onConfirm(e, selectRef.current!.value);
@@ -36,11 +48,21 @@ export default function MovePhotosDialog(props: MovePhotosDialogPropsInterface) 
       onCancel={props.onCancel}
       isConfirming={props.dialogIsActioning}
     >
-      <select ref={selectRef}>
-        {albums.map(a => (
-          <option key={a.id} value={a.id}>{a.name}</option>
-        ))}
-      </select>
+      {isLoading ?
+        (
+          <div className="flex justify-center">
+            <SpinnerIcon className="w-5"/>
+          </div>
+        )
+        :
+        (
+          <select ref={selectRef}>
+            {albums.map(a => (
+              <option key={a.id} value={a.id}>{a.name}</option>
+            ))}
+          </select>
+        )
+      }
     </Dialog>
   );
 }

@@ -23,11 +23,15 @@ export default function Home() {
   const [isAddingNewAlbum, setIsAddingNewAlbum] = useState(false);
   const [isOpenAddNewAlbum, setIsOpenAddNewAlbum] = useState(false);
 
-  const { get, post } = useApiRequest(true);
+  const { request } = useApiRequest();
 
   const getAllAlbums = useCallback(async () => {
 
-    const { data, error } = await get('/album/all');
+    // const { data, error } = await get('/album/all');
+    const { data, error } = await request({
+      route: '/album/all',
+      withAuth: true,
+    });
 
     if ( data ) {
       setAlbums(data.albums);
@@ -60,7 +64,12 @@ export default function Home() {
       name: albumName,
     };
 
-    const { data, error } = await post('/album', body);
+    const { data, error } = await request({
+      method: 'POST',
+      route: '/album',
+      withAuth: true,
+      payload: body,
+    });
 
     if ( data ) {
       const newAlbums = [...albums];
