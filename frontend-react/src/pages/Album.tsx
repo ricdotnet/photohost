@@ -128,7 +128,7 @@ function Album() {
     setIsMovingPhotos(true);
 
     const body = {
-      album: albumId,
+      album: aId,
       photos: selectedPhotos
     };
 
