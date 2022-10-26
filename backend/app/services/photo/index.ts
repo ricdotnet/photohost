@@ -94,11 +94,11 @@ export async function doGetAll(req: Request) {
     columnValues.push(req.query['album'] as string);
     query += 'AND album = $2';
   } else {
-    query += 'AND album IS NULL ORDER BY id';
+    query += 'AND album IS NULL';
   }
 
   const photosResult =
-    await client.query<IPhoto>(`${query} LIMIT 10`, [...columnValues]);
+    await client.query<IPhoto>(`${query} ORDER BY created_at LIMIT 10`, [...columnValues]);
 
   return clone(photosResult.rows);
 }
@@ -156,8 +156,8 @@ export async function doGetCursors(req: Request) {
   const cursorsResult =
     await client.query(`SELECT *
                         FROM (SELECT id,
-                                     LAG(id) OVER (ORDER by id)  AS prev,
-                                     LEAD(id) OVER (ORDER by id) AS next
+                                     LAG(id) OVER (ORDER by created_at) AS prev,
+                                     LEAD(id) OVER (ORDER by created_at) AS next
                               FROM photos
                               WHERE "user" = $1
                                 AND ${albumQuery}) x

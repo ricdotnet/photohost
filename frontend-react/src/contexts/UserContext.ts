@@ -8,6 +8,7 @@ const UserStore = {
   last_login: '',
   last_updated: '',
   digest: '',
+  photos_layout: 'columns',
 };
 
 export const UserContext = createContext(UserStore);

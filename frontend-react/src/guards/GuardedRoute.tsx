@@ -15,7 +15,10 @@ function GuardedRoute(props: GuardRoutePropsInterface) {
   useEffect(() => {
     useTokenAuth()
       .then((data) => {
-        setUser(data);
+        // TODO: edit this with better context
+        const user = data;
+        user.photos_layout = 'columns';
+        setUser(user);
         setIsAuthed(true);
       })
       .catch(() => <Navigate to="/login"/>);

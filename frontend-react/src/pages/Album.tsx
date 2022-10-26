@@ -13,10 +13,13 @@ import DeletePhotosDialog from '../blocks/dialogs/DeletePhotosDialog';
 import MovePhotosDialog from '../blocks/dialogs/MovePhotosDialog';
 
 import './Album.scss';
+import Button from '../components/button/Button';
 
 function Album() {
   const { albumId } = useParams();
   const navigateTo = useNavigate();
+
+  const userContext = useContext(UserContext);
 
   const [photos, setPhotos] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -29,6 +32,7 @@ function Album() {
   const [isDeletingPhotos, setIsDeletingPhotos] = useState(false);
   const [isOpenDeletePhotos, setIsOpenDeletePhotos] = useState(false);
   const [selectedPhotos, setSelectedPhotos] = useState<string[]>([]);
+  const [layout, setLayout] = useState('');
 
   const { request } = useApiRequest();
 
@@ -50,6 +54,7 @@ function Album() {
   }, []);
 
   useEffect(() => {
+    setLayout(userContext.photos_layout);
     getAllPhotos();
   }, []);
 
@@ -185,9 +190,21 @@ function Album() {
     setPhotos(tmp);
   };
 
+  const onChangeLayout = () => {
+    (layout === 'columns')
+      ? setLayout('rows')
+      : setLayout('columns');
+  };
+
   return (
     <UserLayout>
       <div className="page-top">
+        <Button
+          variant="primary"
+          value="Layout"
+          type="button"
+          handleClick={onChangeLayout}
+        />
         <PhotosDropdown
           onClickUploadPhotos={onOpenUploadPhoto}
           onClickDeleteAlbum={onOpenDeleteAlbum}
@@ -202,6 +219,7 @@ function Album() {
             <PhotosContext.Provider value={photos}>
               <RenderPhotoList
                 onSelectionChange={handleOnSelectionChange}
+                layout={layout}
               />
             </PhotosContext.Provider>
           )
@@ -248,6 +266,7 @@ function Album() {
 
 interface RenderPhotoListPropsInterface {
   onSelectionChange: (e: BaseSyntheticEvent, selection: string) => void;
+  layout: string;
 }
 
 function RenderPhotoList(props: RenderPhotoListPropsInterface) {
@@ -288,13 +307,14 @@ function RenderPhotoList(props: RenderPhotoListPropsInterface) {
   };
 
   return (
-    <div className="photo-grid">
+    <div className={'photo-grid-' + props.layout}>
       {photosContext.map((photo: any) => (
         <RenderPhoto
           photo={photo}
           key={photo.id}
           onClick={handleOnClickPhoto}
           onSelect={handleOnSelect}
+          layout={props.layout}
         />
       ))}
       {isViewingPhoto &&
@@ -314,6 +334,7 @@ interface RenderPhotoPropsInterface {
   photo: PhotoInterface;
   onClick: (e: BaseSyntheticEvent, photo: PhotoInterface) => void;
   onSelect: (e: BaseSyntheticEvent, photoId: string) => void;
+  layout: string;
 }
 
 function RenderPhoto(props: RenderPhotoPropsInterface) {
@@ -336,10 +357,14 @@ function RenderPhoto(props: RenderPhotoPropsInterface) {
   };
 
   return (
-    <div className={'photo-item ' + (isSelected ? 'scale-90' : '')} onClick={handleOnClick}>
-      <div className={'photo-item__skeleton ' + (loading ? 'block' : 'hidden')}></div>
+    <div
+      className={'photo-item ' + (isSelected ? 'scale-90 ' : '') + (props.layout === 'columns' ? '' : 'flex-shrink-0')}
+      onClick={handleOnClick}
+    >
+      <div
+        className={'photo-item__skeleton-' + props.layout + (loading ? ' block' : ' hidden')}></div>
       <img
-        className={'w-full rounded ' + (loading ? 'hidden' : 'block')}
+        className={'photo-item__img-' + props.layout + (loading ? ' hidden' : ' block')}
         src={import.meta.env.VITE_API + '/photo/single?photoId=' + props.photo.id + '&digest=' + userContext.digest}
         alt={props.photo.name} onLoad={handleOnLoad}
       />
