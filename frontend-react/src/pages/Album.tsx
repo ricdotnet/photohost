@@ -40,8 +40,8 @@ function Album() {
       route: '/photo/all?' + searchParams,
       withAuth: true,
     });
-    
-    if (error) throw new Error(error);
+
+    if ( error ) throw new Error(error);
 
     if ( data ) {
       setPhotos(data);
@@ -72,7 +72,7 @@ function Album() {
       withAuth: true,
     });
 
-    if (error) throw new Error(error);
+    if ( error ) throw new Error(error);
 
     setIsDeletingAlbum(false);
     navigateTo('/');
@@ -99,9 +99,9 @@ function Album() {
       payload: formData,
     });
 
-    if (error) throw new Error(error);
+    if ( error ) throw new Error(error);
     // TODO: add uploaded photos to the list?
-    
+
     setIsUploadingPhoto(false);
     setIsOpenUploadPhoto(false);
   };
@@ -139,7 +139,7 @@ function Album() {
       payload: body,
     });
 
-    if (error) throw new Error(error);
+    if ( error ) throw new Error(error);
 
     removePhotosFromList();
 
@@ -169,7 +169,7 @@ function Album() {
       payload: body,
     });
 
-    if (error) throw new Error(error);
+    if ( error ) throw new Error(error);
 
     removePhotosFromList();
 
@@ -183,7 +183,7 @@ function Album() {
     // whilst removing.... get the next amount of photos equal to the amount taken out of the list
 
     setPhotos(tmp);
-  }
+  };
 
   return (
     <UserLayout>
