@@ -1,19 +1,23 @@
 import { BaseSyntheticEvent } from 'react';
 
+import './DropdownChild.scss';
+
 interface DropdownChildPropsInterface {
   value: string;
   handleOnClick: (e: BaseSyntheticEvent) => void;
+  disabled?: boolean;
 }
 
 export default function DropdownChild(props: DropdownChildPropsInterface) {
 
   return (
     <button
-      className="py-2 min-w-[150px] max-w-[200px] w-full px-4 hover:bg-gray-100 cursor-pointer text-left whitespace-nowrap"
+      className="dropdown-child"
       type="button"
       onClick={props.handleOnClick}
+      disabled={props.disabled}
     >
       {props.value}
     </button>
-  )
+  );
 }

@@ -15,7 +15,7 @@ import MovePhotosDialog from '../blocks/dialogs/MovePhotosDialog';
 import './Album.scss';
 
 function Album() {
-  const { album } = useParams();
+  const { albumId } = useParams();
   const navigateTo = useNavigate();
 
   const [photos, setPhotos] = useState([]);
@@ -34,7 +34,7 @@ function Album() {
 
   const getAllPhotos = useCallback(async () => {
     const searchParams = new URLSearchParams();
-    searchParams.append('album', album as string);
+    searchParams.append('album', albumId as string);
 
     const { data, error } = await request({
       route: '/photo/all?' + searchParams,
@@ -64,7 +64,7 @@ function Album() {
   const onConfirmDeleteAlbum = async () => {
     setIsDeletingAlbum(true);
     const searchParams = new URLSearchParams();
-    searchParams.append('id', album as string);
+    searchParams.append('id', albumId as string);
 
     const { data, error } = await request({
       route: '/album?' + searchParams,
@@ -90,7 +90,7 @@ function Album() {
     setIsUploadingPhoto(true);
 
     // append the current album
-    formData.append('album', album as string);
+    formData.append('album', albumId as string);
 
     const { data, error } = await request({
       route: '/photo/upload',
@@ -123,8 +123,8 @@ function Album() {
     setIsOpenMovePhotos(false);
   };
 
-  const onMovePhotosConfirm = async (e: BaseSyntheticEvent, albumId: string) => {
-    if ( albumId === album ) return;
+  const onMovePhotosConfirm = async (e: BaseSyntheticEvent, aId: string) => {
+    if ( aId === albumId ) return;
     setIsMovingPhotos(true);
 
     const body = {
@@ -253,7 +253,7 @@ interface RenderPhotoListPropsInterface {
 function RenderPhotoList(props: RenderPhotoListPropsInterface) {
   const photosContext = useContext(PhotosContext);
 
-  const { album, photoId } = useParams();
+  const { albumId, photoId } = useParams();
   const navigateTo = useNavigate();
 
   const [photo, setPhoto] = useState<PhotoInterface | null>(null);
@@ -270,7 +270,7 @@ function RenderPhotoList(props: RenderPhotoListPropsInterface) {
   const handleOnClickPhoto = (e: BaseSyntheticEvent, photo: PhotoInterface) => {
     setIsViewingPhoto(true);
     setPhoto(photo);
-    navigateTo(`/${album}/${photo.id}`);
+    navigateTo(`/${albumId}/${photo.id}`);
 
     document.body.classList.add('overflow-hidden');
   };
@@ -278,7 +278,7 @@ function RenderPhotoList(props: RenderPhotoListPropsInterface) {
   const handleOnCloseViewer = () => {
     setIsViewingPhoto(false);
     setPhoto(null);
-    navigateTo(`/album/${album}`);
+    navigateTo(`/album/${albumId}`);
 
     document.body.classList.remove('overflow-hidden');
   };
@@ -300,7 +300,7 @@ function RenderPhotoList(props: RenderPhotoListPropsInterface) {
       {isViewingPhoto &&
         (
           <PhotoOverlay
-            album={album!}
+            album={albumId!}
             photo={photo!}
             onClose={handleOnCloseViewer}
           />

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useParams } from 'react-router-dom';
 import Dropdown from '../../components/dropdown/Dropdown';
 import DropdownChild from '../../components/dropdown/DropdownChild';
 import Button from '../../components/button/Button';
@@ -14,6 +15,8 @@ interface PhotosDropDownPropsInterface {
 }
 
 export default function PhotosDropdown(props: PhotosDropDownPropsInterface) {
+
+  const { albumId } = useParams();
 
   const [isOpen, setIsOpen] = useState(false);
 
@@ -65,12 +68,22 @@ export default function PhotosDropdown(props: PhotosDropDownPropsInterface) {
         {props.showSelectionOptions &&
           (
             <>
-              <DropdownChild value="Move all selected" handleOnClick={onClickMoveAllSelected}/>
-              <DropdownChild value="Delete all selected" handleOnClick={onClickDeleteAllSelected}/>
+              <DropdownChild
+                value="Move all selected"
+                handleOnClick={onClickMoveAllSelected}
+              />
+              <DropdownChild
+                value="Delete all selected"
+                handleOnClick={onClickDeleteAllSelected}
+              />
             </>
           )
         }
-        <DropdownChild value="Delete album" handleOnClick={onClickDeleteAlbum}/>
+        <DropdownChild
+          value="Delete album"
+          handleOnClick={onClickDeleteAlbum}
+          disabled={albumId === 'default-album'}
+        />
       </Dropdown>
     </div>
   );

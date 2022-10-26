@@ -12,11 +12,11 @@ export const router = createBrowserRouter([
     element: <GuardedRoute component={<Home/>} redirectTo="/login"/>,
   },
   {
-    path: '/album/:album',
+    path: '/album/:albumId',
     element: <GuardedRoute component={<Album/>} redirectTo="/login"/>,
   },
   {
-    path: '/:album/:photoId',
+    path: '/:albumId/:photoId',
     element: <GuardedRoute component={<Album/>} redirectTo="/login"/>
   },
   {

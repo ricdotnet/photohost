@@ -1,0 +1,9 @@
+.dropdown-child {
+  @apply py-2 px-4 w-full min-w-[150px] max-w-[200px];
+  @apply text-left whitespace-nowrap;
+  @apply hover:bg-gray-100 cursor-pointer;
+
+  &:disabled {
+    @apply text-gray-500;
+  }
+}
