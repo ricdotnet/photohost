@@ -32,9 +32,9 @@ photo.post('/upload', authorization, multipart, async (req, res) => {
     return res.status(401).send({ code: 401, message: 'No file was uploaded.' });
   }
 
-  await doInsert(req);
+  const photos = await doInsert(req);
 
-  res.status(200).send({ code: 200, message: 'multipart success' });
+  res.status(200).send({ code: 200, photos });
 });
 
 /**

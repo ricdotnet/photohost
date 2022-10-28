@@ -18,7 +18,7 @@ function Album() {
   const { albumId } = useParams();
   const navigateTo = useNavigate();
 
-  const [photos, setPhotos] = useState([]);
+  const [photos, setPhotos] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isDeletingAlbum, setIsDeletingAlbum] = useState(false);
   const [isOpenDeleteAlbum, setIsOpenDeleteAlbum] = useState(false);
@@ -100,7 +100,10 @@ function Album() {
     });
 
     if ( error ) throw new Error(error);
-    // TODO: add uploaded photos to the list?
+
+    if ( data && data.photos ) {
+      setPhotos([...data.photos, ...photos]);
+    }
 
     setIsUploadingPhoto(false);
     setIsOpenUploadPhoto(false);
@@ -339,7 +342,7 @@ function RenderPhoto(props: RenderPhotoPropsInterface) {
     <div className={'photo-item ' + (isSelected ? 'scale-90' : '')} onClick={handleOnClick}>
       <div className={'photo-item__skeleton ' + (loading ? 'block' : 'hidden')}></div>
       <img
-        className={'w-full rounded ' + (loading ? 'hidden' : 'block')}
+        className={'w-full ' + (loading ? 'hidden' : 'block')}
         src={import.meta.env.VITE_API + '/photo/single?photoId=' + props.photo.id + '&digest=' + userContext.digest}
         alt={props.photo.name} onLoad={handleOnLoad}
       />

@@ -10,9 +10,11 @@ import fs from 'fs';
 import path from 'path';
 import fsp from 'fs/promises';
 
-export function doInsert(req: Request): Promise<void> {
+export function doInsert(req: Request): Promise<any> {
   return new Promise(async (resolve) => {
     const { album } = req.formData;
+    const photos = [];
+
     for ( let fileEl in req.files! ) {
       const file: IFile = req.files![fileEl];
 
@@ -26,14 +28,18 @@ export function doInsert(req: Request): Promise<void> {
       // do not set an album if default-album
       const albumToSave = album === 'default-album' ? null : album;
 
-      await client.query<IPhoto>('INSERT INTO photos ("user", path, filename, name, album) VALUES ($1, $2, $3, $4, $5)',
+      const photoResult = await client.query<IPhoto>(`INSERT INTO photos ("user", path, filename, name, album)
+                                                      VALUES ($1, $2, $3, $4, $5)
+                                                      RETURNING *`,
         [req.userContext!.id, '', file.originalName, sanitizedName, albumToSave]);
 
       // if the insert is successful then move the file
       await moveTmpFile(req.userContext!, file);
 
+      photos.push(photoResult.rows[0]);
+
       if ( parseInt(fileEl) === req.files!.length - 1 ) {
-        resolve();
+        resolve(photos);
       }
     }
   });
@@ -98,7 +104,7 @@ export async function doGetAll(req: Request) {
   }
 
   const photosResult =
-    await client.query<IPhoto>(`${query} ORDER BY created_at LIMIT 10`, [...columnValues]);
+    await client.query<IPhoto>(`${query} ORDER BY created_at DESC LIMIT 25`, [...columnValues]);
 
   return clone(photosResult.rows);
 }
@@ -156,8 +162,8 @@ export async function doGetCursors(req: Request) {
   const cursorsResult =
     await client.query(`SELECT *
                         FROM (SELECT id,
-                                     LAG(id) OVER (ORDER by created_at)  AS prev,
-                                     LEAD(id) OVER (ORDER by created_at) AS next
+                                     LAG(id) OVER (ORDER by created_at DESC)  AS prev,
+                                     LEAD(id) OVER (ORDER by created_at DESC) AS next
                               FROM photos
                               WHERE "user" = $1
                                 AND ${albumQuery}) x

@@ -3,7 +3,7 @@
 }
 
 .photo-item {
-  @apply rounded-md mb-4 relative bg-white p-1 break-inside-avoid shadow-md overflow-hidden;
+  @apply mb-4 relative bg-white break-inside-avoid overflow-hidden;
   @apply transition duration-150 ease-in-out;
 
   &__skeleton {
@@ -11,8 +11,12 @@
   }
 
   &__hover-effect {
-    @apply absolute w-full h-full left-0 bottom-0 hover:bg-white/20;
-    @apply rounded-md transition ease-in-out;
+    @apply absolute w-full h-full left-0 bottom-0 cursor-zoom-in;
+    @apply transition ease-in-out;
+
+    &:hover {
+      box-shadow: inset 0 0 100px rgb(0 0 0 / 0.3);
+    }
   }
 
   .checkbox {
