@@ -1,5 +1,5 @@
-import GuestLayout from '../layouts/GuestLayout';
 import { Link } from 'react-router-dom';
+import GuestLayout from '../layouts/GuestLayout';
 
 function RequestAccess() {
   return (
