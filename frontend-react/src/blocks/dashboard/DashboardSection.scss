@@ -1,0 +1,16 @@
+.dashboard-section {
+  @apply w-full flex flex-col py-4;
+  @apply md:flex-row;
+
+  &__title {
+    @apply w-full md:w-[250px] flex-shrink-0 bg-red-300;
+  }
+
+  &__content {
+    @apply w-full flex-shrink p-4 bg-blue-300;
+  }
+
+  &:not(:last-child) {
+    @apply border-b border-gray-300;
+  }
+}

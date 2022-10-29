@@ -2,12 +2,14 @@ import { BaseSyntheticEvent, forwardRef, useImperativeHandle, useRef } from 'rea
 import './Input.scss';
 
 interface InputPropsInterface {
-  handleChange: (data: string) => void;
+  handleChange?: (data: string) => void;
   id: string;
   label: string;
   type?: string;
   placeholder?: string;
   hasError?: boolean;
+  value?: string;
+  disabled?: boolean;
 }
 
 function Input(props: InputPropsInterface, ref: any) {
@@ -15,7 +17,9 @@ function Input(props: InputPropsInterface, ref: any) {
   const inputRef = useRef<HTMLInputElement>(null);
 
   const onChange = (e: BaseSyntheticEvent) => {
-    props.handleChange(e.target.value);
+    if ( props.handleChange ) {
+      props.handleChange(e.target.value);
+    }
   };
 
   const hasError = (props.hasError) ? 'border-red-500 shake-animation' : 'border-slate-300';
@@ -38,6 +42,8 @@ function Input(props: InputPropsInterface, ref: any) {
         placeholder={props.placeholder}
         aria-labelledby={props.id}
         autoComplete="off"
+        value={props.value}
+        disabled={props.disabled}
       />
     </>
   );
