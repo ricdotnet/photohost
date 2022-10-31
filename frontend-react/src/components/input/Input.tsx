@@ -5,6 +5,7 @@ interface InputPropsInterface {
   handleChange?: (data: string) => void;
   id: string;
   label: string;
+  className?: string;
   type?: string;
   placeholder?: string;
   hasError?: boolean;
@@ -22,7 +23,7 @@ function Input(props: InputPropsInterface, ref: any) {
     }
   };
 
-  const hasError = (props.hasError) ? 'border-red-500 shake-animation' : 'border-slate-300';
+  const hasError = (props.hasError) ? 'border-red-500 shake-animation ' : 'border-slate-300 ';
 
   useImperativeHandle(ref, () => {
     return {
@@ -36,7 +37,8 @@ function Input(props: InputPropsInterface, ref: any) {
     <>
       <div id={props.id} className="hidden">{props.label}</div>
       <input
-        ref={inputRef} name={props.id} className={'input ' + hasError}
+        ref={inputRef} name={props.id}
+        className={'input ' + hasError + (props.className ?? null)}
         type={props.type ?? 'text'}
         onChange={onChange}
         placeholder={props.placeholder}

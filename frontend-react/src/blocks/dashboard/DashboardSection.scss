@@ -3,11 +3,11 @@
   @apply md:flex-row;
 
   &__title {
-    @apply w-full md:w-[250px] flex-shrink-0 bg-red-300;
+    @apply w-full md:w-[250px] flex-shrink-0 px-4 mb-2 md:mb-0;
   }
 
   &__content {
-    @apply w-full flex-shrink p-4 bg-blue-300;
+    @apply w-full flex-shrink p-4 bg-white rounded-md shadow;
   }
 
   &:not(:last-child) {

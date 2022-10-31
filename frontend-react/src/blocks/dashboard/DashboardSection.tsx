@@ -4,7 +4,7 @@ import './DashboardSection.scss';
 
 interface DashboardSectionPropsInterface {
   title: string;
-  children: ReactNode;
+  sectionContent: ReactNode;
 }
 
 export default function DashboardSection(props: DashboardSectionPropsInterface) {
@@ -14,7 +14,7 @@ export default function DashboardSection(props: DashboardSectionPropsInterface) 
         {props.title}
       </div>
       <div className="dashboard-section__content">
-        {props.children}
+        {props.sectionContent}
       </div>
     </div>
   );
