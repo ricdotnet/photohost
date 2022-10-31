@@ -3,6 +3,7 @@ import './Input.scss';
 
 interface InputPropsInterface {
   handleChange?: (data: string) => void;
+  handleOnFocus?: () => void;
   id: string;
   label: string;
   className?: string;
@@ -23,12 +24,19 @@ function Input(props: InputPropsInterface, ref: any) {
     }
   };
 
+  const onFocus = () => {
+    props.handleOnFocus!();
+  };
+
   const hasError = (props.hasError) ? 'border-red-500 shake-animation ' : 'border-slate-300 ';
 
   useImperativeHandle(ref, () => {
     return {
       reset() {
         inputRef.current!.value = '';
+      },
+      value() {
+        return inputRef.current!.value;
       }
     };
   }, []);
@@ -41,6 +49,7 @@ function Input(props: InputPropsInterface, ref: any) {
         className={'input ' + hasError + (props.className ?? null)}
         type={props.type ?? 'text'}
         onChange={onChange}
+        onFocus={onFocus}
         placeholder={props.placeholder}
         aria-labelledby={props.id}
         autoComplete="off"
