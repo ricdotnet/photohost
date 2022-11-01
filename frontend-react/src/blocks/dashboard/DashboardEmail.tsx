@@ -67,7 +67,7 @@ function UpdateEmail() {
     }, 5000);
   };
 
-  const handleOnFocus = () => {
+  const handleOnChange = () => {
     setHasError(false);
     setErrorMessage('');
   };
@@ -88,7 +88,7 @@ function UpdateEmail() {
         label="New email address"
         placeholder="New email address"
         hasError={hasError}
-        handleOnFocus={handleOnFocus}
+        handleChange={handleOnChange}
         type="email"
       />
       <Input
@@ -98,7 +98,7 @@ function UpdateEmail() {
         label="New email address confirm"
         placeholder="Confirm new email address"
         hasError={hasError}
-        handleOnFocus={handleOnFocus}
+        handleChange={handleOnChange}
         type="email"
       />
       <div className="flex items-center space-x-2">

@@ -19,13 +19,15 @@ function Input(props: InputPropsInterface, ref: any) {
   const inputRef = useRef<HTMLInputElement>(null);
 
   const onChange = (e: BaseSyntheticEvent) => {
-    if ( props.handleChange ) {
+    if ( props.handleChange && props.hasError ) {
       props.handleChange(e.target.value);
     }
   };
 
   const onFocus = () => {
-    props.handleOnFocus!();
+    if ( props.handleOnFocus ) {
+      props.handleOnFocus!();
+    }
   };
 
   const hasError = (props.hasError) ? 'border-red-500 shake-animation ' : 'border-slate-300 ';

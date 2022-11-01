@@ -33,7 +33,13 @@ function ChangeDigest() {
   const onClickReset = () => {
     setIsResetting(true);
 
-    setTimeout(() => setIsResetting(false), 5000);
+    setTimeout(() => {
+      setIsResetting(false);
+      toastEventChannel.dispatch('onAddToast', {
+        type: 'info',
+        content: 'Your digest has been reset.'
+      });
+    }, 5000);
   };
 
   return (
@@ -45,13 +51,18 @@ function ChangeDigest() {
         value={userContext.digest}
         disabled={true}
       />
+      <div className="my-4">
+        Any shared photo-url with the old digest will be invalidated after resetting your digest.<br/>
+        You will have to re-share the links for photos to be accessible in private mode.
+      </div>
       <div className="flex space-x-2">
-        <Button
-          variant="primary"
-          value="Copy"
-          type="button"
-          handleClick={onClickCopy}
-        />
+        {/* I do not see a use for a copy button atm... will keep it commented though */}
+        {/*<Button*/}
+        {/*  variant="primary"*/}
+        {/*  value="Copy"*/}
+        {/*  type="button"*/}
+        {/*  handleClick={onClickCopy}*/}
+        {/*/>*/}
         <Button
           variant="secondary"
           value="Reset digest"
