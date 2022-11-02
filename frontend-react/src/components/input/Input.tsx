@@ -34,6 +34,9 @@ function Input(props: InputPropsInterface, ref: any) {
 
   useImperativeHandle(ref, () => {
     return {
+      setValue(v: string) {
+        inputRef.current!.value = v;
+      },
       reset() {
         inputRef.current!.value = '';
       },
