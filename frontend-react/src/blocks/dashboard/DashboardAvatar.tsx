@@ -1,9 +1,9 @@
-import DashboardSection from './DashboardSection';
-import Button from '../../components/button/Button';
 import { useContext, useEffect, useRef, useState } from 'react';
 import { UserContext } from '../../contexts/UserContext';
-import Input from '../../components/input/Input';
 import { toastEventChannel } from '../../bus/ToastEventChannel';
+import DashboardSection from './DashboardSection';
+import Button from '../../components/button/Button';
+import Input from '../../components/input/Input';
 
 export default function DashboardAvatar() {
   return (

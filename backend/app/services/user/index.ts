@@ -3,6 +3,7 @@ import { client } from '../../config/database';
 import { IUserContext } from '../../interfaces';
 import { hash, verify } from 'argon2';
 import { clone } from 'lodash';
+import validator from 'validator';
 
 export async function doRegister(req: Request) {
   const { email, username, password } = req.body;
@@ -61,6 +62,31 @@ export async function getUserInfo(req: Request) {
   delete userClone.password;
 
   return userClone;
+}
+
+export async function updateUserData(req: Request) {
+  const { username } = req.userContext;
+
+  const queryParams = [];
+  let query;
+
+  if ( req.query.type === 'email' ) {
+    const { newEmail, newEmailConfirm } = req.body;
+
+    if ( !newEmail || !newEmailConfirm ) {
+      return Promise.reject('you must post an email');
+    }
+
+    if ( !validator.isEmail(newEmail) ) {
+      return Promise.reject('invalid email posted');
+    }
+
+    if ( newEmail !== newEmailConfirm ) {
+      return Promise.reject('the emails posted do not match');
+    }
+
+
+  }
 }
 
 async function findUserByUsername(username: string) {
