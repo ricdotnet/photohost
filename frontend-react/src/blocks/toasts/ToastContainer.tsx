@@ -22,7 +22,12 @@ function ToastContainer(props: ToastContainerPropsInterface) {
         type: toast.type,
         nodeRef: nodeRef,
       };
-      setToasts((tts) => [...tts, tt]);
+      setToasts((tts) => {
+        if ( tts.length === 5 ) {
+          tts.shift();
+        }
+        return [...tts, tt];
+      });
     });
   }, []);
 
@@ -34,7 +39,7 @@ function ToastContainer(props: ToastContainerPropsInterface) {
 
   return (
     <TransitionGroup className="toast-container">
-      {!toasts.length ? null :
+      {toasts.length &&
         toasts.map((toast) => {
           return (
             <CSSTransition

@@ -15,7 +15,7 @@ export const useApiRequest = () => {
   const api = import.meta.env.VITE_API;
   const authorizationHeader = `Bearer ${localStorage.getItem('access-token')}`;
 
-  const request = async ({ route, method, headers, withAuth, payload, params }: RequestOptions) => {
+  const request = async ({ route, method, headers, withAuth = true, payload, params }: RequestOptions) => {
 
     const options: AxiosRequestConfig = {
       url: api + route,
@@ -30,7 +30,7 @@ export const useApiRequest = () => {
 
     try {
       const response = await axios.request(options);
-      
+
       data = response.data;
     } catch (err) {
       error = err;

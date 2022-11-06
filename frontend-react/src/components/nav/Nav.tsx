@@ -25,6 +25,7 @@ function Nav() {
         </div>
         <div className="nav__content-right">
           <Link to="/">Home</Link>
+          <Link to="/dashboard">Dashboard</Link>
           <a href="#" onClick={handleLogout}>Logout</a>
         </div>
       </div>

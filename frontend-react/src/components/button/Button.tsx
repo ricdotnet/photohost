@@ -10,6 +10,7 @@ interface ButtonPropsInterface {
   variant: ButtonVariants;
   value?: string;
   type?: ButtonTypes;
+  className?: string;
   handleClick?: (e: BaseSyntheticEvent) => void;
   isActioning?: boolean;
   disabled?: boolean;
@@ -20,13 +21,15 @@ interface ButtonPropsInterface {
 function Button(props: ButtonPropsInterface) {
 
   // kill me please 😭
-  const bgColor = props.variant === 'primary' ? ' bg-[#5C5ABC]'
-    : props.variant === 'secondary' ? ' bg-[#F5F5F5]'
-      : props.variant === 'danger' ? ' bg-red-600' : '';
+  const bgColor = props.variant === 'primary' ? ' bg-[#5C5ABC] '
+    : props.variant === 'secondary' ? ' bg-[#F5F5F5] '
+      : props.variant === 'danger' ? ' bg-red-600 ' : ' ';
 
   if ( props.href ) {
     return (
-      <Link to={props.href} className={'button button__' + props.variant}>
+      <Link
+        to={props.href}
+        className={'button button__' + props.variant + (props.className ?? null)}>
         {props.value}
       </Link>
     );
@@ -39,7 +42,7 @@ function Button(props: ButtonPropsInterface) {
 
   return (
     <button
-      className={'flex space-x-2 button button__' + props.variant + bgColor}
+      className={'flex space-x-2 button button__' + props.variant + bgColor + (props.className ?? null)}
       type={props.type}
       disabled={props.disabled}
       {...events}
@@ -49,7 +52,7 @@ function Button(props: ButtonPropsInterface) {
           <span>{props.value}</span>
         )
       }
-      {props.isActioning ? (<SpinnerIcon className="w-5 h-5 text-white"/>) : null}
+      {props.isActioning && <SpinnerIcon className="w-5 h-5"/>}
     </button>
   );
 }

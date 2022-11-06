@@ -3,6 +3,8 @@ import { client } from '../../config/database';
 import { IUserContext } from '../../interfaces';
 import { hash, verify } from 'argon2';
 import { clone } from 'lodash';
+import validator from 'validator';
+import * as crypto from 'crypto';
 
 export async function doRegister(req: Request) {
   const { email, username, password } = req.body;
@@ -61,6 +63,48 @@ export async function getUserInfo(req: Request) {
   delete userClone.password;
 
   return userClone;
+}
+
+export async function updateUserData(req: Request) {
+  const { username } = req.userContext!;
+
+  if ( req.query.type === 'username' ) {
+    // update username and avatar here
+  }
+
+  if ( req.query.type === 'email' ) {
+    const { email, emailConfirm } = req.body;
+
+    if ( !email || !emailConfirm ) {
+      return Promise.reject('you must post an email');
+    }
+
+    if ( !validator.isEmail(email) || !validator.isEmail(emailConfirm) ) {
+      return Promise.reject('invalid email posted');
+    }
+
+    if ( email !== emailConfirm ) {
+      return Promise.reject('the emails posted do not match');
+    }
+
+    const userRows = await findUserByEmail(email);
+    if ( userRows.length > 0 ) {
+      return Promise.reject('the email posted already exists');
+    }
+
+    return client.query('UPDATE users SET email = $1 WHERE username = $2',
+      [email, username]);
+  }
+
+  if ( req.query.type === 'digest' ) {
+    const digest = crypto.randomBytes(16).toString('hex');
+    return client.query('UPDATE users SET digest = $1 WHERE username = $2',
+      [digest, username]);
+  }
+
+  if ( req.query.type === 'api-key' ) {
+    // reset api-key (not implemented yet)
+  }
 }
 
 async function findUserByUsername(username: string) {

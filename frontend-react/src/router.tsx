@@ -5,6 +5,7 @@ import Login from './pages/Login';
 import RequestAccess from './pages/RequestAccess';
 import Album from './pages/Album';
 import Photo from './pages/Photo';
+import Dashboard from './pages/Dashboard';
 
 export const router = createBrowserRouter([
   {
@@ -22,6 +23,10 @@ export const router = createBrowserRouter([
   {
     path: '/photo/:photoId',
     element: <GuardedRoute component={<Photo/>} redirectTo="/login"/>,
+  },
+  {
+    path: '/dashboard',
+    element: <GuardedRoute component={<Dashboard/>} redirectTo="/login"/>,
   },
   {
     path: '/login',
