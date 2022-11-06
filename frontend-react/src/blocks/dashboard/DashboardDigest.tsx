@@ -1,9 +1,10 @@
 import { useContext, useState } from 'react';
 import { UserContext } from '../../contexts/UserContext';
+import { useDashboard } from '../../hooks/UseDashboard';
+import { toastEventChannel } from '../../bus/ToastEventChannel';
 import DashboardSection from './DashboardSection';
 import Input from '../../components/input/Input';
 import Button from '../../components/button/Button';
-import { toastEventChannel } from '../../bus/ToastEventChannel';
 
 export default function DashboardDigest() {
   return (
@@ -16,6 +17,8 @@ export default function DashboardDigest() {
 
 function ChangeDigest() {
   const userContext = useContext(UserContext);
+
+  const { updateDigest } = useDashboard();
 
   const [isResetting, setIsResetting] = useState(false);
 
@@ -30,16 +33,30 @@ function ChangeDigest() {
     toastEventChannel.dispatch('onAddToast', toast);
   };
 
-  const onClickReset = () => {
+  const onClickReset = async () => {
     setIsResetting(true);
 
-    setTimeout(() => {
+    const { data, error } = await updateDigest('digest');
+
+    if ( error ) {
+      // show the error
+    }
+
+    if ( data ) {
       setIsResetting(false);
       toastEventChannel.dispatch('onAddToast', {
         type: 'info',
         content: 'Your digest has been reset.'
       });
-    }, 5000);
+    }
+
+    // setTimeout(() => {
+    //   setIsResetting(false);
+    //   toastEventChannel.dispatch('onAddToast', {
+    //     type: 'info',
+    //     content: 'Your digest has been reset.'
+    //   });
+    // }, 5000);
   };
 
   return (
@@ -52,7 +69,8 @@ function ChangeDigest() {
         disabled={true}
       />
       <div className="my-4">
-        Any shared photo-url with the old digest will be invalidated after resetting your digest.<br/>
+        Any shared photo-url with the old digest will be invalidated after resetting your
+        digest.<br/>
         You will have to re-share the links for photos to be accessible in private mode.
       </div>
       <div className="flex space-x-2">

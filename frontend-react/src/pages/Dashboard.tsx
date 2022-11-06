@@ -11,10 +11,10 @@ interface DashboardPropsInterface {
 export default function Dashboard(props: DashboardPropsInterface) {
   return (
     <UserLayout>
-      <DashboardAvatar/>
+      {/*<DashboardAvatar/>*/}
       <DashboardEmail/>
       <DashboardDigest/>
-      <DashboardApiKey/>
+      {/*<DashboardApiKey/>*/}
     </UserLayout>
   );
 }

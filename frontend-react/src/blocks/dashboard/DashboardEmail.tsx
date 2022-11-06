@@ -1,10 +1,11 @@
 import { useContext, useRef, useState } from 'react';
 import { UserContext } from '../../contexts/UserContext';
+import { useDashboard } from '../../hooks/UseDashboard';
+import { toastEventChannel } from '../../bus/ToastEventChannel';
 import validator from 'validator';
 import DashboardSection from './DashboardSection';
 import Input from '../../components/input/Input';
 import Button from '../../components/button/Button';
-import { toastEventChannel } from '../../bus/ToastEventChannel';
 
 export default function DashboardEmail() {
 
@@ -27,7 +28,9 @@ function UpdateEmail() {
 
   const [isSaving, setIsSaving] = useState(false);
 
-  const onClickSave = () => {
+  const { updateEmail } = useDashboard();
+
+  const onClickSave = async () => {
     const newEmail = newEmailRef.current!.value();
     const newEmailConfirm = newEmailConfirmRef.current!.value();
 
@@ -56,15 +59,29 @@ function UpdateEmail() {
     }
 
     setIsSaving(true);
-    setTimeout(() => {
+
+    const { data, error } = await updateEmail({
+      email: newEmail,
+      emailConfirm: newEmailConfirm,
+    }, 'email');
+
+    if ( error ) {
+      setIsSaving(false);
+      toastEventChannel.dispatch('onAddToast', {
+        type: 'danger',
+        content: 'It was not possible to update your email address. Please try again later.'
+      });
+    }
+
+    if ( data ) {
+      newEmailRef.current!.reset();
+      newEmailConfirmRef.current!.reset();
       setIsSaving(false);
       toastEventChannel.dispatch('onAddToast', {
         type: 'info',
         content: 'Email address updated. Please refresh to apply new changes.'
       });
-      newEmailRef.current!.reset();
-      newEmailConfirmRef.current!.reset();
-    }, 5000);
+    }
   };
 
   const handleOnChange = () => {

@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { doLogin, doRegister, getUserInfo } from '../../services/user';
+import { doLogin, doRegister, getUserInfo, updateUserData } from '../../services/user';
 import { authorization, createToken } from '../middlwares/authorization';
 
 export const user: Router = Router();
@@ -57,4 +57,19 @@ user.get('/info', authorization, async (req, res) => {
   const user = await getUserInfo(req);
 
   res.status(200).send({ user });
+});
+
+user.patch('/', authorization, async (req, res) => {
+
+  if ( !req.query.type || !req.body ) {
+    return res.status(400).send({ code: 400, error: 'bad-request' });
+  }
+
+  try {
+    await updateUserData(req);
+  } catch (err) {
+    return res.status(400).send({ code: 400, error: err });
+  }
+
+  res.status(200).send({ code: 200, message: 'user information updated' });
 });
