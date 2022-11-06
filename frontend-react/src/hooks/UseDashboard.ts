@@ -13,10 +13,29 @@ export const useDashboard = () => {
       }
     });
 
-    console.log(data);
+    return {
+      data,
+      error
+    };
+  };
+
+  const updateDigest = async (type: string) => {
+    const { data, error } = await request({
+      route: '/user',
+      method: 'PATCH',
+      params: {
+        type: type,
+      }
+    });
+
+    return {
+      data,
+      error,
+    };
   };
 
   return {
     updateEmail,
+    updateDigest,
   };
 };
