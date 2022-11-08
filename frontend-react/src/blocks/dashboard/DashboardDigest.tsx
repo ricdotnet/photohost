@@ -1,5 +1,5 @@
 import { useContext, useState } from 'react';
-import { UserContext } from '../../contexts/UserContext';
+import { UserContext, UserStore } from '../../contexts/UserContext';
 import { useDashboard } from '../../hooks/UseDashboard';
 import { toastEventChannel } from '../../bus/ToastEventChannel';
 import DashboardSection from './DashboardSection';
@@ -16,7 +16,7 @@ export default function DashboardDigest() {
 }
 
 function ChangeDigest() {
-  const userContext = useContext(UserContext);
+  const [userContext, updateUser] = useContext(UserContext);
 
   const { updateDigest } = useDashboard();
 
@@ -48,15 +48,12 @@ function ChangeDigest() {
         type: 'info',
         content: 'Your digest has been reset.'
       });
-    }
 
-    // setTimeout(() => {
-    //   setIsResetting(false);
-    //   toastEventChannel.dispatch('onAddToast', {
-    //     type: 'info',
-    //     content: 'Your digest has been reset.'
-    //   });
-    // }, 5000);
+      updateUser((user: typeof UserStore) => ({
+        ...user,
+        digest: data.user.digest,
+      }));
+    }
   };
 
   return (

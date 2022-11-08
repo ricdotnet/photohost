@@ -1,6 +1,6 @@
 import { ReactElement, useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
-import { UserContext } from '../contexts/UserContext';
+import { UserContext, UserStore } from '../contexts/UserContext';
 import { useTokenAuth } from '../hooks/UseTokenAuth';
 
 interface GuardRoutePropsInterface {
@@ -10,12 +10,14 @@ interface GuardRoutePropsInterface {
 
 function GuardedRoute(props: GuardRoutePropsInterface) {
   const [isAuthed, setIsAuthed] = useState(false);
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState<typeof UserStore | null>(null);
 
   useEffect(() => {
     useTokenAuth()
       .then((data) => {
-        setUser(data);
+        setUser((user: typeof UserStore | null) => {
+          return user = data;
+        });
         setIsAuthed(true);
       })
       .catch(() => <Navigate to="/login"/>);
@@ -30,7 +32,7 @@ function GuardedRoute(props: GuardRoutePropsInterface) {
   };
 
   return (
-    <UserContext.Provider value={user!}>
+    <UserContext.Provider value={[user!, setUser]}>
       {renderChildren()}
     </UserContext.Provider>
   );

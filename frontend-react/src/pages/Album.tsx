@@ -320,7 +320,7 @@ interface RenderPhotoPropsInterface {
 }
 
 function RenderPhoto(props: RenderPhotoPropsInterface) {
-  const userContext = useContext(UserContext);
+  const [userContext] = useContext(UserContext);
   const [loading, setLoading] = useState(true);
   const [isSelected, setIsSelected] = useState(false);
 

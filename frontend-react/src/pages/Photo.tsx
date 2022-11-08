@@ -4,7 +4,7 @@ import { useContext } from 'react';
 import { UserContext } from '../contexts/UserContext';
 
 function Photo() {
-  const userContext = useContext(UserContext);
+  const [userContext] = useContext(UserContext);
   const { photoId } = useParams();
 
   return (
