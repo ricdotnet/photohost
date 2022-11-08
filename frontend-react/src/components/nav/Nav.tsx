@@ -1,12 +1,12 @@
 import { useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { UserContext } from '../../contexts/UserContext';
-import './Nav.scss';
 
+import './Nav.scss';
 import photoHostMini from '../../assets/photoHostMini.svg';
 
 function Nav() {
-  const userContext = useContext(UserContext);
+  const [userContext] = useContext(UserContext);
   const navigateTo = useNavigate();
 
   const handleLogout = () => {
@@ -20,7 +20,7 @@ function Nav() {
         <div className="nav__content-left">
           <img src={photoHostMini} width="40" alt="PhotoHost Logo"/>
           <span>
-            Hello, {userContext.username}
+            Hello, {userContext.email}
           </span>
         </div>
         <div className="nav__content-right">

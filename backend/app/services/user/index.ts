@@ -98,7 +98,7 @@ export async function updateUserData(req: Request) {
 
   if ( req.query.type === 'digest' ) {
     const digest = crypto.randomBytes(16).toString('hex');
-    return client.query('UPDATE users SET digest = $1 WHERE username = $2',
+    return client.query('UPDATE users SET digest = $1 WHERE username = $2 RETURNING digest',
       [digest, username]);
   }
 

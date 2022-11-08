@@ -1,6 +1,6 @@
 import { createContext } from 'react';
 
-const UserStore = {
+export const UserStore = {
   id: '',
   username: '',
   email: '',
@@ -10,4 +10,6 @@ const UserStore = {
   digest: '',
 };
 
-export const UserContext = createContext(UserStore);
+type UserContextType = [typeof UserStore, any];
+
+export const UserContext = createContext<UserContextType>([UserStore, null]);

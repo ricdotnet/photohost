@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/UseAuth';
 import GuestLayout from '../layouts/GuestLayout';
@@ -9,8 +9,8 @@ import Logo from '../components/logo/Logo';
 function Login() {
   const navigateTo = useNavigate();
 
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+  const usernameRef = useRef<any>();
+  const passwordRef = useRef<any>();
 
   const [usernameError, setUsernameError] = useState(false);
   const [passwordError, setPasswordError] = useState(false);
@@ -19,32 +19,22 @@ function Login() {
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
-    if ( !username ) {
+    if ( !usernameRef.current!.value() ) {
       setUsernameError(true);
     }
-    if ( !password ) {
+    if ( !passwordRef.current!.value() ) {
       setPasswordError(true);
     }
-    if ( !username || !password ) return;
+    if ( !usernameRef.current!.value() || !passwordRef.current!.value() ) return;
     setIsSigningIn(true);
 
     try {
-      await useAuth(username, password);
+      await useAuth(usernameRef.current!.value(), passwordRef.current!.value());
       setIsSigningIn(false);
       navigateTo('/');
     } catch (err) {
-      console.log(err);
-    }
-  };
-
-  const handleInputChange = (d: string, setter: string) => {
-    if ( setter === 'username' ) {
-      setUsername(d);
-      setUsernameError(false);
-    }
-    if ( setter === 'password' ) {
-      setPassword(d);
-      setPasswordError(false);
+      // handle the error
+      setIsSigningIn(false);
     }
   };
 
@@ -56,16 +46,18 @@ function Login() {
         </div>
         <form onSubmit={handleSubmit} className="flex flex-col space-y-3">
           <Input
+            ref={usernameRef}
             id="username" label="Username" placeholder="Username"
-            handleChange={(d: string) => handleInputChange(d, 'username')}
             type="text"
             hasError={usernameError}
+            handleOnFocus={() => setUsernameError(false)}
           />
           <Input
+            ref={passwordRef}
             id="password" label="Password" placeholder="Password"
-            handleChange={(d: string) => handleInputChange(d, 'password')}
             type="password"
             hasError={passwordError}
+            handleOnFocus={() => setPasswordError(false)}
           />
 
           <Button value="Login" variant="primary" type="submit" isActioning={isSigningIn}/>

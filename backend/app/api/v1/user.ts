@@ -60,16 +60,17 @@ user.get('/info', authorization, async (req, res) => {
 });
 
 user.patch('/', authorization, async (req, res) => {
+  let data;
 
   if ( !req.query.type || !req.body ) {
     return res.status(400).send({ code: 400, error: 'bad-request' });
   }
 
   try {
-    await updateUserData(req);
+    data = await updateUserData(req);
   } catch (err) {
     return res.status(400).send({ code: 400, error: err });
   }
 
-  res.status(200).send({ code: 200, message: 'user information updated' });
+  res.status(200).send({ code: 200, user: data?.rows[0] ?? '' });
 });

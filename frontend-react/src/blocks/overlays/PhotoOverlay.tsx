@@ -18,7 +18,7 @@ interface PhotoOverlayPropsInterface {
 }
 
 function PhotoOverlay(props: PhotoOverlayPropsInterface) {
-  const userContext = useContext(UserContext);
+  const [userContext] = useContext(UserContext);
 
   const navigateTo = useNavigate();
   const { photoId } = useParams();

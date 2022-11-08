@@ -18,7 +18,7 @@ export default function DashboardEmail() {
 }
 
 function UpdateEmail() {
-  const userContext = useContext(UserContext);
+  const [userContext, updateUser] = useContext(UserContext);
 
   const newEmailRef = useRef<any>(null);
   const newEmailConfirmRef = useRef<any>(null);
@@ -79,8 +79,13 @@ function UpdateEmail() {
       setIsSaving(false);
       toastEventChannel.dispatch('onAddToast', {
         type: 'info',
-        content: 'Email address updated. Please refresh to apply new changes.'
+        content: 'Email address updated.'
       });
+
+      updateUser((user: any) => ({
+        ...user,
+        email: newEmail
+      }));
     }
   };
 
