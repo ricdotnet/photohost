@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/UseAuth';
 import GuestLayout from '../layouts/GuestLayout';
@@ -49,6 +49,11 @@ function Login() {
     }
   };
 
+  const handleErrorMessageClick = () => {
+    clearTimeout(errorTimer!);
+    setLoginFailed(false);
+  };
+
   return (
     <GuestLayout>
       <div className="login-container">
@@ -75,9 +80,14 @@ function Login() {
           <Button value="Request Access" variant="secondary" href="/request-access"/>
         </form>
 
-        <div className={'login-container__error-box ' + (loginFailed ? 'block' : 'hidden')}>
-          Please verify your credentials and try again.
-        </div>
+        {loginFailed &&
+          <div
+            className={'login-container__error-box'}
+            onClick={handleErrorMessageClick}
+          >
+            Please verify your credentials and try again.
+          </div>
+        }
 
       </div>
     </GuestLayout>

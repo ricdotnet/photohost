@@ -10,6 +10,6 @@
   }
 
   &__error-box {
-    @apply text-center border border-red-300 p-3 rounded-md text-red-600;
+    @apply text-center border border-red-300 p-3 rounded-md text-red-600 cursor-pointer;
   }
 }
