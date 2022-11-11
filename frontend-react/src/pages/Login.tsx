@@ -1,10 +1,12 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/UseAuth';
 import GuestLayout from '../layouts/GuestLayout';
 import Input from '../components/input/Input';
 import Button from '../components/button/Button';
 import Logo from '../components/logo/Logo';
+
+import './Login.scss';
 
 function Login() {
   const navigateTo = useNavigate();
@@ -16,6 +18,8 @@ function Login() {
   const [passwordError, setPasswordError] = useState(false);
 
   const [isSigningIn, setIsSigningIn] = useState(false);
+  const [loginFailed, setLoginFailed] = useState(false);
+  const [errorTimer, setErrorTimer] = useState<NodeJS.Timeout | null>(null);
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
@@ -33,18 +37,30 @@ function Login() {
       setIsSigningIn(false);
       navigateTo('/');
     } catch (err) {
-      // handle the error
+      setLoginFailed(true);
       setIsSigningIn(false);
+
+      if ( errorTimer !== null ) {
+        clearTimeout(errorTimer);
+      }
+      setErrorTimer((timer: NodeJS.Timeout | null) => {
+        return setTimeout(() => setLoginFailed(false), 5000);
+      });
     }
+  };
+
+  const handleErrorMessageClick = () => {
+    clearTimeout(errorTimer!);
+    setLoginFailed(false);
   };
 
   return (
     <GuestLayout>
-      <div className="w-[90%] md:w-[400px] h-auto bg-white rounded p-10">
-        <div className="flex justify-center mb-6">
+      <div className="login-container">
+        <div className="login-container__logo">
           <Logo/>
         </div>
-        <form onSubmit={handleSubmit} className="flex flex-col space-y-3">
+        <form onSubmit={handleSubmit} className="login-container__form">
           <Input
             ref={usernameRef}
             id="username" label="Username" placeholder="Username"
@@ -63,6 +79,16 @@ function Login() {
           <Button value="Login" variant="primary" type="submit" isActioning={isSigningIn}/>
           <Button value="Request Access" variant="secondary" href="/request-access"/>
         </form>
+
+        {loginFailed &&
+          <div
+            className={'login-container__error-box'}
+            onClick={handleErrorMessageClick}
+          >
+            Please verify your credentials and try again.
+          </div>
+        }
+
       </div>
     </GuestLayout>
   );
