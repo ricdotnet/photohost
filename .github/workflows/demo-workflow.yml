@@ -5,7 +5,9 @@ jobs:
   Explore-GitHub-Actions:
     runs-on: ubuntu-latest
     steps:
-      - name: Display frontend-react contents.
+      - name: Checkout repository code
+        uses: actions/checkout@v2
+      - name: Display frontend-react package.json contents.
         run: |
-          ls ${{ github.workspace }}/frontend-react
+          cat ${{ github.workspace }}/frontend-react/package.json
         
