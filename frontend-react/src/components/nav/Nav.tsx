@@ -20,7 +20,7 @@ function Nav() {
         <div className="nav__content-left">
           <img src={photoHostMini} width="40" alt="PhotoHost Logo"/>
           <span>
-            Hello, {userContext.email}
+            Hello, {userContext.username}
           </span>
         </div>
         <div className="nav__content-right">

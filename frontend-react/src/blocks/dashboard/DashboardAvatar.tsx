@@ -15,7 +15,7 @@ export default function DashboardAvatar() {
 };
 
 function ChangeAvatar() {
-  const userContext = useContext(UserContext);
+  const [userContext] = useContext(UserContext);
 
   const usernameInputRef = useRef<any>(null);
 
