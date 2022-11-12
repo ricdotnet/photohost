@@ -1,4 +1,4 @@
-import React, { BaseSyntheticEvent, useRef, useState } from 'react';
+import { BaseSyntheticEvent, useRef, useState } from 'react';
 import { InputRefInterface } from '../../interfaces/InputRefInterface';
 import Input from '../../components/input/Input';
 import Dialog from '../../components/dialog/Dialog';
