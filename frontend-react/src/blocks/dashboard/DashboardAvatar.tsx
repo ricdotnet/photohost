@@ -1,6 +1,7 @@
 import { useContext, useEffect, useRef, useState } from 'react';
 import { UserContext } from '../../contexts/UserContext';
 import { toastEventChannel } from '../../bus/ToastEventChannel';
+import { InputRefInterface } from '../../interfaces/InputRefInterface';
 import DashboardSection from './DashboardSection';
 import Button from '../../components/button/Button';
 import Input from '../../components/input/Input';
@@ -17,7 +18,7 @@ export default function DashboardAvatar() {
 function ChangeAvatar() {
   const [userContext] = useContext(UserContext);
 
-  const usernameInputRef = useRef<any>(null);
+  const usernameInputRef = useRef<InputRefInterface>(null);
 
   const [username, setUsername] = useState();
   const [errorMessage, setErrorMessage] = useState('');
