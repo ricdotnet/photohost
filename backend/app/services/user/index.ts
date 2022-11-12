@@ -92,12 +92,14 @@ export async function updateUserData(req: Request) {
       return Promise.reject('the email posted already exists');
     }
 
+    updateLastUpdated(username);
     return client.query('UPDATE users SET email = $1 WHERE username = $2',
       [email, username]);
   }
 
   if ( req.query.type === 'digest' ) {
     const digest = crypto.randomBytes(16).toString('hex');
+    updateLastUpdated(username);
     return client.query('UPDATE users SET digest = $1 WHERE username = $2 RETURNING digest',
       [digest, username]);
   }
@@ -130,6 +132,10 @@ async function findUserById(id: number) {
 
 function updateLastLogin(username: string) {
   client.query('UPDATE users SET last_login = now() WHERE username = $1', [username]);
+}
+
+function updateLastUpdated(username: string) {
+  client.query('UPDATE users SET last_updated = now() WHERE username = $1', [username]);
 }
 
 // if the token is valid then we will get the user data from the username...
