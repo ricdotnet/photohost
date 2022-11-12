@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/UseAuth';
+import { InputRefInterface } from '../interfaces/InputRefInterface';
 import GuestLayout from '../layouts/GuestLayout';
 import Input from '../components/input/Input';
 import Button from '../components/button/Button';
@@ -11,8 +12,8 @@ import './Login.scss';
 function Login() {
   const navigateTo = useNavigate();
 
-  const usernameRef = useRef<any>();
-  const passwordRef = useRef<any>();
+  const usernameRef = useRef<InputRefInterface>(null);
+  const passwordRef = useRef<InputRefInterface>(null);
 
   const [usernameError, setUsernameError] = useState(false);
   const [passwordError, setPasswordError] = useState(false);

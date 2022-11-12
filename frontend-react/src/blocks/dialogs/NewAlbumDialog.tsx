@@ -1,4 +1,5 @@
-import React, { BaseSyntheticEvent, useRef, useState } from 'react';
+import { BaseSyntheticEvent, useRef, useState } from 'react';
+import { InputRefInterface } from '../../interfaces/InputRefInterface';
 import Input from '../../components/input/Input';
 import Dialog from '../../components/dialog/Dialog';
 
@@ -10,20 +11,13 @@ interface NewAlbumDialogPropsInterface {
 
 export default function NewAlbumDialog(props: NewAlbumDialogPropsInterface) {
 
-  const inputRef = useRef(null);
+  const albumNameRef = useRef<InputRefInterface>(null);
 
-  const [albumName, setAlbumName] = useState('');
   const [albumNameError, setAlbumNameError] = useState(false);
 
-  const handleAlbumNameChange = (d: string) => {
-    if ( albumNameError ) setAlbumNameError(false);
-
-    setAlbumName(d);
-  };
-
   const handleOnConfirm = (e: BaseSyntheticEvent) => {
-    if ( !albumName ) return setAlbumNameError(true);
-    props.onConfirm(e, albumName);
+    if ( !albumNameRef.current!.value() ) return setAlbumNameError(true);
+    props.onConfirm(e, albumNameRef.current!.value());
   };
 
   const handleOnCancel = (e: BaseSyntheticEvent | KeyboardEvent) => {
@@ -39,10 +33,11 @@ export default function NewAlbumDialog(props: NewAlbumDialogPropsInterface) {
       isConfirming={props.dialogIsActioning}
     >
       <Input
-        ref={inputRef}
-        handleChange={handleAlbumNameChange} id="album-name"
+        ref={albumNameRef}
+        id="album-name"
         label="album-name"
         placeholder="New album name"
+        handleOnFocus={() => setAlbumNameError(false)}
         hasError={albumNameError}
       />
     </Dialog>

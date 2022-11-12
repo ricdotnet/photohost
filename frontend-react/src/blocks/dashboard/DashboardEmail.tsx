@@ -2,6 +2,7 @@ import { useContext, useRef, useState } from 'react';
 import { UserContext } from '../../contexts/UserContext';
 import { useDashboard } from '../../hooks/UseDashboard';
 import { toastEventChannel } from '../../bus/ToastEventChannel';
+import { InputRefInterface } from '../../interfaces/InputRefInterface';
 import validator from 'validator';
 import DashboardSection from './DashboardSection';
 import Input from '../../components/input/Input';
@@ -20,8 +21,8 @@ export default function DashboardEmail() {
 function UpdateEmail() {
   const [userContext, updateUser] = useContext(UserContext);
 
-  const newEmailRef = useRef<any>(null);
-  const newEmailConfirmRef = useRef<any>(null);
+  const newEmailRef = useRef<InputRefInterface>(null);
+  const newEmailConfirmRef = useRef<InputRefInterface>(null);
 
   const [hasError, setHasError] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
