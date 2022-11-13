@@ -1,19 +1,24 @@
 import { StrictMode } from 'react';
 import ToastContainer from '../blocks/toasts/ToastContainer';
-import Nav from '../components/nav/Nav';
+import Nav from '../blocks/nav/Nav';
+
+import './UserLayout.scss';
 
 function UserLayout({ children }: any) {
 
   return (
-    <>
-      <StrictMode>
-        <Nav/>
-        <div className="px-4">
-          <div className="max-w-[960px] mx-auto">{children}</div>
+    <StrictMode>
+      <Nav/>
+      <div className="px-4">
+        <div
+          className="main-content"
+          aria-label="main-content"
+        >
+          {children}
         </div>
-      </StrictMode>
+      </div>
       <ToastContainer/>
-    </>
+    </StrictMode>
   );
 }
 
