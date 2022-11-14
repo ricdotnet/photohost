@@ -1,4 +1,4 @@
-import { useContext, useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { UserContext } from '../../contexts/UserContext';
 
@@ -7,7 +7,7 @@ import './Nav.scss';
 export default function Nav() {
   const [userContext] = useContext(UserContext);
   const navigateTo = useNavigate();
-  const mobileNavRef = useRef<HTMLDivElement>(null);
+
   const [mobileIsOpen, setMobileIsOpen] = useState(false);
 
   useEffect(() => {
@@ -26,7 +26,7 @@ export default function Nav() {
   };
 
   const onMobileMenuAction = () => {
-    if (mobileIsOpen) {
+    if ( mobileIsOpen ) {
       setMobileIsOpen(false);
       document.body.classList.remove('overflow-hidden');
     } else {
@@ -41,28 +41,29 @@ export default function Nav() {
   };
 
   return (
-    <header className="nav-bar">
-      <div className="nav-bar__container">
-        Hello {userContext.username}
-        <nav>
-          <Link to="/">Home</Link>
-          <Link to="/dashboard">Dashboard</Link>
-          <a href="#" onClick={handleLogout}>Logout</a>
-        </nav>
-        <button
-          className="nav-bar__mobile-hamburger"
-          aria-expanded={mobileIsOpen}
-          onClick={onMobileMenuAction}
-        >
-          {/*<BurgerMenuIcon/>*/}
-          <span className="top"></span>
-          <span className="mid"></span>
-          <span className="bot"></span>
-        </button>
+    <header aria-label="navbar">
+      <div className="nav-bar">
+        <div className="nav-container">
+          Hello {userContext.username}
+          <nav>
+            <Link to="/">Home</Link>
+            <Link to="/dashboard">Dashboard</Link>
+            <a href="#" onClick={handleLogout}>Logout</a>
+          </nav>
+          <button
+            className="mobile-hamburger"
+            aria-expanded={mobileIsOpen}
+            onClick={onMobileMenuAction}
+          >
+            <span className="top"></span>
+            <span className="mid"></span>
+            <span className="bot"></span>
+          </button>
+        </div>
       </div>
       {mobileIsOpen &&
-        <div ref={mobileNavRef} className="mobile-nav">
-          <div className="container">
+        <div className="mobile-nav-pane">
+          <div className="mobile-nav-pane__container">
             <Link onClick={onMobileMenuAction} to="/">Home</Link>
             <Link onClick={onMobileMenuAction} to="/dashboard">Dashboard</Link>
             <a href="#" onClick={handleLogout}>Logout</a>
