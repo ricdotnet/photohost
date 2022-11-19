@@ -5,4 +5,9 @@ export interface PhotoInterface {
   // date_added: string;
   // last_updated: string;
   private: boolean;
+  width: number;
+  height: number;
+  blurhash: {
+    hash: string;
+  };
 }

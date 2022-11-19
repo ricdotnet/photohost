@@ -9,13 +9,11 @@ function UserLayout({ children }: any) {
   return (
     <StrictMode>
       <Nav/>
-      <div className="px-4">
-        <div
-          className="main-content"
-          aria-label="main-content"
-        >
-          {children}
-        </div>
+      <div
+        className="main-content"
+        aria-label="main-content"
+      >
+        {children}
       </div>
       <ToastContainer/>
     </StrictMode>

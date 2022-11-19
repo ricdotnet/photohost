@@ -4,6 +4,7 @@ import { UserContext } from '../contexts/UserContext';
 import { PhotosContext } from '../contexts/PhotosContext';
 import { PhotoInterface } from '../interfaces/PhotoInterface';
 import { useApiRequest } from '../hooks/UseApiRequest';
+import { BlurhashCanvas } from 'react-blurhash';
 import UserLayout from '../layouts/UserLayout';
 import DeleteAlbumDialog from '../blocks/dialogs/DeleteAlbumDialog';
 import PhotoOverlay from '../blocks/overlays/PhotoOverlay';
@@ -323,9 +324,15 @@ function RenderPhoto(props: RenderPhotoPropsInterface) {
   const [userContext] = useContext(UserContext);
   const [loading, setLoading] = useState(true);
   const [isSelected, setIsSelected] = useState(false);
+  const [heightRatio, setHeightRatio] = useState(0);
+
+  useEffect(() => {
+    const hr = (props.photo.height * 100) / props.photo.width;
+    setHeightRatio(() => hr);
+  }, []);
 
   const handleOnLoad = () => {
-    setLoading(false);
+    setLoading(() => false);
   };
 
   const handleOnClick = (e: BaseSyntheticEvent) => {
@@ -339,14 +346,25 @@ function RenderPhoto(props: RenderPhotoPropsInterface) {
   };
 
   return (
-    <div className={'photo-item ' + (isSelected ? 'scale-90' : '')} onClick={handleOnClick}>
-      <div className={'photo-item__skeleton ' + (loading ? 'block' : 'hidden')}></div>
+    <div
+      className={'photo-item ' + (isSelected ? 'scale-90' : '')}
+      onClick={handleOnClick}
+    >
+      <BlurhashCanvas
+        hash={props.photo.blurhash.hash}
+        height={32}
+        width={32}
+      />
       <img
-        className={'w-full ' + (loading ? 'hidden' : 'block')}
         src={import.meta.env.VITE_API + '/photo/single?photoId=' + props.photo.id + '&digest=' + userContext.digest}
         alt={props.photo.name} onLoad={handleOnLoad}
+        loading="lazy"
+        sizes="(max-width: 600px) 480px, 800px"
       />
-      <div className="photo-item__hover-effect">
+      <div style={{
+        paddingBottom: `${heightRatio}%`
+      }}></div>
+      <div className={`photo-item__hover-effect`}>
         <input
           onClick={handleOnSelect}
           type="checkbox"

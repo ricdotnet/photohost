@@ -6,9 +6,11 @@ import { IFile } from '@ricdotnet/upfile/src/types';
 import { getUserData } from '../user';
 import { lookup } from 'mime-types';
 import { SQLColumnValue } from '../../types';
+import { getBlurhash } from '@plaiceholder/blurhash';
 import fs from 'fs';
 import path from 'path';
 import fsp from 'fs/promises';
+import imageSize from 'image-size';
 
 export function doInsert(req: Request): Promise<any> {
   return new Promise(async (resolve) => {
@@ -27,11 +29,16 @@ export function doInsert(req: Request): Promise<any> {
 
       // do not set an album if default-album
       const albumToSave = album === 'default-album' ? null : album;
+      const { width, height } = imageSize(file.file);
+      const fileBytes = await fsp.readFile(file.file);
+      const blurhash = await getBlurhash(fileBytes);
 
-      const photoResult = await client.query<IPhoto>(`INSERT INTO photos ("user", path, filename, name, album)
-                                                      VALUES ($1, $2, $3, $4, $5)
-                                                      RETURNING *`,
-        [req.userContext!.id, '', file.originalName, sanitizedName, albumToSave]);
+      const photoResult =
+        await client.query<IPhoto>(`INSERT INTO photos ("user", path, filename, name, album, width,
+                                                        height, blurhash)
+                                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+                                    RETURNING *`,
+          [req.userContext!.id, '', file.originalName, sanitizedName, albumToSave, width, height, blurhash]);
 
       // if the insert is successful then move the file
       await moveTmpFile(req.userContext!, file);
