@@ -112,9 +112,9 @@ function PhotoOverlay(props: PhotoOverlayPropsInterface) {
           <CrossIcon className="w-6"/>
         </button>
       </div>
-      <div className={'loader ' + (!isLoadingNext ? 'hidden' : '')}>
+      {isLoadingNext && <div className="loader">
         <SpinnerIcon className="w-10 h-10 text-white"/>
-      </div>
+      </div>}
       <div className="foreground">
         <img
           className={isLoadingNext ? 'hidden' : ''}
