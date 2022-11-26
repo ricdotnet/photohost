@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Nav from '../blocks/nav/Nav';
 import ToastContainer from '../blocks/toasts/ToastContainer';
 import GlobalUploadDialog from '../blocks/dialogs/GlobalUploadDialog';
@@ -9,6 +9,37 @@ function UserLayout({ children }: any) {
 
   const [isDraggingOver, setIsDraggingOver] = useState(false);
   const [imageFile, setImageFile] = useState<any>(null);
+
+  const [isCmdPressed, setIsCommandPressed] = useState(false);
+
+  useEffect(() => {
+    window.addEventListener('keydown', keyDownHandler);
+    window.addEventListener('keyup', keyUpHandler);
+
+    return () => {
+      window.removeEventListener('keydown', keyDownHandler);
+      window.removeEventListener('keyup', keyUpHandler);
+    }
+  }, [isCmdPressed]);
+
+  const keyDownHandler = async (e: any) => {
+    if (!isCmdPressed && (e.key === 'Meta' || e.key === 'Control')) {
+      setIsCommandPressed(() => true);
+    }
+    if (isCmdPressed && e.key === 'v') {
+      const items = await navigator.clipboard.read();
+      for (let item of items) {
+        const blob = await item.getType(item.types[0]);
+        setImageFile(blob);
+      }
+    }
+  }
+
+  const keyUpHandler = (e: any) => {
+    if (isCmdPressed && (e.key === 'Meta' || e.key === 'Control')) {
+      setIsCommandPressed(() => false);
+    }
+  }
 
   const canDoGlobalUpload = (): boolean => {
     for(const child of children) {
