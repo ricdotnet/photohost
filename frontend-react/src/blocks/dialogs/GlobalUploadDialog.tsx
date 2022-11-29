@@ -16,6 +16,7 @@ export default function GlobalUploadDialog(props: GlobalUploadDialogInterface) {
 
   useEffect(() => {
     if ( props.file !== null ) {
+      console.log(props.file);
       setLoadingPreview(() => true);
       const reader = new FileReader();
       reader.onloadend = () => {

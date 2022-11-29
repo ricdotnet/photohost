@@ -19,42 +19,47 @@ function UserLayout({ children }: any) {
     return () => {
       window.removeEventListener('keydown', keyDownHandler);
       window.removeEventListener('keyup', keyUpHandler);
-    }
+    };
   }, [isCmdPressed]);
 
   const keyDownHandler = async (e: any) => {
-    if (!isCmdPressed && (e.key === 'Meta' || e.key === 'Control')) {
+    if ( !isCmdPressed && (e.key === 'Meta' || e.key === 'Control') ) {
       setIsCommandPressed(() => true);
     }
-    if (isCmdPressed && e.key === 'v') {
-      const items = await navigator.clipboard.read();
-      for (let item of items) {
-        const blob = await item.getType(item.types[0]);
-        setImageFile(blob);
+    if ( isCmdPressed && e.key === 'v' ) {
+      try {
+        const items = await navigator.clipboard.read();
+        for ( let item of items ) {
+          const types = item.types.filter(t => t.includes('image/'));
+          const blob = await item.getType(types[0]);
+          setImageFile(blob);
+        }
+      } catch (err) {
+        // silently catch
       }
     }
-  }
+  };
 
   const keyUpHandler = (e: any) => {
-    if (isCmdPressed && (e.key === 'Meta' || e.key === 'Control')) {
+    if ( isCmdPressed && (e.key === 'Meta' || e.key === 'Control') ) {
       setIsCommandPressed(() => false);
     }
-  }
+  };
 
   const canDoGlobalUpload = (): boolean => {
-    for(const child of children) {
-      if (!child?.key && child?.type?.name?.includes('Dialog')) {
+    for ( const child of children ) {
+      if ( !child?.key && child?.type?.name?.includes('Dialog') ) {
         return false;
       }
     }
 
     return true;
-  }
+  };
 
   const handleOnDragOver = (e: any) => {
     e.stopPropagation();
     e.preventDefault();
-    if (!canDoGlobalUpload()) return;
+    if ( !canDoGlobalUpload() ) return;
     setIsDraggingOver(() => true);
   };
 
@@ -67,7 +72,7 @@ function UserLayout({ children }: any) {
   const handleOnDrop = (e: any) => {
     e.stopPropagation();
     e.preventDefault();
-    if (!canDoGlobalUpload()) return;
+    if ( !canDoGlobalUpload() ) return;
     setIsDraggingOver(() => false);
     setImageFile(() => {
       return e.dataTransfer.files[0];
