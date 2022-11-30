@@ -9,7 +9,7 @@ interface ToastContainerPropsInterface {
   children?: ReactNode;
 }
 
-function ToastContainer(props: ToastContainerPropsInterface) {
+export default function ToastContainer() {
 
   const [toasts, setToasts] = useState<any[]>([]);
   const nodeRef = useRef(null);
@@ -62,5 +62,3 @@ function ToastContainer(props: ToastContainerPropsInterface) {
     </TransitionGroup>
   );
 }
-
-export default ToastContainer;

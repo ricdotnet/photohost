@@ -1,4 +1,4 @@
-import { forwardRef, Ref, useEffect } from 'react';
+import { forwardRef, Ref, RefObject, useEffect } from 'react';
 
 import './Toast.scss';
 
@@ -6,6 +6,7 @@ export interface ToastInterface {
   id: number;
   content: string;
   type: 'info' | 'warning' | 'danger';
+  nodeRef?: RefObject<any>;
 }
 
 interface ToastPropsInterface extends ToastInterface {
