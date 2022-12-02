@@ -1,11 +1,12 @@
-import { forwardRef, Ref, RefObject, useEffect } from 'react';
+import { ForwardedRef, forwardRef, Ref, RefObject, useEffect } from 'react';
+import { ToastTypes } from '../../interfaces/Types';
 
 import './Toast.scss';
 
 export interface ToastInterface {
-  id: number;
   content: string;
-  type: 'info' | 'warning' | 'danger';
+  id: number;
+  type: ToastTypes;
   nodeRef?: RefObject<any>;
 }
 
@@ -14,10 +15,16 @@ interface ToastPropsInterface extends ToastInterface {
   ref: Ref<HTMLDivElement>;
 }
 
-function Toast(props: ToastPropsInterface, ref: any) {
+function Toast({
+  content,
+  id,
+  nodeRef,
+  onRemove,
+  type,
+}: ToastPropsInterface, ref: ForwardedRef<HTMLDivElement>) {
 
   useEffect(() => {
-    const timer = setTimeout(() => props.onRemove(props.id), 10000);
+    const timer = setTimeout(() => onRemove(id), 10000);
 
     return () => {
       clearTimeout(timer);
@@ -27,10 +34,10 @@ function Toast(props: ToastPropsInterface, ref: any) {
   return (
     <div
       ref={ref}
-      className={'toast ' + props.type}
-      onClick={() => props.onRemove(props.id)}
+      className={'toast ' + type}
+      onClick={() => onRemove(id)}
     >
-      {props.content}
+      {content}
     </div>
   );
 }

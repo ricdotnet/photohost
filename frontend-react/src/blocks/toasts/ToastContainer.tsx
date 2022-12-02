@@ -1,4 +1,4 @@
-import { ReactNode, useEffect, useRef, useState } from 'react';
+import { ReactNode, RefObject, useEffect, useRef, useState } from 'react';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
 import { toastEventChannel } from '../../bus/ToastEventChannel';
 import Toast, { ToastInterface } from '../../components/toast/Toast';
@@ -11,8 +11,37 @@ interface ToastContainerPropsInterface {
 
 export default function ToastContainer() {
 
-  const [toasts, setToasts] = useState<any[]>([]);
-  const nodeRef = useRef(null);
+  const nodeRef = useRef<typeof Toast>(null);
+  const { toasts, handleRemoveToast } = useToastsQueue(nodeRef);
+
+  return (
+    <TransitionGroup className="toast-container">
+      {toasts.length &&
+        toasts.map((toast: ToastInterface) => {
+          return (
+            <CSSTransition
+              key={toast.id}
+              classNames="toast"
+              timeout={200}
+              ref={toast.nodeRef}
+            >
+              <Toast
+                ref={toast.nodeRef}
+                content={toast.content}
+                onRemove={handleRemoveToast}
+                id={toast.id}
+                type={toast.type}
+              />
+            </CSSTransition>
+          );
+        })
+      }
+    </TransitionGroup>
+  );
+}
+
+function useToastsQueue(nodeRef: RefObject<typeof Toast>) {
+  const [toasts, setToasts] = useState<ToastInterface[]>([]);
 
   useEffect(() => {
     toastEventChannel.subscribe('onAddToast', (toast: ToastInterface) => {
@@ -37,28 +66,5 @@ export default function ToastContainer() {
     );
   };
 
-  return (
-    <TransitionGroup className="toast-container">
-      {toasts.length &&
-        toasts.map((toast) => {
-          return (
-            <CSSTransition
-              key={toast.id}
-              classNames="toast"
-              timeout={200}
-              ref={toast.nodeRef}
-            >
-              <Toast
-                ref={toast.nodeRef}
-                content={toast.content}
-                onRemove={handleRemoveToast}
-                id={toast.id}
-                type={toast.type}
-              />
-            </CSSTransition>
-          );
-        })
-      }
-    </TransitionGroup>
-  );
+  return { toasts, handleRemoveToast };
 }
