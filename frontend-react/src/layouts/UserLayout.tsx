@@ -1,83 +1,25 @@
-import { useEffect, useState } from 'react';
+import { ReactElement } from 'react';
+import { useGlobalUpload } from '../hooks/UseGlobalUpload';
 import Nav from '../blocks/nav/Nav';
 import ToastContainer from '../blocks/toasts/ToastContainer';
 import GlobalUploadDialog from '../blocks/dialogs/GlobalUploadDialog';
 
 import './UserLayout.scss';
 
-function UserLayout({ children }: any) {
+interface UserLayoutPropsInterface {
+  children: ReactElement[];
+}
 
-  const [isDraggingOver, setIsDraggingOver] = useState(false);
-  const [imageFile, setImageFile] = useState<any>(null);
+export default function UserLayout({ children }: UserLayoutPropsInterface) {
 
-  const [isCmdPressed, setIsCommandPressed] = useState(false);
-
-  useEffect(() => {
-    window.addEventListener('keydown', keyDownHandler);
-    window.addEventListener('keyup', keyUpHandler);
-
-    return () => {
-      window.removeEventListener('keydown', keyDownHandler);
-      window.removeEventListener('keyup', keyUpHandler);
-    };
-  }, [isCmdPressed]);
-
-  const keyDownHandler = async (e: any) => {
-    if ( !isCmdPressed && (e.key === 'Meta' || e.key === 'Control') ) {
-      setIsCommandPressed(() => true);
-    }
-    if ( isCmdPressed && e.key === 'v' ) {
-      try {
-        const items = await navigator.clipboard.read();
-        for ( let item of items ) {
-          const types = item.types.filter(t => t.includes('image/'));
-          const blob = await item.getType(types[0]);
-          setImageFile(blob);
-        }
-      } catch (err) {
-        // silently catch
-      }
-    }
-  };
-
-  const keyUpHandler = (e: any) => {
-    if ( isCmdPressed && (e.key === 'Meta' || e.key === 'Control') ) {
-      setIsCommandPressed(() => false);
-    }
-  };
-
-  const canDoGlobalUpload = (): boolean => {
-    for ( const child of children ) {
-      if ( !child?.key && child?.type?.name?.includes('Dialog') ) {
-        return false;
-      }
-    }
-
-    return true;
-  };
-
-  const handleOnDragOver = (e: any) => {
-    e.stopPropagation();
-    e.preventDefault();
-    if ( !canDoGlobalUpload() ) return;
-    setIsDraggingOver(() => true);
-  };
-
-  const handleOnDragLeave = (e: any) => {
-    e.stopPropagation();
-    e.preventDefault();
-    setIsDraggingOver(() => false);
-  };
-
-  const handleOnDrop = (e: any) => {
-    e.stopPropagation();
-    e.preventDefault();
-    if ( !canDoGlobalUpload() ) return;
-    setIsDraggingOver(() => false);
-    setImageFile(() => {
-      return e.dataTransfer.files[0];
-    });
-  };
+  const {
+    handleOnDragOver,
+    handleOnDragLeave,
+    handleOnDrop,
+    handleResetImage,
+    isDraggingOver,
+    imageFile
+  } = useGlobalUpload();
 
   return (
     <div
@@ -97,11 +39,9 @@ function UserLayout({ children }: any) {
       {imageFile && <GlobalUploadDialog
         dialogIsActioning={false}
         onConfirm={() => console.log('confirmed')}
-        onCancel={() => setImageFile(() => null)}
+        onCancel={handleResetImage}
         file={imageFile}
       />}
     </div>
   );
 }
-
-export default UserLayout;

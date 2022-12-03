@@ -55,7 +55,7 @@ export default function Dialog({
       className="background"
       onClick={clickHandler}
     >
-      <div className="dialog-box">
+      <div className="dialog-box" aria-label="dialog-box">
         <span className="dialog-box__title">{title}</span>
         {children}
         {controls &&
