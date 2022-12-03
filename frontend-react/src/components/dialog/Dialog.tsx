@@ -1,6 +1,7 @@
-import React, { BaseSyntheticEvent, ReactNode, useEffect } from 'react';
-import './Dialog.scss';
+import React, { BaseSyntheticEvent, ReactNode, useEffect, useRef } from 'react';
 import Button from '../button/Button';
+
+import './Dialog.scss';
 
 interface DialogPropsInterface {
   title: string;
@@ -12,68 +13,90 @@ interface DialogPropsInterface {
   onCancel?: (e: BaseSyntheticEvent | KeyboardEvent) => void;
 }
 
-function Dialog({
-                  children,
-                  title,
-                  controls,
-                  isConfirming,
-                  isCanceling,
-                  onCancel,
-                  onConfirm
-                }: DialogPropsInterface) {
+export default function Dialog({
+  children,
+  title,
+  controls,
+  isConfirming,
+  isCanceling,
+  onCancel,
+  onConfirm
+}: DialogPropsInterface) {
+
+  const backgroundRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    document.addEventListener('keyup', (e: KeyboardEvent) => {
-      if ( !onCancel ) return;
-      if ( e.key === 'Escape' ) {
-        onCancel(e);
-      }
-    });
+    document.addEventListener('keyup', keyupHandler);
+    document.body.classList.add('overflow-hidden');
 
     return () => {
-      document.removeEventListener('keyup', () => {
-      });
+      document.body.classList.remove('overflow-hidden');
+      document.removeEventListener('keyup', keyupHandler);
     };
   }, []);
 
+  const keyupHandler = (e: KeyboardEvent) => {
+    if ( !onCancel ) return;
+    if ( e.key === 'Escape' ) {
+      onCancel(e);
+    }
+  };
+
+  const clickHandler = (e: BaseSyntheticEvent) => {
+    if ( !onCancel ) return;
+    if ( e.target === backgroundRef.current) {
+      onCancel(e);
+    }
+  };
+
   return (
-    <div className="background">
+    <div
+      ref={backgroundRef}
+      className="background"
+      onClick={clickHandler}
+    >
       <div className="dialog-box">
         <span className="dialog-box__title">{title}</span>
         {children}
-        {controls ? (
+        {controls &&
           <DialogControls
             isActioning={{ isConfirming, isCanceling }}
             onCancel={onCancel}
             onConfirm={onConfirm}
           />
-        ) : null}
+        }
       </div>
     </div>
   );
 }
 
-function DialogControls(props: any) {
+interface IsActioning {
+  isConfirming?: boolean;
+  isCanceling?: boolean;
+}
+interface DialogControlsPropsInterface extends Pick<DialogPropsInterface, 'onCancel' | 'onConfirm'> {
+  isActioning: IsActioning;
+}
+
+function DialogControls({isActioning, onConfirm, onCancel}: DialogControlsPropsInterface) {
   return (
     <div className="dialog-box__buttons">
       <Button
         value="Cancel"
         variant="secondary"
         type="button"
-        isActioning={props.isActioning.isCanceling}
-        disabled={props.isActioning.isActioning || props.isActioning.isConfirming}
-        handleClick={props.onCancel}
+        isActioning={isActioning.isCanceling}
+        disabled={isActioning && isActioning.isConfirming}
+        handleClick={onCancel}
       />
       <Button
         value="Confirm"
         variant="primary"
         type="button"
-        isActioning={props.isActioning.isConfirming}
-        disabled={props.isActioning.isActioning || props.isActioning.isConfirming}
-        handleClick={props.onConfirm}
+        isActioning={isActioning.isConfirming}
+        disabled={isActioning && isActioning.isConfirming}
+        handleClick={onConfirm}
       />
     </div>
   );
 }
-
-export default Dialog;
