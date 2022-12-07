@@ -4,6 +4,7 @@ import { UserContext } from '../contexts/UserContext';
 import { PhotosContext } from '../contexts/PhotosContext';
 import { PhotoInterface } from '../interfaces/PhotoInterface';
 import { useApiRequest } from '../hooks/UseApiRequest';
+import { usePhotoUpload } from '../hooks/UsePhotoUpload';
 import { BlurhashCanvas } from 'react-blurhash';
 import UserLayout from '../layouts/UserLayout';
 import DeleteAlbumDialog from '../blocks/dialogs/DeleteAlbumDialog';
@@ -15,7 +16,7 @@ import MovePhotosDialog from '../blocks/dialogs/MovePhotosDialog';
 
 import './Album.scss';
 
-function Album() {
+export default function Album() {
   const { albumId } = useParams();
   const navigateTo = useNavigate();
 
@@ -90,19 +91,15 @@ function Album() {
   const onConfirmUploadPhoto = async (e: BaseSyntheticEvent, formData: FormData) => {
     setIsUploadingPhoto(true);
 
-    // append the current album
-    formData.append('album', albumId as string);
-
-    const { data, error } = await request({
-      route: '/photo/upload',
-      method: 'post',
-      withAuth: true,
-      payload: formData,
+    const { data, error } = await usePhotoUpload({
+      albumId: albumId!,
+      formData: formData
     });
+    if ( error ) {
+      throw new Error(error);
+    }
 
-    if ( error ) throw new Error(error);
-
-    if ( data && data.photos ) {
+    if ( data ) {
       setPhotos([...data.photos, ...photos]);
     }
 
@@ -211,40 +208,32 @@ function Album() {
           )
       }
       {isOpenDeleteAlbum &&
-        (
-          <DeleteAlbumDialog
-            onConfirm={onConfirmDeleteAlbum}
-            onCancel={onCancelDeleteAlbum}
-            dialogIsActioning={isDeletingAlbum}
-          />
-        )
+        <DeleteAlbumDialog
+          onConfirm={onConfirmDeleteAlbum}
+          onCancel={onCancelDeleteAlbum}
+          dialogIsActioning={isDeletingAlbum}
+        />
       }
       {isOpenUploadPhoto &&
-        (
-          <UploadPhotoDialog
-            dialogIsActioning={isUploadingPhoto}
-            onConfirm={onConfirmUploadPhoto}
-            onCancel={onCancelUploadPhoto}
-          />
-        )
+        <UploadPhotoDialog
+          dialogIsActioning={isUploadingPhoto}
+          onConfirm={onConfirmUploadPhoto}
+          onCancel={onCancelUploadPhoto}
+        />
       }
       {isOpenMovePhotos &&
-        (
-          <MovePhotosDialog
-            dialogIsActioning={isMovingPhotos}
-            onConfirm={onMovePhotosConfirm}
-            onCancel={onMovePhotosCancel}
-          />
-        )
+        <MovePhotosDialog
+          dialogIsActioning={isMovingPhotos}
+          onConfirm={onMovePhotosConfirm}
+          onCancel={onMovePhotosCancel}
+        />
       }
       {isOpenDeletePhotos &&
-        (
-          <DeletePhotosDialog
-            dialogIsActioning={isDeletingPhotos}
-            onConfirm={onDeletePhotosConfirm}
-            onCancel={onDeletePhotosCancel}
-          />
-        )
+        <DeletePhotosDialog
+          dialogIsActioning={isDeletingPhotos}
+          onConfirm={onDeletePhotosConfirm}
+          onCancel={onDeletePhotosCancel}
+        />
       }
     </UserLayout>
   );
@@ -374,5 +363,3 @@ function RenderPhoto(props: RenderPhotoPropsInterface) {
     </div>
   );
 }
-
-export default Album;

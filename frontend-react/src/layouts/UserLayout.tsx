@@ -1,4 +1,4 @@
-import { ReactElement } from 'react';
+import { ReactElement, ReactNode } from 'react';
 import { useGlobalUpload } from '../hooks/UseGlobalUpload';
 import Nav from '../blocks/nav/Nav';
 import ToastContainer from '../blocks/toasts/ToastContainer';
@@ -7,7 +7,7 @@ import GlobalUploadDialog from '../blocks/dialogs/GlobalUploadDialog';
 import './UserLayout.scss';
 
 interface UserLayoutPropsInterface {
-  children: ReactElement[];
+  children: ReactNode[];
 }
 
 export default function UserLayout({ children }: UserLayoutPropsInterface) {
@@ -18,7 +18,8 @@ export default function UserLayout({ children }: UserLayoutPropsInterface) {
     handleOnDrop,
     handleResetImage,
     isDraggingOver,
-    imageFile
+    imageFile,
+    onConfirmUpload
   } = useGlobalUpload();
 
   return (
@@ -38,7 +39,7 @@ export default function UserLayout({ children }: UserLayoutPropsInterface) {
       {isDraggingOver && <div className="upload-overlay">Drop images here</div>}
       {imageFile && <GlobalUploadDialog
         dialogIsActioning={false}
-        onConfirm={() => console.log('confirmed')}
+        onConfirm={onConfirmUpload}
         onCancel={handleResetImage}
         file={imageFile}
       />}

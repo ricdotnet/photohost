@@ -1,10 +1,18 @@
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
+import { usePhotoUpload } from './UsePhotoUpload';
+import { UserContext } from '../contexts/UserContext';
+import { useNavigate } from 'react-router-dom';
 
 export const useGlobalUpload = () => {
+  const [userContext] = useContext(UserContext);
+
   const [isDraggingOver, setIsDraggingOver] = useState(false);
   const [imageFile, setImageFile] = useState<any>(null);
+  const [imageType, setImageType] = useState('');
 
   const [isCmdPressed, setIsCommandPressed] = useState(false);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     window.addEventListener('keydown', keyDownHandler);
@@ -27,6 +35,7 @@ export const useGlobalUpload = () => {
         for ( let item of items ) {
           const types = item.types.filter(t => t.includes('image/'));
           const blob = await item.getType(types[0]);
+          setImageType(types[0].split('/')[1]);
           setImageFile(blob);
         }
       } catch (err) {
@@ -69,6 +78,20 @@ export const useGlobalUpload = () => {
     });
   };
 
+  const onConfirmUpload = async () => {
+    const formData = new FormData();
+
+    formData.append('file', imageFile);
+    formData.append('name', userContext.username + Date.now() + '.' + imageType);
+    const { data, error } = await usePhotoUpload({ formData: formData });
+
+    if (error) throw new Error(error);
+    if (data) {
+      handleResetImage();
+      navigate(`/photo/${data.photos[0].id}`);
+    }
+  }
+
   const handleResetImage = () => {
     setImageFile(null);
   };
@@ -80,5 +103,6 @@ export const useGlobalUpload = () => {
     handleResetImage,
     isDraggingOver,
     imageFile,
+    onConfirmUpload,
   };
-}
+};
