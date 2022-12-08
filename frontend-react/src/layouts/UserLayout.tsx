@@ -1,13 +1,34 @@
-import { StrictMode } from 'react';
-import ToastContainer from '../blocks/toasts/ToastContainer';
+import { ReactElement, ReactNode } from 'react';
+import { useGlobalUpload } from '../hooks/UseGlobalUpload';
 import Nav from '../blocks/nav/Nav';
+import ToastContainer from '../blocks/toasts/ToastContainer';
+import GlobalUploadDialog from '../blocks/dialogs/GlobalUploadDialog';
 
 import './UserLayout.scss';
 
-function UserLayout({ children }: any) {
+interface UserLayoutPropsInterface {
+  children: ReactNode[];
+}
+
+export default function UserLayout({ children }: UserLayoutPropsInterface) {
+
+  const {
+    handleOnDragOver,
+    handleOnDragLeave,
+    handleOnDrop,
+    handleResetImage,
+    isDraggingOver,
+    imageFile,
+    onConfirmUpload
+  } = useGlobalUpload();
 
   return (
-    <StrictMode>
+    <div
+      className="h-screen"
+      onDragOver={handleOnDragOver}
+      onDragLeave={handleOnDragLeave}
+      onDrop={handleOnDrop}
+    >
       <Nav/>
       <div
         className="main-content"
@@ -16,8 +37,13 @@ function UserLayout({ children }: any) {
         {children}
       </div>
       <ToastContainer/>
-    </StrictMode>
+      {isDraggingOver && <div className="upload-overlay">Drop images here</div>}
+      {imageFile && <GlobalUploadDialog
+        dialogIsActioning={false}
+        onConfirm={onConfirmUpload}
+        onCancel={handleResetImage}
+        file={imageFile}
+      />}
+    </div>
   );
 }
-
-export default UserLayout;

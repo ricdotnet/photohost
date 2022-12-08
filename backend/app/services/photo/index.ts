@@ -14,15 +14,15 @@ import imageSize from 'image-size';
 
 export function doInsert(req: Request): Promise<any> {
   return new Promise(async (resolve) => {
-    const { album } = req.formData;
+    const { album, name } = req.formData;
     const photos = [];
 
     for ( let fileEl in req.files! ) {
       const file: IFile = req.files![fileEl];
 
       let sanitizedName;
-      if ( !req.body['fileName'] ) {
-        sanitizedName = sanitizeFilename(file.originalName);
+      if ( !req.body['fileName'] || name ) {
+        sanitizedName = sanitizeFilename(name ?? file.originalName);
       } else {
         sanitizedName = req.body['fileName'];
       }
@@ -38,10 +38,10 @@ export function doInsert(req: Request): Promise<any> {
                                                         height, blurhash)
                                     VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
                                     RETURNING *`,
-          [req.userContext!.id, '', file.originalName, sanitizedName, albumToSave, width, height, blurhash]);
+          [req.userContext!.id, '', name ?? file.originalName, sanitizedName, albumToSave, width, height, blurhash]);
 
       // if the insert is successful then move the file
-      await moveTmpFile(req.userContext!, file);
+      await moveTmpFile(req.userContext!, file, name);
 
       photos.push(photoResult.rows[0]);
 
@@ -198,8 +198,9 @@ async function deletePhoto(userId: number, username: string, photoId: string) {
  *
  * @param user The user data object
  * @param file The file object
+ * @param name An optional name passed to be the filename
  */
-async function moveTmpFile(user: IUserContext, file: IFile) {
+async function moveTmpFile(user: IUserContext, file: IFile, name?: string) {
 
   const userDir = fs.existsSync(path.join('uploads', user.username));
 
@@ -207,7 +208,7 @@ async function moveTmpFile(user: IUserContext, file: IFile) {
     await fsp.mkdir(path.join('uploads', user.username));
   }
 
-  await fsp.rename(file.file, path.join('uploads', user.username, file.originalName));
+  await fsp.rename(file.file, path.join('uploads', user.username, name ?? file.originalName));
 }
 
 /**

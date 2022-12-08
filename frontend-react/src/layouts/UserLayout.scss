@@ -1,3 +1,15 @@
 .main-content {
   @apply max-w-[960px] mx-auto px-2;
 }
+
+.upload-overlay {
+  position: fixed;
+  top: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(255, 255, 255, 0.7);
+  display: grid;
+  justify-content: center;
+  align-items: center;
+  font-size: 22px;
+}
