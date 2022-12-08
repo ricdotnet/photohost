@@ -82,7 +82,7 @@ export const useGlobalUpload = () => {
     const formData = new FormData();
 
     formData.append('file', imageFile);
-    formData.append('name', userContext.username + Date.now() + '.' + imageType);
+    formData.append('name', imageFile.name ?? userContext.username + Date.now() + '.' + imageType);
     const { data, error } = await usePhotoUpload({ formData: formData });
 
     if (error) throw new Error(error);

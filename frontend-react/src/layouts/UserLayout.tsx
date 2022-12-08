@@ -24,6 +24,7 @@ export default function UserLayout({ children }: UserLayoutPropsInterface) {
 
   return (
     <div
+      className="h-screen"
       onDragOver={handleOnDragOver}
       onDragLeave={handleOnDragLeave}
       onDrop={handleOnDrop}
