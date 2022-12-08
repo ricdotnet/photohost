@@ -15,6 +15,7 @@ import NewAlbumDialog from '../blocks/dialogs/NewAlbumDialog';
 import AlbumsDropdown from '../blocks/dropdowns/AlbumsDropdown';
 
 import './Home.scss';
+import { AlbumType } from '../interfaces/Types';
 
 export default function Home() {
   const [albums, setAlbums] = useState<AlbumInterface[]>([]);
@@ -56,19 +57,20 @@ export default function Home() {
     setIsOpenAddNewAlbum(false);
   };
 
-  const onConfirmAddNewAlbum = async (e: BaseSyntheticEvent, albumName: string) => {
+  const onConfirmAddNewAlbum = async (e: BaseSyntheticEvent, { albumName, albumCover }: AlbumType) => {
     e.preventDefault();
     setIsAddingNewAlbum(true);
 
-    const body = {
+    let payload = {
       name: albumName,
+      cover: albumCover,
     };
 
     const { data, error } = await request({
       method: 'POST',
       route: '/album',
       withAuth: true,
-      payload: body,
+      payload: payload,
     });
 
     if ( data ) {
@@ -121,7 +123,13 @@ const RenderAlbums = memo(function RenderAlbums() {
       {
         !albumsContext.length ? (<div>You have no albums here</div>)
           : albumsContext.map((album) => (
-            <AlbumItem name={album.name} photos={album.photos ?? 0} id={album.id} key={album.id}/>
+            <AlbumItem
+              name={album.name}
+              photos={album.photos ?? 0}
+              id={album.id}
+              key={album.id}
+              cover={album.cover}
+            />
           ))
       }
     </div>
@@ -131,6 +139,7 @@ const RenderAlbums = memo(function RenderAlbums() {
 interface AlbumItemPropsInterface {
   id: string;
   name: string;
+  cover: string;
   photos: number;
 }
 
@@ -141,7 +150,7 @@ function AlbumItem(props: AlbumItemPropsInterface) {
         <div className="album-item__cover">
           <img
             className="album-item__cover-item"
-            src={`https://picsum.photos/seed/${props.name}/800/800`}
+            src={props.cover ?? `https://picsum.photos/seed/${props.name}/800/800`}
             alt="Album Cover"
           />
         </div>
