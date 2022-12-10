@@ -3,19 +3,28 @@ import { client } from '../../config/database';
 
 // TODO: add error handling to this service
 
+export async function doGetAlbum(albumId: string) {
+  const albumData =
+    await client.query('SELECT * FROM albums WHERE id = $1', [albumId]);
+
+  return albumData.rows[0];
+}
+
 export async function doCreateAlbum(req: Request) {
   const { name, cover } = req.body;
   const { id } = req.userContext!;
 
   const columns = ['"user"', 'name'];
-  const values = [id, name]
-  if (!!cover) {
+  const values = [id, name];
+  if ( !!cover ) {
     columns.push('cover');
     values.push(cover);
   }
 
-  const preparedVars = columns.map((c, i) => `$${i+1}`);
-  let query = `INSERT INTO albums (${columns.join(',')}) VALUES (${preparedVars.join(',')}) RETURNING *`;
+  const preparedVars = columns.map((c, i) => `$${i + 1}`);
+  let query = `INSERT INTO albums (${columns.join(',')})
+               VALUES (${preparedVars.join(',')})
+               RETURNING *`;
 
   const newAlbumResponse =
     await client.query(query, values);

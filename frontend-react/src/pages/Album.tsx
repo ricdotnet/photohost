@@ -13,6 +13,7 @@ import UploadPhotoDialog from '../blocks/dialogs/UploadPhotoDialog';
 import PhotosDropdown from '../blocks/dropdowns/PhotosDropdown';
 import DeletePhotosDialog from '../blocks/dialogs/DeletePhotosDialog';
 import MovePhotosDialog from '../blocks/dialogs/MovePhotosDialog';
+import EditAlbumDialog from '../blocks/dialogs/EditAlbumDialog';
 
 import './Album.scss';
 
@@ -20,6 +21,7 @@ export default function Album() {
   const { albumId } = useParams();
   const navigateTo = useNavigate();
 
+  const [album, setAlbum] = useState<any>();
   const [photos, setPhotos] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isDeletingAlbum, setIsDeletingAlbum] = useState(false);
@@ -30,20 +32,23 @@ export default function Album() {
   const [isOpenMovePhotos, setIsOpenMovePhotos] = useState(false);
   const [isDeletingPhotos, setIsDeletingPhotos] = useState(false);
   const [isOpenDeletePhotos, setIsOpenDeletePhotos] = useState(false);
+  const [isEditingAlbum, setIsEditingAlbum] = useState(false);
+  const [isOpenEditAlbum, setIsOpenEditAlbum] = useState(false);
   const [selectedPhotos, setSelectedPhotos] = useState<string[]>([]);
-
-  const { request } = useApiRequest();
 
   const getAllPhotos = useCallback(async () => {
     const searchParams = new URLSearchParams();
     searchParams.append('album', albumId as string);
 
+    const { request } = useApiRequest();
     const { data, error } = await request({
       route: '/photo/all?' + searchParams,
       withAuth: true,
     });
 
-    if ( error ) throw new Error(error);
+    if ( error ) {
+      // console.log(error);
+    }
 
     if ( data ) {
       setPhotos(data);
@@ -51,8 +56,28 @@ export default function Album() {
     }
   }, []);
 
+  const getAlbumData = useCallback(async () => {
+    const queryParams = new URLSearchParams();
+    queryParams.append('albumId', albumId as string);
+
+    const { request } = useApiRequest();
+    const { data, error } = await request({
+      route: '/album/?' + queryParams,
+      withAuth: true,
+    });
+
+    if ( error ) {
+      console.error(error);
+    }
+
+    if ( data ) {
+      setAlbum(data.album);
+    }
+  }, []);
+
   useEffect(() => {
     getAllPhotos();
+    getAlbumData();
   }, []);
 
   const onOpenDeleteAlbum = () => {
@@ -68,6 +93,7 @@ export default function Album() {
     const searchParams = new URLSearchParams();
     searchParams.append('id', albumId as string);
 
+    const { request } = useApiRequest();
     const { data, error } = await request({
       route: '/album?' + searchParams,
       method: 'delete',
@@ -126,6 +152,7 @@ export default function Album() {
 
   const onMovePhotosConfirm = async (e: BaseSyntheticEvent, aId: string) => {
     if ( aId === albumId ) return;
+
     setIsMovingPhotos(true);
 
     const body = {
@@ -133,6 +160,7 @@ export default function Album() {
       photos: selectedPhotos
     };
 
+    const { request } = useApiRequest();
     const { data, error } = await request({
       route: '/photo/move',
       method: 'post',
@@ -163,6 +191,7 @@ export default function Album() {
       photos: selectedPhotos,
     };
 
+    const { request } = useApiRequest();
     const { data, error } = await request({
       route: '/photo/delete',
       method: 'delete',
@@ -186,12 +215,27 @@ export default function Album() {
     setPhotos(tmp);
   };
 
+  const onOpenEditAlbum = () => {
+    setIsOpenEditAlbum(true);
+  };
+
+  const onConfirmEditAlbum = () => {
+    setIsEditingAlbum(true);
+    setTimeout(() => setIsEditingAlbum(false), 5000);
+  };
+
+  const onCancelEditAlbum = () => {
+    setIsOpenEditAlbum(false);
+  };
+
   return (
     <UserLayout>
       <div className="page-top">
+        {album && album.name}
         <PhotosDropdown
-          onClickUploadPhotos={onOpenUploadPhoto}
           onClickDeleteAlbum={onOpenDeleteAlbum}
+          onClickEditAlbum={onOpenEditAlbum}
+          onClickUploadPhotos={onOpenUploadPhoto}
           onClickMoveAllSelected={handleMoveAllSelected}
           onClickDeleteAllSelected={handleDeleteAllSelected}
           showSelectionOptions={selectedPhotos.length > 0}
@@ -206,6 +250,15 @@ export default function Album() {
               />
             </PhotosContext.Provider>
           )
+      }
+      {isOpenEditAlbum &&
+        <EditAlbumDialog
+          dialogIsActioning={isEditingAlbum}
+          onConfirm={onConfirmEditAlbum}
+          onCancel={onCancelEditAlbum}
+          albumName={album.name}
+          albumCover={album.cover}
+        />
       }
       {isOpenDeleteAlbum &&
         <DeleteAlbumDialog

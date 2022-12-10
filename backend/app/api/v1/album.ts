@@ -1,10 +1,35 @@
 import { Router } from 'express';
 import { authorization } from '../middlwares/authorization';
-import { doCreateAlbum, doDeleteAlbum, doGetAlbums } from '../../services/album';
+import { doCreateAlbum, doDeleteAlbum, doGetAlbum, doGetAlbums } from '../../services/album';
+import validator from 'validator';
+import isUUID = validator.isUUID;
 
 export const album: Router = Router();
 
 // TODO: Add error handling to these routes
+
+/**
+ * @Get a single album data
+ */
+album.get('/', authorization, async (req, res) => {
+  const { albumId } = req.query;
+
+  if ( albumId === 'default-album' ) {
+    return res.status(200).send({ code: 200, album: { name: 'Default Album', cover: null } });
+  }
+
+  if ( !albumId || !isUUID(albumId as string) ) {
+    return res.status(400).send({ code: 400, message: 'invalid albumId' });
+  }
+
+  const album = await doGetAlbum(albumId as string);
+
+  if ( !album ) {
+    return res.send(404).send({ code: 404, message: 'album not found' });
+  }
+
+  res.status(200).send({ code: 200, album });
+});
 
 /**
  * @Post create a new album

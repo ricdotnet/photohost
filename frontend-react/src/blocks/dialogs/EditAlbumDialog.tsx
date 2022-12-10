@@ -4,13 +4,15 @@ import { AlbumType } from '../../interfaces/Types';
 import Input from '../../components/input/Input';
 import Dialog from '../../components/dialog/Dialog';
 
-interface NewAlbumDialogPropsInterface {
+interface EditAlbumDialogPropsInterface {
   dialogIsActioning: boolean;
   onConfirm: (e: BaseSyntheticEvent, albumInfo: AlbumType) => void;
   onCancel: (e: BaseSyntheticEvent | KeyboardEvent) => void;
+  albumName: string;
+  albumCover: string;
 }
 
-export default function NewAlbumDialog(props: NewAlbumDialogPropsInterface) {
+export default function EditAlbumDialog(props: EditAlbumDialogPropsInterface) {
 
   const albumNameRef = useRef<InputRefInterface>(null);
   const albumCoverRef = useRef<InputRefInterface>(null);
@@ -19,10 +21,10 @@ export default function NewAlbumDialog(props: NewAlbumDialogPropsInterface) {
 
   const handleOnConfirm = (e: BaseSyntheticEvent) => {
     if ( !albumNameRef.current!.value() ) return setAlbumNameError(true);
-    props.onConfirm(e, {
-      albumName: albumNameRef.current!.value(),
-      albumCover: albumCoverRef.current!.value(),
-    });
+    // props.onConfirm(e, {
+    //   albumName: albumNameRef.current!.value(),
+    //   albumCover: albumCoverRef.current!.value(),
+    // });
   };
 
   const handleOnCancel = (e: BaseSyntheticEvent | KeyboardEvent) => {
@@ -31,7 +33,7 @@ export default function NewAlbumDialog(props: NewAlbumDialogPropsInterface) {
 
   return (
     <Dialog
-      title="Create a new album"
+      title="Edit the album"
       controls={true}
       onConfirm={handleOnConfirm}
       onCancel={handleOnCancel}
@@ -44,12 +46,14 @@ export default function NewAlbumDialog(props: NewAlbumDialogPropsInterface) {
         placeholder="New album name"
         handleOnFocus={() => setAlbumNameError(false)}
         hasError={albumNameError}
+        value={props.albumName}
       />
       <Input
         ref={albumCoverRef}
         id="album-cover"
         label="album-cover"
         placeholder="New album cover"
+        value={props.albumCover}
         // handleOnFocus={() => setAlbumNameError(false)}
         // hasError={albumNameError}
       />

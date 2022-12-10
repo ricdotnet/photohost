@@ -89,6 +89,7 @@ export default function Home() {
   return (
     <UserLayout>
       <div className="page-top">
+        Your Albums
         <AlbumsDropdown
           onAddAlbumClick={onOpenAddNewAlbum}
         />
@@ -148,11 +149,13 @@ function AlbumItem(props: AlbumItemPropsInterface) {
     <div className="album-item">
       <Link to={'/album/' + props.id} key={props.id}>
         <div className="album-item__cover">
-          <img
-            className="album-item__cover-item"
-            src={props.cover ?? `https://picsum.photos/seed/${props.name}/800/800`}
-            alt="Album Cover"
-          />
+          {props.cover &&
+            <img
+              className="album-item__cover-item"
+              src={props.cover}
+              alt="Album Cover"
+            />
+          }
         </div>
       </Link>
       <span className="album-item__name">{props.name}</span>

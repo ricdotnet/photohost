@@ -7,8 +7,9 @@ import ChevronUpIcon from '../../components/icons/ChevronUpIcon';
 import ChevronDownIcon from '../../components/icons/ChevronDownIcon';
 
 interface PhotosDropDownPropsInterface {
-  onClickUploadPhotos: () => void;
   onClickDeleteAlbum: () => void;
+  onClickEditAlbum: () => void;
+  onClickUploadPhotos: () => void;
   onClickMoveAllSelected: () => void;
   onClickDeleteAllSelected: () => void;
   showSelectionOptions: boolean;
@@ -26,6 +27,10 @@ export default function PhotosDropdown(props: PhotosDropDownPropsInterface) {
 
   const onRemoteClose = () => {
     setIsOpen(false);
+  };
+
+  const onClickEdit = () => {
+    props.onClickEditAlbum();
   };
 
   const onClickUpload = () => {
@@ -79,6 +84,10 @@ export default function PhotosDropdown(props: PhotosDropDownPropsInterface) {
             </>
           )
         }
+        <DropdownChild
+          value="Edit Album"
+          handleOnClick={onClickEdit}
+        />
         <DropdownChild
           value="Delete album"
           handleOnClick={onClickDeleteAlbum}
