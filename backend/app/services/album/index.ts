@@ -10,6 +10,33 @@ export async function doGetAlbum(albumId: string) {
   return albumData.rows[0];
 }
 
+interface EditAlbumPayload {
+  albumName: string | undefined;
+  albumCover: string | undefined;
+}
+
+export async function doUpdateAlbum(albumId: string, payload: EditAlbumPayload) {
+  const { albumName, albumCover } = payload;
+
+  const columns = [];
+  const values = [];
+
+  if ( albumName ) {
+    values.push(albumName);
+    columns.push(`name = $${values.length}`);
+  }
+
+  if ( albumCover ) {
+    values.push(albumCover);
+    columns.push(`cover = $${values.length}`);
+  }
+
+  const query = `UPDATE albums
+                 SET ${columns.join()}
+                 WHERE id = $${values.length + 1}`;
+  await client.query(query, [...values, albumId]);
+}
+
 export async function doCreateAlbum(req: Request) {
   const { name, cover } = req.body;
   const { id } = req.userContext!;

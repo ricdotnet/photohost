@@ -16,6 +16,7 @@ import MovePhotosDialog from '../blocks/dialogs/MovePhotosDialog';
 import EditAlbumDialog from '../blocks/dialogs/EditAlbumDialog';
 
 import './Album.scss';
+import { AlbumType } from '../interfaces/Types';
 
 export default function Album() {
   const { albumId } = useParams();
@@ -219,9 +220,37 @@ export default function Album() {
     setIsOpenEditAlbum(true);
   };
 
-  const onConfirmEditAlbum = () => {
+  const onConfirmEditAlbum = async (payload: AlbumType) => {
     setIsEditingAlbum(true);
-    setTimeout(() => setIsEditingAlbum(false), 5000);
+
+    const queryParams = new URLSearchParams();
+    queryParams.append('albumId', albumId as string);
+
+    const { request } = useApiRequest();
+    const { data, error } = await request({
+      route: '/album',
+      params: queryParams,
+      method: 'put',
+      withAuth: true,
+      payload: payload,
+    });
+
+    if ( error ) {
+      console.error(error);
+    }
+
+    if ( data ) {
+      const a = album;
+      if ( payload.albumName ) {
+        a.name = payload.albumName;
+      }
+      if ( payload.albumCover ) {
+        a.cover = payload.albumCover;
+      }
+      setAlbum(a);
+      setIsEditingAlbum(false);
+      setIsOpenEditAlbum(false);
+    }
   };
 
   const onCancelEditAlbum = () => {
