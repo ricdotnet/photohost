@@ -6,6 +6,7 @@ import { PhotoInterface } from '../interfaces/PhotoInterface';
 import { useApiRequest } from '../hooks/UseApiRequest';
 import { usePhotoUpload } from '../hooks/UsePhotoUpload';
 import { BlurhashCanvas } from 'react-blurhash';
+import { AlbumType } from '../interfaces/Types';
 import UserLayout from '../layouts/UserLayout';
 import DeleteAlbumDialog from '../blocks/dialogs/DeleteAlbumDialog';
 import PhotoOverlay from '../blocks/overlays/PhotoOverlay';
@@ -16,8 +17,8 @@ import MovePhotosDialog from '../blocks/dialogs/MovePhotosDialog';
 import EditAlbumDialog from '../blocks/dialogs/EditAlbumDialog';
 
 import './Album.scss';
-import { AlbumType } from '../interfaces/Types';
 
+// TODO: Extract logic into a hook?
 export default function Album() {
   const { albumId } = useParams();
   const navigateTo = useNavigate();
@@ -230,7 +231,7 @@ export default function Album() {
     const { data, error } = await request({
       route: '/album',
       params: queryParams,
-      method: 'put',
+      method: 'patch',
       withAuth: true,
       payload: payload,
     });
@@ -435,7 +436,7 @@ function RenderPhoto(props: RenderPhotoPropsInterface) {
       <div style={{
         paddingBottom: `${heightRatio}%`
       }}></div>
-      <div className={`photo-item__hover-effect`}>
+      <div className="photo-item__hover-effect">
         <input
           onClick={handleOnSelect}
           type="checkbox"

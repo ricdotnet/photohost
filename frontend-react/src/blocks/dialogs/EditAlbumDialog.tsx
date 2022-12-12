@@ -1,17 +1,9 @@
 import { BaseSyntheticEvent, useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { InputRefInterface } from '../../interfaces/InputRefInterface';
-import { AlbumType } from '../../interfaces/Types';
+import { EditAlbumDialogPropsInterface } from '../../interfaces/PropsInterfaces';
 import Input from '../../components/input/Input';
 import Dialog from '../../components/dialog/Dialog';
-
-interface EditAlbumDialogPropsInterface {
-  dialogIsActioning: boolean;
-  onConfirm: (albumInfo: AlbumType) => void;
-  onCancel: (e: BaseSyntheticEvent | KeyboardEvent) => void;
-  albumName: string;
-  albumCover: string;
-}
 
 export default function EditAlbumDialog(props: EditAlbumDialogPropsInterface) {
 
@@ -61,8 +53,7 @@ export default function EditAlbumDialog(props: EditAlbumDialogPropsInterface) {
         id="album-cover"
         label="album-cover"
         placeholder="New album cover"
-        // handleOnFocus={() => setAlbumNameError(false)}
-        // hasError={albumNameError}
+        disabled={albumId === 'default-album'}
       />
     </Dialog>
   );

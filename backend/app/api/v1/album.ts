@@ -40,7 +40,7 @@ album.get('/', authorization, async (req, res) => {
 /**
  * @Put edit an album
  */
-album.put('/', async (req, res) => {
+album.patch('/', async (req, res) => {
   const { albumId } = req.query;
 
   if ( albumId === 'default-album' ) {
@@ -51,9 +51,9 @@ album.put('/', async (req, res) => {
     return res.status(400).send({ code: 400, message: 'invalid albumId' });
   }
 
-  const a = await doUpdateAlbum(albumId as string, req.body);
+  await doUpdateAlbum(albumId as string, req.body);
 
-  res.status(200).send({ code: 200, message: a });
+  res.status(200).send({ code: 200, message: 'album updated' });
 });
 
 /**
