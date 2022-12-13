@@ -11,6 +11,7 @@ import fs from 'fs';
 import path from 'path';
 import fsp from 'fs/promises';
 import imageSize from 'image-size';
+import sharp from 'sharp';
 
 export function doInsert(req: Request): Promise<any> {
   return new Promise(async (resolve) => {
@@ -62,6 +63,8 @@ export async function doDelete(req: Request) {
 
 // TODO: get user data from digest?
 export async function doGetOne(req: Request): Promise<undefined | { file: Buffer, mimeType: string | boolean }> {
+  const { thumbnail } = req.query;
+
   const photoResult =
     await client.query<IPhoto>('SELECT * FROM photos WHERE id = $1',
       [req.query.photoId]);
@@ -84,7 +87,10 @@ export async function doGetOne(req: Request): Promise<undefined | { file: Buffer
     return;
   }
 
-  const file = await fsp.readFile(path.join('uploads', 'ricdotnet', photo.path, photo.filename));
+  // we want to get the thumbnail if the user requests a thumbnail (preview purposes)
+  const fileName = (thumbnail) ? 'thumbnail-' + photo.filename : photo.filename;
+
+  const file = await fsp.readFile(path.join('uploads', 'ricdotnet', photo.path, fileName));
 
   const mimeType = lookup(photo.filename);
 
@@ -209,6 +215,7 @@ async function moveTmpFile(user: IUserContext, file: IFile, name?: string) {
   }
 
   await fsp.rename(file.file, path.join('uploads', user.username, name ?? file.originalName));
+  createThumbnail(file, user.username, name);
 }
 
 /**
@@ -233,4 +240,11 @@ async function verifyDigest(userId: number, requestDigest: string): Promise<bool
   const { digest } = await getUserData(userId);
 
   return digest === requestDigest;
+}
+
+async function createThumbnail(file: IFile, username: string, name?: string) {
+  const f = await fsp.readFile(path.join('uploads', username, name ?? file.originalName));
+  await sharp(f)
+    .resize({ width: 300, fit: 'contain' })
+    .toFile(path.join('uploads', username, `thumbnail-${name ?? file.originalName}`));
 }

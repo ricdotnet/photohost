@@ -345,7 +345,8 @@ function RenderPhoto(props: RenderPhotoPropsInterface) {
         width={32}
       />
       <img
-        src={import.meta.env.VITE_API + '/photo/single?photoId=' + props.photo.id + '&digest=' + userContext.digest}
+        src={import.meta.env.VITE_API + '/photo/single?photoId=' + props.photo.id + '&digest=' + userContext.digest + '&thumbnail=true'}
+        // src={import.meta.env.VITE_API + '/photo/single?photoId=' + props.photo.id + '&digest=' + userContext.digest}
         alt={props.photo.name} onLoad={handleOnLoad}
         loading="lazy"
         sizes="(max-width: 600px) 480px, 800px"

@@ -90,6 +90,7 @@ photo.get('/single', async (req, res) => {
     return res.status(401).send({ code: 401, message: 'not possible to determine mime-type' });
   }
 
+  res.setHeader('Cache-Control', 'max-age=3600');
   res.setHeader('content-type', file?.mimeType as string);
   res.status(200).send(file?.file);
 });
