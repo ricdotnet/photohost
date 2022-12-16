@@ -1,16 +1,19 @@
 import { Router } from 'express';
 import { multipart } from '../middlwares/multipart';
+import { config } from '../../config';
 import {
   doDelete,
   doGetAll,
   doGetCursors,
   doGetOne,
+  doGetThumbnail,
   doInsert,
   doMove,
   getPhotoData
 } from '../../services/photo';
 import { authorization } from '../middlwares/authorization';
 import validator from 'validator';
+import path from 'path';
 
 export const photo: Router = Router();
 
@@ -68,7 +71,6 @@ photo.get('/all', authorization, async (req, res) => {
   res.status(200).send(photos);
 });
 
-// TODO: merge the following routes into one single route with permissions check?
 /**
  * @Get a single photo by name
  *
@@ -95,34 +97,38 @@ photo.get('/single', async (req, res) => {
   res.status(200).send(file?.file);
 });
 
+/**
+ * @Get a single thumbnail from an authorized client only
+ * 
+ * This will be used mainly to render previews (photos list) improving loading times and client performance
+ * ... we dont need full photos rendering on previews 
+ */
+photo.get('/thumbnail', authorization, async (req, res) => {
+  const { id, username } = req.userContext!;
+
+  if ( !id || !username ) {
+    return res.status(403).send({ code: 403, message: 'you do not have access to this resource' });
+  }
+
+  const file = await doGetThumbnail(req.query['photoId'] as string, id, username);
+
+  if ( !file ) {
+    return res.status(404).send({
+      code: 404,
+      message: 'the image you are trying to access does not exist'
+    });
+  }
+
+  res.setHeader('cache-control', `public, max-age=${config.cachingTime}`);
+  res.sendFile(path.join(__dirname, '..', '..', '..', file));
+});
+
 photo.post('/move', authorization, async (req, res) => {
 
   await doMove(req);
 
   res.status(200).send({ code: 200, message: 'photos moved' });
 });
-
-/**
- * @Get a single photo via a public url
- *
- * This will be used by users to allow access to their photos. Whoever gets this link will be able to see
- *  the photo, BUT, only if the photo is not set to private
- */
-// photo.get('/single', async (req, res) => {
-//
-//   const file = await doGetOne(req);
-//
-//   if ( !file?.file ) {
-//     return res.status(404).send({ code: 404, message: 'photo not found' });
-//   }
-//
-//   if ( !file?.mimeType ) {
-//     return res.status(401).send({ code: 401, message: 'not possible to determine mime-type' });
-//   }
-//
-//   res.setHeader('content-type', file?.mimeType as string);
-//   res.status(200).send(file?.file);
-// });
 
 /**
  * @Get a single photo data

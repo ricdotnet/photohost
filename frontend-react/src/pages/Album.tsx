@@ -1,11 +1,12 @@
-import { BaseSyntheticEvent, useCallback, useContext, useEffect, useState } from 'react';
+import { BaseSyntheticEvent, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
-import { UserContext } from '../contexts/UserContext';
 import { PhotosContext } from '../contexts/PhotosContext';
-import { PhotoInterface } from '../interfaces/PhotoInterface';
 import { useApiRequest } from '../hooks/UseApiRequest';
 import { usePhotoUpload } from '../hooks/UsePhotoUpload';
+import { useThumbnail } from '../hooks/UseThumbnail';
 import { BlurhashCanvas } from 'react-blurhash';
+import { PhotoInterface } from '../interfaces/PhotoInterface';
+import { RenderPhotoPropsInterface } from '../interfaces/RenderPhotoPropsInterface';
 import UserLayout from '../layouts/UserLayout';
 import DeleteAlbumDialog from '../blocks/dialogs/DeleteAlbumDialog';
 import PhotoOverlay from '../blocks/overlays/PhotoOverlay';
@@ -40,7 +41,6 @@ export default function Album() {
 
     const { data, error } = await request({
       route: '/photo/all?' + searchParams,
-      withAuth: true,
     });
 
     if ( error ) throw new Error(error);
@@ -71,7 +71,6 @@ export default function Album() {
     const { data, error } = await request({
       route: '/album?' + searchParams,
       method: 'delete',
-      withAuth: true,
     });
 
     if ( error ) throw new Error(error);
@@ -133,10 +132,9 @@ export default function Album() {
       photos: selectedPhotos
     };
 
-    const { data, error } = await request({
+    const { error } = await request({
       route: '/photo/move',
       method: 'post',
-      withAuth: true,
       payload: body,
     });
 
@@ -163,10 +161,9 @@ export default function Album() {
       photos: selectedPhotos,
     };
 
-    const { data, error } = await request({
+    const { error } = await request({
       route: '/photo/delete',
       method: 'delete',
-      withAuth: true,
       payload: body,
     });
 
@@ -303,36 +300,17 @@ function RenderPhotoList(props: RenderPhotoListPropsInterface) {
   );
 }
 
-interface RenderPhotoPropsInterface {
-  photo: PhotoInterface;
-  onClick: (e: BaseSyntheticEvent, photo: PhotoInterface) => void;
-  onSelect: (e: BaseSyntheticEvent, photoId: string) => void;
-}
-
 function RenderPhoto(props: RenderPhotoPropsInterface) {
-  const [userContext] = useContext(UserContext);
-  const [loading, setLoading] = useState(true);
-  const [isSelected, setIsSelected] = useState(false);
-  const [heightRatio, setHeightRatio] = useState(0);
 
-  useEffect(() => {
-    const hr = (props.photo.height * 100) / props.photo.width;
-    setHeightRatio(() => hr);
-  }, []);
-
-  const handleOnLoad = () => {
-    setLoading(() => false);
-  };
-
-  const handleOnClick = (e: BaseSyntheticEvent) => {
-    props.onClick(e, props.photo);
-  };
-
-  const handleOnSelect = (e: BaseSyntheticEvent) => {
-    e.stopPropagation();
-    props.onSelect(e, props.photo.id);
-    setIsSelected(!isSelected);
-  };
+  const {
+    loading,
+    isSelected,
+    heightRatio,
+    thumbnailRef,
+    handleOnClick,
+    handleOnLoad,
+    handleOnSelect
+  } = useThumbnail(props);
 
   return (
     <div
@@ -344,10 +322,12 @@ function RenderPhoto(props: RenderPhotoPropsInterface) {
         height={32}
         width={32}
       />
+      {/*{loadingPreview && <SpinnerIcon className="w-5 mx-auto"/>}*/}
       <img
-        src={import.meta.env.VITE_API + '/photo/single?photoId=' + props.photo.id + '&digest=' + userContext.digest + '&thumbnail=true'}
-        // src={import.meta.env.VITE_API + '/photo/single?photoId=' + props.photo.id + '&digest=' + userContext.digest}
-        alt={props.photo.name} onLoad={handleOnLoad}
+        className={loading ? 'hidden' : 'block'}
+        ref={thumbnailRef}
+        alt={props.photo.name}
+        onLoad={handleOnLoad}
         loading="lazy"
         sizes="(max-width: 600px) 480px, 800px"
       />
