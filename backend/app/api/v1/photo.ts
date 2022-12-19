@@ -76,6 +76,8 @@ photo.get('/all', authorization, async (req, res) => {
  *
  * This route will get the image inside the frontend app. When the user is navigating through their album
  *  or looking at a single photo page.
+ *
+ * TODO: Remove the digest from here?
  */
 photo.get('/single', async (req, res) => {
   if ( !req.query.digest ) {
@@ -92,16 +94,16 @@ photo.get('/single', async (req, res) => {
     return res.status(401).send({ code: 401, message: 'not possible to determine mime-type' });
   }
 
-  res.setHeader('Cache-Control', 'max-age=3600');
+  res.setHeader('cache-control', `public, max-age=${config.cachingTime(365)}`);
   res.setHeader('content-type', file?.mimeType as string);
   res.status(200).send(file?.file);
 });
 
 /**
  * @Get a single thumbnail from an authorized client only
- * 
+ *
  * This will be used mainly to render previews (photos list) improving loading times and client performance
- * ... we dont need full photos rendering on previews 
+ * ... we dont need full photos rendering on previews
  */
 photo.get('/thumbnail', authorization, async (req, res) => {
   const { id, username } = req.userContext!;
@@ -119,7 +121,7 @@ photo.get('/thumbnail', authorization, async (req, res) => {
     });
   }
 
-  res.setHeader('cache-control', `public, max-age=${config.cachingTime}`);
+  res.setHeader('cache-control', `public, max-age=${config.cachingTime(365)}`);
   res.sendFile(path.join(__dirname, '..', '..', '..', file));
 });
 

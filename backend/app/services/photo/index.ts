@@ -107,7 +107,8 @@ export async function doGetOne(req: Request): Promise<undefined | { file: Buffer
 
   const file = await fsp.readFile(path.join('uploads', 'ricdotnet', photo.path, fileName));
 
-  const mimeType = lookup(photo.filename);
+  // const mimeType = lookup(photo.filename);
+  const mimeType = resolveImageType(photo.filename, 'mimeType');
 
   if (!mimeType) {
     console.log('Not possible to determine mime-type.');
