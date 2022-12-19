@@ -7,25 +7,31 @@ import { getUserData } from '../user';
 import { lookup } from 'mime-types';
 import { SQLColumnValue } from '../../types';
 import { getBlurhash } from '@plaiceholder/blurhash';
+import { randomUUID } from 'crypto';
+import { resolveImageType } from '../../utils';
 import fs from 'fs';
 import path from 'path';
 import fsp from 'fs/promises';
 import imageSize from 'image-size';
+import sharp from 'sharp';
 
 export function doInsert(req: Request): Promise<any> {
   return new Promise(async (resolve) => {
     const { album, name } = req.formData;
     const photos = [];
 
-    for ( let fileEl in req.files! ) {
+    for (let fileEl in req.files!) {
       const file: IFile = req.files![fileEl];
 
-      let sanitizedName;
-      if ( !req.body['fileName'] || name ) {
-        sanitizedName = sanitizeFilename(name ?? file.originalName);
-      } else {
-        sanitizedName = req.body['fileName'];
-      }
+      const fileExtension = resolveImageType(file.originalName, 'extension');
+      const fileName = req.userContext!.username + '-' + randomUUID() + '.' + fileExtension;
+      const sanitizedName = sanitizeFilename(fileName);
+
+      // if ( !req.body['fileName'] || name ) {
+      //   sanitizedName = sanitizeFilename(name ?? file.originalName);
+      // } else {
+      //   sanitizedName = req.body['fileName'];
+      // }
 
       // do not set an album if default-album
       const albumToSave = album === 'default-album' ? null : album;
@@ -33,19 +39,21 @@ export function doInsert(req: Request): Promise<any> {
       const fileBytes = await fsp.readFile(file.file);
       const blurhash = await getBlurhash(fileBytes);
 
-      const photoResult =
-        await client.query<IPhoto>(`INSERT INTO photos ("user", path, filename, name, album, width,
+      const photoResult = await client.query<IPhoto>(
+        `INSERT INTO photos ("user", path, filename, name, album, width,
                                                         height, blurhash)
                                     VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
                                     RETURNING *`,
-          [req.userContext!.id, '', name ?? file.originalName, sanitizedName, albumToSave, width, height, blurhash]);
+        [req.userContext!.id, '', fileName, sanitizedName, albumToSave, width, height, blurhash]
+      );
+      // [req.userContext!.id, '', name ?? file.originalName, sanitizedName, albumToSave, width, height, blurhash]);
 
       // if the insert is successful then move the file
-      await moveTmpFile(req.userContext!, file, name);
+      await moveTmpFile(req.userContext!, file, fileName);
 
       photos.push(photoResult.rows[0]);
 
-      if ( parseInt(fileEl) === req.files!.length - 1 ) {
+      if (parseInt(fileEl) === req.files!.length - 1) {
         resolve(photos);
       }
     }
@@ -55,40 +63,54 @@ export function doInsert(req: Request): Promise<any> {
 export async function doDelete(req: Request) {
   const { id, username } = req.userContext!;
 
-  for ( const photo of req.body.photos ) {
+  for (const photo of req.body.photos) {
     await deletePhoto(id, username, photo);
   }
 }
 
-// TODO: get user data from digest?
-export async function doGetOne(req: Request): Promise<undefined | { file: Buffer, mimeType: string | boolean }> {
-  const photoResult =
-    await client.query<IPhoto>('SELECT * FROM photos WHERE id = $1',
-      [req.query.photoId]);
+export async function doGetThumbnail(photoId: string, userId: number, username: string) {
+  const photoResult = await client.query<IPhoto>('SELECT * FROM photos WHERE id = $1 AND "user" = $2', [
+    photoId,
+    userId,
+  ]);
 
   const photo = photoResult.rows[0];
 
-  if ( !photo ) {
-    return;
-  }
+  if (!photo) return;
+
+  return path.join('uploads', username, photo.path, 'thumbnails', photo.filename);
+  // return await fsp.readFile(path.join('uploads', username, photo.path, 'thumbnail-' + photo.filename));
+}
+
+// TODO: get user data from digest?
+export async function doGetOne(req: Request): Promise<undefined | { file: Buffer; mimeType: string | boolean }> {
+  const { thumbnail } = req.query;
+
+  const photoResult = await client.query<IPhoto>('SELECT * FROM photos WHERE id = $1', [req.query.photoId]);
+
+  const photo = photoResult.rows[0];
+
+  if (!photo) return;
 
   // Now we want to check if the user is allowed to see this photo
   let canSee;
-  if ( req.path.includes('/public/') ) {
+  if (req.path.includes('/public/')) {
     canSee = !photo.private;
   } else {
     canSee = await verifyDigest(photo.user, req.query['digest'] as string);
   }
 
-  if ( !canSee ) {
-    return;
-  }
+  if (!canSee) return;
 
-  const file = await fsp.readFile(path.join('uploads', 'ricdotnet', photo.path, photo.filename));
+  // we want to get the thumbnail if the user requests a thumbnail (preview purposes)
+  const fileName = thumbnail ? 'thumbnail-' + photo.filename : photo.filename;
 
-  const mimeType = lookup(photo.filename);
+  const file = await fsp.readFile(path.join('uploads', 'ricdotnet', photo.path, fileName));
 
-  if ( !mimeType ) {
+  // const mimeType = lookup(photo.filename);
+  const mimeType = resolveImageType(photo.filename, 'mimeType');
+
+  if (!mimeType) {
     console.log('Not possible to determine mime-type.');
     return;
   }
@@ -103,15 +125,14 @@ export async function doGetAll(req: Request) {
   let columnValues: SQLColumnValue[] = [req.userContext!.id];
   let query = 'SELECT * FROM photos WHERE "user" = $1 ';
 
-  if ( req.query['album'] !== 'default-album' ) {
+  if (req.query['album'] !== 'default-album') {
     columnValues.push(req.query['album'] as string);
     query += 'AND album = $2';
   } else {
     query += 'AND album IS NULL';
   }
 
-  const photosResult =
-    await client.query<IPhoto>(`${query} ORDER BY created_at DESC LIMIT 25`, [...columnValues]);
+  const photosResult = await client.query<IPhoto>(`${query} ORDER BY created_at DESC LIMIT 25`, [...columnValues]);
 
   return clone(photosResult.rows);
 }
@@ -119,32 +140,32 @@ export async function doGetAll(req: Request) {
 export async function doMove(req: Request) {
   const { album, photos } = req.body;
 
-  const albumValue = (album === 'default-album') ? null : album;
+  const albumValue = album === 'default-album' ? null : album;
   let columnValues: SQLColumnValue[] = [];
   let preparedColumns = '';
 
-  for ( const photo of photos ) {
+  for (const photo of photos) {
     columnValues.push(photo);
     // +1 because we already have 1 prepared statement
     preparedColumns += `$${columnValues.length + 1}`;
-    if ( columnValues.length < photos.length ) {
+    if (columnValues.length < photos.length) {
       preparedColumns += ',';
     }
   }
 
-  await client.query(`UPDATE photos
+  await client.query(
+    `UPDATE photos
                       SET album = $1
                       WHERE id IN (${preparedColumns})`,
-    [albumValue, ...columnValues]);
+    [albumValue, ...columnValues]
+  );
 }
 
 export async function getPhotoData(req: Request) {
   const { photoId } = req.query;
   const { id } = req.userContext!;
 
-  const photoDataResult =
-    await client.query('SELECT * FROM photos WHERE "user" = $1 AND name = $2',
-      [id, photoId]);
+  const photoDataResult = await client.query('SELECT * FROM photos WHERE "user" = $1 AND name = $2', [id, photoId]);
 
   return photoDataResult.rows;
 }
@@ -161,13 +182,13 @@ export async function doGetCursors(req: Request) {
 
   const columnValues: SQLColumnValue[] = [id, photoId as string];
   let albumQuery = 'album IS NULL';
-  if ( album !== 'default-album' ) {
+  if (album !== 'default-album') {
     albumQuery = 'album = $3';
     columnValues.push(album as string);
   }
 
-  const cursorsResult =
-    await client.query(`SELECT *
+  const cursorsResult = await client.query(
+    `SELECT *
                         FROM (SELECT id,
                                      LAG(id) OVER (ORDER by created_at DESC)  AS prev,
                                      LEAD(id) OVER (ORDER by created_at DESC) AS next
@@ -175,19 +196,25 @@ export async function doGetCursors(req: Request) {
                               WHERE "user" = $1
                                 AND ${albumQuery}) x
                         WHERE id = $2`,
-      [...columnValues]);
+    [...columnValues]
+  );
 
   return cursorsResult.rows[0];
 }
 
+// TODO: some error handling in case the deletion of the file fails
 async function deletePhoto(userId: number, username: string, photoId: string) {
-  const photoResult = await client.query<IPhoto>('SELECT * FROM photos WHERE "user" = $1 AND id = $2',
-    [userId, photoId]);
+  const photoResult = await client.query<IPhoto>('SELECT * FROM photos WHERE "user" = $1 AND id = $2', [
+    userId,
+    photoId,
+  ]);
 
   const photo = photoResult.rows[0];
 
   // remove the file first
   await fsp.rm(path.join('uploads', username, photo.path, photo.filename));
+  // then remove the thumbnail too
+  await fsp.rm(path.join('uploads', username, photo.path, 'thumbnails', photo.filename));
 
   // then delete entry from the database
   await client.query('DELETE FROM photos WHERE id = $1', [photoId]);
@@ -200,15 +227,16 @@ async function deletePhoto(userId: number, username: string, photoId: string) {
  * @param file The file object
  * @param name An optional name passed to be the filename
  */
-async function moveTmpFile(user: IUserContext, file: IFile, name?: string) {
-
+async function moveTmpFile(user: IUserContext, file: IFile, fileName: string) {
   const userDir = fs.existsSync(path.join('uploads', user.username));
 
-  if ( !userDir ) {
-    await fsp.mkdir(path.join('uploads', user.username));
+  if (!userDir) {
+    await fsp.mkdir(path.join('uploads', user.username)); // create user dir
+    await fsp.mkdir(path.join('uploads', user.username, 'thumbnails')); // create thumbnails dir inside the user dir
   }
 
-  await fsp.rename(file.file, path.join('uploads', user.username, name ?? file.originalName));
+  await fsp.rename(file.file, path.join('uploads', user.username, fileName));
+  createThumbnail(file, user.username, fileName);
 }
 
 /**
@@ -229,8 +257,12 @@ function sanitizeFilename(originalName: string): string {
  * @returns A boolean value from the comparison of both digests
  */
 async function verifyDigest(userId: number, requestDigest: string): Promise<boolean> {
-
   const { digest } = await getUserData(userId);
 
   return digest === requestDigest;
+}
+
+async function createThumbnail(file: IFile, username: string, fileName: string) {
+  const f = await fsp.readFile(path.join('uploads', username, fileName));
+  await sharp(f).resize({ width: 300, fit: 'contain' }).toFile(path.join('uploads', username, 'thumbnails', fileName));
 }

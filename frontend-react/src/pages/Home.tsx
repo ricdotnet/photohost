@@ -27,10 +27,8 @@ export default function Home() {
 
   const getAllAlbums = useCallback(async () => {
 
-    // const { data, error } = await get('/album/all');
     const { data, error } = await request({
       route: '/album/all',
-      withAuth: true,
     });
 
     if ( data ) {
@@ -67,7 +65,6 @@ export default function Home() {
     const { data, error } = await request({
       method: 'POST',
       route: '/album',
-      withAuth: true,
       payload: body,
     });
 
@@ -99,14 +96,12 @@ export default function Home() {
             </AlbumsContext.Provider>
           )
       }
-      {!isOpenAddNewAlbum ? null :
-        (
-          <NewAlbumDialog
-            onConfirm={onConfirmAddNewAlbum}
-            onCancel={onCancelAddNewAlbum}
-            dialogIsActioning={isAddingNewAlbum}
-          />
-        )
+      {isOpenAddNewAlbum &&
+        <NewAlbumDialog
+          onConfirm={onConfirmAddNewAlbum}
+          onCancel={onCancelAddNewAlbum}
+          dialogIsActioning={isAddingNewAlbum}
+        />
       }
     </UserLayout>
   );

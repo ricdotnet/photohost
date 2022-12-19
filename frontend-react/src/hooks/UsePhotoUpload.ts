@@ -13,7 +13,6 @@ export const usePhotoUpload = async ({ albumId, formData }: UsePhotoUploadParams
   return await request({
     route: '/photo/upload',
     method: 'post',
-    withAuth: true,
     payload: formData,
   });
 };

@@ -20,7 +20,6 @@ export default function MovePhotosDialog(props: MovePhotosDialogPropsInterface) 
   const getAllAlbums = useCallback(async () => {
     const { data, error } = await request({
       route: '/album/all',
-      withAuth: true,
     });
 
     if ( error ) throw new Error(error);
