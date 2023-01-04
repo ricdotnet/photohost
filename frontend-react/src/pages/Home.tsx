@@ -144,13 +144,13 @@ function AlbumItem(props: AlbumItemPropsInterface) {
     <div className="album-item">
       <Link to={'/album/' + props.id} key={props.id}>
         <div className="album-item__cover">
-          {props.cover &&
+          {/*{props.cover &&*/}
             <img
               className="album-item__cover-item"
-              src={props.cover}
+              src={props.cover ?? `https://picsum.photos/seed/${props.name}/500/`}
               alt="Album Cover"
             />
-          }
+          {/*}*/}
         </div>
       </Link>
       <span className="album-item__name">{props.name}</span>
