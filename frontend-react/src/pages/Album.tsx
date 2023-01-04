@@ -5,6 +5,7 @@ import { useApiRequest } from '../hooks/UseApiRequest';
 import { usePhotoUpload } from '../hooks/UsePhotoUpload';
 import { useThumbnail } from '../hooks/UseThumbnail';
 import { BlurhashCanvas } from 'react-blurhash';
+import { AlbumType } from '../interfaces/Types';
 import { PhotoInterface } from '../interfaces/PhotoInterface';
 import { RenderPhotoPropsInterface } from '../interfaces/RenderPhotoPropsInterface';
 import UserLayout from '../layouts/UserLayout';
@@ -14,13 +15,16 @@ import UploadPhotoDialog from '../blocks/dialogs/UploadPhotoDialog';
 import PhotosDropdown from '../blocks/dropdowns/PhotosDropdown';
 import DeletePhotosDialog from '../blocks/dialogs/DeletePhotosDialog';
 import MovePhotosDialog from '../blocks/dialogs/MovePhotosDialog';
+import EditAlbumDialog from '../blocks/dialogs/EditAlbumDialog';
 
 import './Album.scss';
 
+// TODO: Extract logic into a hook?
 export default function Album() {
   const { albumId } = useParams();
   const navigateTo = useNavigate();
 
+  const [album, setAlbum] = useState<any>();
   const [photos, setPhotos] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isDeletingAlbum, setIsDeletingAlbum] = useState(false);
@@ -31,19 +35,22 @@ export default function Album() {
   const [isOpenMovePhotos, setIsOpenMovePhotos] = useState(false);
   const [isDeletingPhotos, setIsDeletingPhotos] = useState(false);
   const [isOpenDeletePhotos, setIsOpenDeletePhotos] = useState(false);
+  const [isEditingAlbum, setIsEditingAlbum] = useState(false);
+  const [isOpenEditAlbum, setIsOpenEditAlbum] = useState(false);
   const [selectedPhotos, setSelectedPhotos] = useState<string[]>([]);
-
-  const { request } = useApiRequest();
 
   const getAllPhotos = useCallback(async () => {
     const searchParams = new URLSearchParams();
     searchParams.append('album', albumId as string);
 
+    const { request } = useApiRequest();
     const { data, error } = await request({
       route: '/photo/all?' + searchParams,
     });
 
-    if ( error ) throw new Error(error);
+    if ( error ) {
+      // console.log(error);
+    }
 
     if ( data ) {
       setPhotos(data);
@@ -51,8 +58,28 @@ export default function Album() {
     }
   }, []);
 
+  const getAlbumData = useCallback(async () => {
+    const queryParams = new URLSearchParams();
+    queryParams.append('albumId', albumId as string);
+
+    const { request } = useApiRequest();
+    const { data, error } = await request({
+      route: '/album/?' + queryParams,
+      withAuth: true,
+    });
+
+    if ( error ) {
+      console.error(error);
+    }
+
+    if ( data ) {
+      setAlbum(data.album);
+    }
+  }, []);
+
   useEffect(() => {
     getAllPhotos();
+    getAlbumData();
   }, []);
 
   const onOpenDeleteAlbum = () => {
@@ -68,6 +95,7 @@ export default function Album() {
     const searchParams = new URLSearchParams();
     searchParams.append('id', albumId as string);
 
+    const { request } = useApiRequest();
     const { data, error } = await request({
       route: '/album?' + searchParams,
       method: 'delete',
@@ -125,6 +153,7 @@ export default function Album() {
 
   const onMovePhotosConfirm = async (e: BaseSyntheticEvent, aId: string) => {
     if ( aId === albumId ) return;
+
     setIsMovingPhotos(true);
 
     const body = {
@@ -132,6 +161,7 @@ export default function Album() {
       photos: selectedPhotos
     };
 
+    const { request } = useApiRequest();
     const { error } = await request({
       route: '/photo/move',
       method: 'post',
@@ -161,6 +191,7 @@ export default function Album() {
       photos: selectedPhotos,
     };
 
+    const { request } = useApiRequest();
     const { error } = await request({
       route: '/photo/delete',
       method: 'delete',
@@ -183,12 +214,55 @@ export default function Album() {
     setPhotos(tmp);
   };
 
+  const onOpenEditAlbum = () => {
+    setIsOpenEditAlbum(true);
+  };
+
+  const onConfirmEditAlbum = async (payload: AlbumType) => {
+    setIsEditingAlbum(true);
+
+    const queryParams = new URLSearchParams();
+    queryParams.append('albumId', albumId as string);
+
+    const { request } = useApiRequest();
+    const { data, error } = await request({
+      route: '/album',
+      params: queryParams,
+      method: 'patch',
+      withAuth: true,
+      payload: payload,
+    });
+
+    if ( error ) {
+      console.error(error);
+    }
+
+    if ( data ) {
+      const a = album;
+      if ( payload.albumName ) {
+        a.name = payload.albumName;
+      }
+      if ( payload.albumCover ) {
+        a.cover = payload.albumCover;
+      }
+      setAlbum(a);
+      setIsEditingAlbum(false);
+      setIsOpenEditAlbum(false);
+    }
+  };
+
+  const onCancelEditAlbum = () => {
+    setIsOpenEditAlbum(false);
+  };
+
   return (
     <UserLayout>
       <div className="page-top">
+        {album && album.name}
         <PhotosDropdown
-          onClickUploadPhotos={onOpenUploadPhoto}
           onClickDeleteAlbum={onOpenDeleteAlbum}
+          onClickEditAlbum={onOpenEditAlbum}
+          onClickUploadPhotos={onOpenUploadPhoto}
           onClickMoveAllSelected={handleMoveAllSelected}
           onClickDeleteAllSelected={handleDeleteAllSelected}
           showSelectionOptions={selectedPhotos.length > 0}
@@ -203,6 +277,15 @@ export default function Album() {
               />
             </PhotosContext.Provider>
           )
+      }
+      {isOpenEditAlbum &&
+        <EditAlbumDialog
+          dialogIsActioning={isEditingAlbum}
+          onConfirm={onConfirmEditAlbum}
+          onCancel={onCancelEditAlbum}
+          albumName={album.name}
+          albumCover={album.cover}
+        />
       }
       {isOpenDeleteAlbum &&
         <DeleteAlbumDialog
@@ -334,7 +417,7 @@ function RenderPhoto(props: RenderPhotoPropsInterface) {
       <div style={{
         paddingBottom: `${heightRatio}%`
       }}></div>
-      <div className={`photo-item__hover-effect`}>
+      <div className="photo-item__hover-effect">
         <input
           onClick={handleOnSelect}
           type="checkbox"

@@ -1,48 +1,26 @@
-import { useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { usePhotosDropdown } from '../../hooks/UsePhotosDropdown';
+import { PhotosDropDownPropsInterface } from '../../interfaces/PropsInterfaces';
 import Dropdown from '../../components/dropdown/Dropdown';
 import DropdownChild from '../../components/dropdown/DropdownChild';
 import Button from '../../components/button/Button';
 import ChevronUpIcon from '../../components/icons/ChevronUpIcon';
 import ChevronDownIcon from '../../components/icons/ChevronDownIcon';
 
-interface PhotosDropDownPropsInterface {
-  onClickUploadPhotos: () => void;
-  onClickDeleteAlbum: () => void;
-  onClickMoveAllSelected: () => void;
-  onClickDeleteAllSelected: () => void;
-  showSelectionOptions: boolean;
-}
-
 export default function PhotosDropdown(props: PhotosDropDownPropsInterface) {
 
   const { albumId } = useParams();
 
-  const [isOpen, setIsOpen] = useState(false);
-
-  const onButtonClick = () => {
-    setIsOpen(!isOpen);
-  };
-
-  const onRemoteClose = () => {
-    setIsOpen(false);
-  };
-
-  const onClickUpload = () => {
-    props.onClickUploadPhotos();
-  };
-
-  const onClickDeleteAlbum = () => {
-    props.onClickDeleteAlbum();
-  };
-
-  const onClickMoveAllSelected = () => {
-    props.onClickMoveAllSelected();
-  };
-
-  const onClickDeleteAllSelected = () => {
-    props.onClickDeleteAllSelected();
-  };
+  const {
+    isOpen,
+    onButtonClick,
+    onRemoteClose,
+    onClickEdit,
+    onClickUpload,
+    onClickDeleteAlbum,
+    onClickMoveAllSelected,
+    onClickDeleteAllSelected
+  } = usePhotosDropdown(props);
 
   return (
     <div className="relative">
@@ -79,6 +57,11 @@ export default function PhotosDropdown(props: PhotosDropDownPropsInterface) {
             </>
           )
         }
+        <DropdownChild
+          value="Edit Album"
+          handleOnClick={onClickEdit}
+          disabled={albumId === 'default-album'}
+        />
         <DropdownChild
           value="Delete album"
           handleOnClick={onClickDeleteAlbum}

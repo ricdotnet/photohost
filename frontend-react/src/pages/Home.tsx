@@ -9,6 +9,7 @@ import React, {
 import { Link } from 'react-router-dom';
 import { AlbumsContext } from '../contexts/AlbumsContext';
 import { AlbumInterface } from '../interfaces/AlbumInterface';
+import { AlbumType } from '../interfaces/Types';
 import { useApiRequest } from '../hooks/UseApiRequest';
 import UserLayout from '../layouts/UserLayout';
 import NewAlbumDialog from '../blocks/dialogs/NewAlbumDialog';
@@ -54,18 +55,19 @@ export default function Home() {
     setIsOpenAddNewAlbum(false);
   };
 
-  const onConfirmAddNewAlbum = async (e: BaseSyntheticEvent, albumName: string) => {
+  const onConfirmAddNewAlbum = async (e: BaseSyntheticEvent, { albumName, albumCover }: AlbumType) => {
     e.preventDefault();
     setIsAddingNewAlbum(true);
 
-    const body = {
+    let payload = {
       name: albumName,
+      cover: albumCover,
     };
 
     const { data, error } = await request({
       method: 'POST',
       route: '/album',
-      payload: body,
+      payload: payload,
     });
 
     if ( data ) {
@@ -84,6 +86,7 @@ export default function Home() {
   return (
     <UserLayout>
       <div className="page-top">
+        Your Albums
         <AlbumsDropdown
           onAddAlbumClick={onOpenAddNewAlbum}
         />
@@ -116,7 +119,13 @@ const RenderAlbums = memo(function RenderAlbums() {
       {
         !albumsContext.length ? (<div>You have no albums here</div>)
           : albumsContext.map((album) => (
-            <AlbumItem name={album.name} photos={album.photos ?? 0} id={album.id} key={album.id}/>
+            <AlbumItem
+              name={album.name}
+              photos={album.photos ?? 0}
+              id={album.id}
+              key={album.id}
+              cover={album.cover}
+            />
           ))
       }
     </div>
@@ -126,6 +135,7 @@ const RenderAlbums = memo(function RenderAlbums() {
 interface AlbumItemPropsInterface {
   id: string;
   name: string;
+  cover: string;
   photos: number;
 }
 
@@ -134,11 +144,13 @@ function AlbumItem(props: AlbumItemPropsInterface) {
     <div className="album-item">
       <Link to={'/album/' + props.id} key={props.id}>
         <div className="album-item__cover">
-          <img
-            className="album-item__cover-item"
-            src={`https://picsum.photos/seed/${props.name}/800/800`}
-            alt="Album Cover"
-          />
+          {/*{props.cover &&*/}
+            <img
+              className="album-item__cover-item"
+              src={props.cover ?? `https://picsum.photos/seed/${props.name}/500/`}
+              alt="Album Cover"
+            />
+          {/*}*/}
         </div>
       </Link>
       <span className="album-item__name">{props.name}</span>

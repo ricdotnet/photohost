@@ -1,25 +1,27 @@
-import { BaseSyntheticEvent, useRef, useState } from 'react';
+import { BaseSyntheticEvent, useEffect, useRef, useState } from 'react';
+import { useParams } from 'react-router-dom';
 import { InputRefInterface } from '../../interfaces/InputRefInterface';
-import { AlbumType } from '../../interfaces/Types';
+import { EditAlbumDialogPropsInterface } from '../../interfaces/PropsInterfaces';
 import Input from '../../components/input/Input';
 import Dialog from '../../components/dialog/Dialog';
 
-interface NewAlbumDialogPropsInterface {
-  dialogIsActioning: boolean;
-  onConfirm: (e: BaseSyntheticEvent, albumInfo: AlbumType) => void;
-  onCancel: (e: BaseSyntheticEvent | KeyboardEvent) => void;
-}
+export default function EditAlbumDialog(props: EditAlbumDialogPropsInterface) {
 
-export default function NewAlbumDialog(props: NewAlbumDialogPropsInterface) {
+  const { albumId } = useParams();
 
   const albumNameRef = useRef<InputRefInterface>(null);
   const albumCoverRef = useRef<InputRefInterface>(null);
 
   const [albumNameError, setAlbumNameError] = useState(false);
 
+  useEffect(() => {
+    albumNameRef.current!.setValue(props.albumName);
+    albumCoverRef.current!.setValue(props.albumCover);
+  }, []);
+
   const handleOnConfirm = (e: BaseSyntheticEvent) => {
     if ( !albumNameRef.current!.value() ) return setAlbumNameError(true);
-    props.onConfirm(e, {
+    props.onConfirm({
       albumName: albumNameRef.current!.value(),
       albumCover: albumCoverRef.current!.value(),
     });
@@ -31,7 +33,7 @@ export default function NewAlbumDialog(props: NewAlbumDialogPropsInterface) {
 
   return (
     <Dialog
-      title="Create a new album"
+      title="Edit the album"
       controls={true}
       onConfirm={handleOnConfirm}
       onCancel={handleOnCancel}
@@ -44,14 +46,14 @@ export default function NewAlbumDialog(props: NewAlbumDialogPropsInterface) {
         placeholder="New album name"
         handleOnFocus={() => setAlbumNameError(false)}
         hasError={albumNameError}
+        disabled={albumId === 'default-album'}
       />
       <Input
         ref={albumCoverRef}
         id="album-cover"
         label="album-cover"
         placeholder="New album cover"
-        // handleOnFocus={() => setAlbumNameError(false)}
-        // hasError={albumNameError}
+        disabled={albumId === 'default-album'}
       />
     </Dialog>
   );

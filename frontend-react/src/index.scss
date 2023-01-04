@@ -37,7 +37,7 @@ body {
 }
 
 .page-top {
-  @apply flex space-x-3 py-4 justify-end border-b border-b-gray-300;
+  @apply flex items-center justify-between space-x-3 py-4 justify-end border-b border-b-gray-300;
 }
 
 .center {
