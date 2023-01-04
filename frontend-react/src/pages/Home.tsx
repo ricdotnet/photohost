@@ -9,13 +9,13 @@ import React, {
 import { Link } from 'react-router-dom';
 import { AlbumsContext } from '../contexts/AlbumsContext';
 import { AlbumInterface } from '../interfaces/AlbumInterface';
+import { AlbumType } from '../interfaces/Types';
 import { useApiRequest } from '../hooks/UseApiRequest';
 import UserLayout from '../layouts/UserLayout';
 import NewAlbumDialog from '../blocks/dialogs/NewAlbumDialog';
 import AlbumsDropdown from '../blocks/dropdowns/AlbumsDropdown';
 
 import './Home.scss';
-import { AlbumType } from '../interfaces/Types';
 
 export default function Home() {
   const [albums, setAlbums] = useState<AlbumInterface[]>([]);
@@ -28,10 +28,8 @@ export default function Home() {
 
   const getAllAlbums = useCallback(async () => {
 
-    // const { data, error } = await get('/album/all');
     const { data, error } = await request({
       route: '/album/all',
-      withAuth: true,
     });
 
     if ( data ) {
@@ -69,7 +67,6 @@ export default function Home() {
     const { data, error } = await request({
       method: 'POST',
       route: '/album',
-      withAuth: true,
       payload: payload,
     });
 
@@ -102,14 +99,12 @@ export default function Home() {
             </AlbumsContext.Provider>
           )
       }
-      {!isOpenAddNewAlbum ? null :
-        (
-          <NewAlbumDialog
-            onConfirm={onConfirmAddNewAlbum}
-            onCancel={onCancelAddNewAlbum}
-            dialogIsActioning={isAddingNewAlbum}
-          />
-        )
+      {isOpenAddNewAlbum &&
+        <NewAlbumDialog
+          onConfirm={onConfirmAddNewAlbum}
+          onCancel={onCancelAddNewAlbum}
+          dialogIsActioning={isAddingNewAlbum}
+        />
       }
     </UserLayout>
   );

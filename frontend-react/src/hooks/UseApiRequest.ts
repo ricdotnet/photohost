@@ -1,4 +1,4 @@
-import axios, { AxiosRequestConfig, RawAxiosRequestHeaders } from 'axios';
+import axios, { AxiosRequestConfig, RawAxiosRequestHeaders, ResponseType } from 'axios';
 
 interface RequestOptions {
   route: string,
@@ -7,6 +7,7 @@ interface RequestOptions {
   payload?: any,
   headers?: RawAxiosRequestHeaders,
   params?: any,
+  responseType?: ResponseType,
 }
 
 export const useApiRequest = () => {
@@ -15,17 +16,18 @@ export const useApiRequest = () => {
   const api = import.meta.env.VITE_API;
   const authorizationHeader = `Bearer ${localStorage.getItem('access-token')}`;
 
-  const request = async ({ route, method, headers, withAuth = true, payload, params }: RequestOptions) => {
+  const request = async ({ route, method = 'GET', headers, withAuth = true, payload, params, responseType = 'json' }: RequestOptions) => {
 
     const options: AxiosRequestConfig = {
       url: api + route,
-      method: method ? method : 'GET',
+      method: method,
       headers: {
         authorization: (withAuth) ? authorizationHeader : null,
         ...headers,
       },
-      data: (payload) ? payload : null,
-      params: (params) ? params : null,
+      data: payload,
+      params: params,
+      responseType: responseType,
     }
 
     try {

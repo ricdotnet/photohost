@@ -53,7 +53,6 @@ function PhotoOverlay(props: PhotoOverlayPropsInterface) {
   const getCursors = async (currentPhoto: string) => {
     const { data, error } = await request({
       route: '/photo/cursors',
-      withAuth: true,
       params: {
         album: props.album,
         photoId: currentPhoto,
