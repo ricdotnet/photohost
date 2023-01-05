@@ -285,6 +285,7 @@ export default function Album() {
           onCancel={onCancelEditAlbum}
           albumName={album.name}
           albumCover={album.cover}
+          randomCover={album['random_cover']}
         />
       }
       {isOpenDeleteAlbum &&

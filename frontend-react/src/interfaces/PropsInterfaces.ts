@@ -16,4 +16,5 @@ export interface EditAlbumDialogPropsInterface {
   onCancel: (e: BaseSyntheticEvent | KeyboardEvent) => void;
   albumName: string;
   albumCover: string;
+  randomCover: boolean;
 }
