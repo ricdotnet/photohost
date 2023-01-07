@@ -1,4 +1,4 @@
-import { ReactElement, ReactNode } from 'react';
+import { ReactNode } from 'react';
 import { useGlobalUpload } from '../hooks/UseGlobalUpload';
 import Nav from '../blocks/nav/Nav';
 import ToastContainer from '../blocks/toasts/ToastContainer';
@@ -7,7 +7,7 @@ import GlobalUploadDialog from '../blocks/dialogs/GlobalUploadDialog';
 import './UserLayout.scss';
 
 interface UserLayoutPropsInterface {
-  children: ReactNode[];
+  children: ReactNode;
 }
 
 export default function UserLayout({ children }: UserLayoutPropsInterface) {

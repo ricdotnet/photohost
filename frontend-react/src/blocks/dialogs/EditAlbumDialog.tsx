@@ -24,9 +24,11 @@ export default function EditAlbumDialog(props: EditAlbumDialogPropsInterface) {
 
   const handleOnConfirm = (e: BaseSyntheticEvent) => {
     if ( !albumNameRef.current!.value() ) return setAlbumNameError(true);
+    console.log(randomCover);
     props.onConfirm({
       albumName: albumNameRef.current!.value(),
       albumCover: albumCoverRef.current!.value(),
+      randomCover: randomCover,
     });
   };
 

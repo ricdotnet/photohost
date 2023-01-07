@@ -5,4 +5,5 @@ export interface AlbumInterface {
   photos: number;
   last_updated: string;
   created_at: string;
+  random_cover: boolean;
 }
