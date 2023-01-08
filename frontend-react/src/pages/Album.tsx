@@ -239,16 +239,10 @@ export default function Album() {
 
     if ( data ) {
       const a = album;
-      if ( payload.albumName ) {
-        a.name = payload.albumName;
-      }
-      if ( payload.albumCover ) {
-        a.cover = payload.albumCover;
-      }
-      if ( payload.randomCover ) {
-        a['random_cover'] = payload.randomCover;
-      }
-      setAlbum(a);
+      a.name = payload.albumName;
+      a.cover = payload.albumCover;
+      a.random_cover = payload.randomCover;
+      setAlbum(() => a);
       setIsEditingAlbum(false);
       setIsOpenEditAlbum(false);
     }
