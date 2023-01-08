@@ -18,6 +18,8 @@ import MovePhotosDialog from '../blocks/dialogs/MovePhotosDialog';
 import EditAlbumDialog from '../blocks/dialogs/EditAlbumDialog';
 
 import './Album.scss';
+import Loading from '../components/loading/Loading';
+import SpinnerIcon from '../components/icons/SpinnerIcon';
 
 // TODO: Extract logic into a hook?
 export default function Album() {
@@ -265,16 +267,13 @@ export default function Album() {
           showSelectionOptions={selectedPhotos.length > 0}
         />
       </div>
-      {
-        loading ? (<div>Loading photos...</div>)
-          : (
-            <PhotosContext.Provider value={photos}>
-              <RenderPhotoList
-                onSelectionChange={handleOnSelectionChange}
-              />
-            </PhotosContext.Provider>
-          )
-      }
+      <Loading loading={loading} message={<SpinnerIcon className="w-10 mx-auto"/>}>
+        <PhotosContext.Provider value={photos}>
+          <RenderPhotoList
+            onSelectionChange={handleOnSelectionChange}
+          />
+        </PhotosContext.Provider>
+      </Loading>
       {isOpenEditAlbum &&
         <EditAlbumDialog
           dialogIsActioning={isEditingAlbum}

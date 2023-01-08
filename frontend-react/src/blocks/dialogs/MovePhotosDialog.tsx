@@ -2,6 +2,7 @@ import { BaseSyntheticEvent, useCallback, useEffect, useRef, useState } from 're
 import { useApiRequest } from '../../hooks/UseApiRequest';
 import Dialog from '../../components/dialog/Dialog';
 import SpinnerIcon from '../../components/icons/SpinnerIcon';
+import Loading from '../../components/loading/Loading';
 
 interface MovePhotosDialogPropsInterface {
   dialogIsActioning: boolean;
@@ -47,21 +48,11 @@ export default function MovePhotosDialog(props: MovePhotosDialogPropsInterface) 
       onCancel={props.onCancel}
       isConfirming={props.dialogIsActioning}
     >
-      {isLoading ?
-        (
-          <div className="flex justify-center">
-            <SpinnerIcon className="w-5"/>
-          </div>
-        )
-        :
-        (
-          <select ref={selectRef}>
-            {albums.map(a => (
-              <option key={a.id} value={a.id}>{a.name}</option>
-            ))}
-          </select>
-        )
-      }
+      <Loading loading={isLoading} message={<SpinnerIcon className="w-5 mx-auto"/>}>
+        <select ref={selectRef}>
+          {albums.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
+        </select>
+      </Loading>
     </Dialog>
   );
 }
