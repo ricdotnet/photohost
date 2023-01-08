@@ -234,7 +234,7 @@ export default function Album() {
     });
 
     if ( error ) {
-      console.error(error);
+      throw new Error(error);
     }
 
     if ( data ) {
