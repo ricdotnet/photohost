@@ -15,6 +15,8 @@ import { useApiRequest } from '../hooks/UseApiRequest';
 import UserLayout from '../layouts/UserLayout';
 import NewAlbumDialog from '../blocks/dialogs/NewAlbumDialog';
 import AlbumsDropdown from '../blocks/dropdowns/AlbumsDropdown';
+import SpinnerIcon from '../components/icons/SpinnerIcon';
+import Loading from '../components/loading/Loading';
 
 import './Home.scss';
 
@@ -95,14 +97,11 @@ export default function Home() {
           onAddAlbumClick={onOpenAddNewAlbum}
         />
       </div>
-      {
-        loading ? (<div>Loading albums...</div>)
-          : (
-            <AlbumsContext.Provider value={albums}>
-              <RenderAlbums/>
-            </AlbumsContext.Provider>
-          )
-      }
+      <Loading loading={loading} message={<SpinnerIcon className="w-10 mx-auto"/>}>
+        <AlbumsContext.Provider value={albums}>
+          <RenderAlbums/>
+        </AlbumsContext.Provider>
+      </Loading>
       {isOpenAddNewAlbum &&
         <NewAlbumDialog
           onConfirm={onConfirmAddNewAlbum}
@@ -167,7 +166,7 @@ function AlbumItem(props: AlbumItemPropsInterface) {
   }, []);
 
   useEffect(() => {
-    if ( props.cover && props.cover instanceof Object) {
+    if ( props.cover && props.cover instanceof Object ) {
       getThumbnail();
     }
   }, []);
