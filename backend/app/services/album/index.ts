@@ -13,10 +13,11 @@ export async function doGetAlbum(albumId: string) {
 interface EditAlbumPayload {
   albumName: string | undefined;
   albumCover: string | undefined;
+  randomCover: boolean;
 }
 
 export async function doUpdateAlbum(albumId: string, payload: EditAlbumPayload) {
-  const { albumName, albumCover } = payload;
+  const { albumName, albumCover, randomCover } = payload;
 
   const columns = [];
   const values = [];
@@ -26,10 +27,11 @@ export async function doUpdateAlbum(albumId: string, payload: EditAlbumPayload) 
     columns.push(`name = $${values.length}`);
   }
 
-  if ( albumCover ) {
-    values.push(albumCover);
-    columns.push(`cover = $${values.length}`);
-  }
+  values.push(albumCover);
+  columns.push(`cover = $${values.length}`);
+
+  values.push(randomCover);
+  columns.push(`random_cover = $${values.length}`);
 
   const query = `UPDATE albums
                  SET ${columns.join()}
@@ -67,7 +69,7 @@ export async function doGetAlbums(req: Request) {
       [id]);
 
   const query = `
-      SELECT albums.id, albums.name, albums.cover, count(photos.*) as photos
+      SELECT albums.id, albums.name, albums.cover, albums.random_cover, count(photos.*) as photos
       FROM albums
                LEFT OUTER JOIN photos ON photos.album = albums.id
       WHERE albums."user" = $1
@@ -75,13 +77,26 @@ export async function doGetAlbums(req: Request) {
       ORDER BY albums.created_at
   `;
 
-  const albumsResponse = await client.query(query, [id]);
+  const { rows } = await client.query(query, [id]);
 
-  return { albums: albumsResponse.rows, noAlbumCount: noAlbumResponse.rows };
+  const albumResults = await Promise.all(rows.map(async (album) => {
+    if ( album['random_cover'] && !!album.photos ) {
+      const random = await selectRandomCover(album.id);
+      album['cover'] = random.rows[0];
+    }
+    return album;
+  }));
+
+  return { albums: albumResults, noAlbumCount: noAlbumResponse.rows };
 }
 
 export function doDeleteAlbum(req: Request) {
   const { id } = req.query;
 
   return client.query('DELETE FROM albums WHERE id = $1', [id]);
+}
+
+function selectRandomCover(albumId: string) {
+  return client.query('SELECT * FROM photos WHERE album = $1 ORDER BY random() LIMIT 1',
+    [albumId]);
 }

@@ -1,4 +1,4 @@
-import { BaseSyntheticEvent, useCallback, useContext, useEffect, useRef, useState } from 'react';
+import { BaseSyntheticEvent, useCallback, useContext, useEffect, useState } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import { PhotosContext } from '../contexts/PhotosContext';
 import { useApiRequest } from '../hooks/UseApiRequest';
@@ -234,18 +234,15 @@ export default function Album() {
     });
 
     if ( error ) {
-      console.error(error);
+      throw new Error(error);
     }
 
     if ( data ) {
       const a = album;
-      if ( payload.albumName ) {
-        a.name = payload.albumName;
-      }
-      if ( payload.albumCover ) {
-        a.cover = payload.albumCover;
-      }
-      setAlbum(a);
+      a.name = payload.albumName;
+      a.cover = payload.albumCover;
+      a.random_cover = payload.randomCover;
+      setAlbum(() => a);
       setIsEditingAlbum(false);
       setIsOpenEditAlbum(false);
     }
@@ -285,6 +282,7 @@ export default function Album() {
           onCancel={onCancelEditAlbum}
           albumName={album.name}
           albumCover={album.cover}
+          randomCover={album.random_cover}
         />
       }
       {isOpenDeleteAlbum &&

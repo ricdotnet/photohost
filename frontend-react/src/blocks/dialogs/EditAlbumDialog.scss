@@ -1,0 +1,7 @@
+.random-cover-switch {
+  @apply w-full flex items-center space-x-3;
+
+  &-checkbox {
+    @apply w-[20px] h-[20px];
+  }
+}

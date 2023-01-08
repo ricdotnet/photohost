@@ -5,6 +5,8 @@ import { EditAlbumDialogPropsInterface } from '../../interfaces/PropsInterfaces'
 import Input from '../../components/input/Input';
 import Dialog from '../../components/dialog/Dialog';
 
+import './EditAlbumDialog.scss';
+
 export default function EditAlbumDialog(props: EditAlbumDialogPropsInterface) {
 
   const { albumId } = useParams();
@@ -13,6 +15,7 @@ export default function EditAlbumDialog(props: EditAlbumDialogPropsInterface) {
   const albumCoverRef = useRef<InputRefInterface>(null);
 
   const [albumNameError, setAlbumNameError] = useState(false);
+  const [randomCover, setRandomCover] = useState(props.randomCover);
 
   useEffect(() => {
     albumNameRef.current!.setValue(props.albumName);
@@ -24,11 +27,16 @@ export default function EditAlbumDialog(props: EditAlbumDialogPropsInterface) {
     props.onConfirm({
       albumName: albumNameRef.current!.value(),
       albumCover: albumCoverRef.current!.value(),
+      randomCover: randomCover,
     });
   };
 
   const handleOnCancel = (e: BaseSyntheticEvent | KeyboardEvent) => {
     props.onCancel(e);
+  };
+
+  const onToggleRandomCover = () => {
+    setRandomCover(() => !randomCover);
   };
 
   return (
@@ -55,6 +63,16 @@ export default function EditAlbumDialog(props: EditAlbumDialogPropsInterface) {
         placeholder="New album cover"
         disabled={albumId === 'default-album'}
       />
+      <div className="random-cover-switch">
+        <input
+          className="random-cover-switch-checkbox"
+          id="randomCover"
+          type="checkbox"
+          checked={randomCover}
+          onChange={onToggleRandomCover}
+        />
+        <label htmlFor="randomCover">Random cover</label>
+      </div>
     </Dialog>
   );
 }

@@ -4,6 +4,7 @@ import React, {
   useCallback,
   useContext,
   useEffect,
+  useRef,
   useState
 } from 'react';
 import { Link } from 'react-router-dom';
@@ -55,7 +56,10 @@ export default function Home() {
     setIsOpenAddNewAlbum(false);
   };
 
-  const onConfirmAddNewAlbum = async (e: BaseSyntheticEvent, { albumName, albumCover }: AlbumType) => {
+  const onConfirmAddNewAlbum = async (e: BaseSyntheticEvent, {
+    albumName,
+    albumCover
+  }: AlbumType) => {
     e.preventDefault();
     setIsAddingNewAlbum(true);
 
@@ -125,6 +129,7 @@ const RenderAlbums = memo(function RenderAlbums() {
               id={album.id}
               key={album.id}
               cover={album.cover}
+              randomCover={album.random_cover}
             />
           ))
       }
@@ -135,22 +140,55 @@ const RenderAlbums = memo(function RenderAlbums() {
 interface AlbumItemPropsInterface {
   id: string;
   name: string;
-  cover: string;
+  cover: string & any;
   photos: number;
+  randomCover: boolean;
 }
 
+// TODO: Refactor this usethumbnail to a hook and also refactor the current UseThumbnail hook
 function AlbumItem(props: AlbumItemPropsInterface) {
+  const thumbnailRef = useRef<HTMLImageElement>(null);
+
+  const getThumbnail = useCallback(async () => {
+    const queryParams = new URLSearchParams();
+    queryParams.append('photoId', props.cover.id);
+
+    const { request } = useApiRequest();
+    const { data, error } = await request({
+      route: '/photo/thumbnail?' + queryParams,
+      responseType: 'blob',
+    });
+
+    if ( error ) return console.error(error);
+
+    if ( data ) {
+      thumbnailRef.current!.src = URL.createObjectURL(data);
+    }
+  }, []);
+
+  useEffect(() => {
+    if ( props.cover && props.cover instanceof Object) {
+      getThumbnail();
+    }
+  }, []);
+
   return (
     <div className="album-item">
       <Link to={'/album/' + props.id} key={props.id}>
         <div className="album-item__cover">
-          {/*{props.cover &&*/}
+          {props.cover && props.randomCover ?
             <img
+              ref={thumbnailRef}
               className="album-item__cover-item"
-              src={props.cover ?? `https://picsum.photos/seed/${props.name}/500/`}
               alt="Album Cover"
             />
-          {/*}*/}
+            :
+            <img
+              className="album-item__cover-item"
+              src={!!props.cover ? props.cover : `https://picsum.photos/seed/${props.name}/500/`}
+              alt="Album Cover"
+            />
+          }
         </div>
       </Link>
       <span className="album-item__name">{props.name}</span>
