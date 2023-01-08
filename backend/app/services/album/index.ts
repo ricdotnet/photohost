@@ -96,7 +96,7 @@ export function doDeleteAlbum(req: Request) {
   return client.query('DELETE FROM albums WHERE id = $1', [id]);
 }
 
-async function selectRandomCover(albumId: string) {
+function selectRandomCover(albumId: string) {
   return client.query('SELECT * FROM photos WHERE album = $1 ORDER BY random() LIMIT 1',
     [albumId]);
 }
