@@ -408,7 +408,7 @@ function RenderPhoto(props: RenderPhotoPropsInterface) {
         ref={thumbnailRef}
         alt={props.photo.name}
         onLoad={handleOnLoad}
-        loading="lazy"
+        // loading="eager"
         sizes="(max-width: 600px) 480px, 800px"
       />
       <div style={{

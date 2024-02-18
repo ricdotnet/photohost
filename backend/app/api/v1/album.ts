@@ -7,8 +7,8 @@ import {
   doGetAlbums,
   doUpdateAlbum
 } from '../../services/album';
-import validator from 'validator';
-import isUUID = validator.isUUID;
+import * as _validator from 'validator';
+import isUUID = _validator.isUUID;
 
 export const album: Router = Router();
 

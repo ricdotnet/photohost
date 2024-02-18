@@ -10,5 +10,5 @@ export const config = {
    * @param {number} d the number of days to cache with 7 days (1 week) being the default
    * @returns {number} the number of seconds for a resource to be cached
    */
-  cachingTime: (d: number = 7) => d * 86400,
+  cachingTime: (d: number = 7): number => d * 86400,
 };

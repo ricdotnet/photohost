@@ -29,14 +29,14 @@ export default function UserLayout({ children }: UserLayoutPropsInterface) {
       onDragLeave={handleOnDragLeave}
       onDrop={handleOnDrop}
     >
-      <Nav/>
+      <Nav />
       <div
         className="main-content"
         aria-label="main-content"
       >
         {children}
       </div>
-      <ToastContainer/>
+      <ToastContainer />
       {isDraggingOver && <div className="upload-overlay">Drop images here</div>}
       {imageFile && <GlobalUploadDialog
         dialogIsActioning={false}

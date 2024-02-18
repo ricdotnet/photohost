@@ -49,4 +49,6 @@ function nonAuthedGuard() {
   if ( token ) {
     return redirect('/');
   }
+
+  return null;
 }
